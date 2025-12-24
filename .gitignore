@@ -58,3 +58,5 @@ logs/
 # */migrations/*.py
 # !*/migrations/__init__.py
 
+# Fichiers de développement (modifications locales ignorées)
+dev_backend.md

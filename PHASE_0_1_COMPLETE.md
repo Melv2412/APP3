@@ -137,3 +137,4 @@ Les **Phase 0 et Phase 1 sont complètes** et fonctionnelles ! Le backend est pr
 
 **Le projet est bien structuré et suit les meilleures pratiques Django/DRF.** 🎉
 
+
