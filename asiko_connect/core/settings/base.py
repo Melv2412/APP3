@@ -9,7 +9,6 @@ from decouple import config, Csv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 # Chemin: core/settings/base.py -> core/settings -> core -> asiko_connect -> racine
 BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-me-in-production')
 
@@ -32,6 +31,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
     'django_filters',
+    'django_extensions',
     
     # Apps du projet
     'asiko_connect.apps.users',
