@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from .models import SensorMeasurement, Prediction
 from .serializers import SensorMeasurementSerializer
 from asiko_connect.utils.calculs import calculate_trend, calculate_curb65
-# from asiko_connect.utils.call_ia import ml_model
 from asiko_connect.apps.sensors.ml_model import ml_model
 from asiko_connect.apps.users.models import User
 
