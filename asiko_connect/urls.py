@@ -10,7 +10,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('asiko_connect.apps.users.urls')),
     path('api/', include('asiko_connect.apps.health_profiles.urls')),
-    # Les autres apps seront ajoutées ici au fur et à mesure
+    path('api/sensors/', include('asiko_connect.apps.sensors.urls')),    # Les autres apps seront ajoutées ici au fur et à mesure
 ]
 
 # Servir les fichiers médias en développement

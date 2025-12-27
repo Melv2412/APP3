@@ -3,7 +3,7 @@ Serializers pour la gestion des utilisateurs.
 """
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
-from .models import User
+from .models import User,PatientData
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -32,8 +32,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
-    """Serializer pour l'inscription d'un nouvel utilisateur."""
-    
     password = serializers.CharField(
         write_only=True,
         required=True,
@@ -45,7 +43,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         required=True,
         style={'input_type': 'password'}
     )
-    
+
+    # Champs spécifiques aux patients
+    smoking = serializers.BooleanField(required=False)
+    diabetes = serializers.BooleanField(required=False)
+    copd_asthma = serializers.BooleanField(required=False)
+    immunosuppression = serializers.BooleanField(required=False)
+
     class Meta:
         model = User
         fields = [
@@ -58,40 +62,60 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             'role',
             'phone',
             'date_of_birth',
+            'smoking',
+            'diabetes',
+            'copd_asthma',
+            'immunosuppression',
         ]
         extra_kwargs = {
             'email': {'required': True},
             'first_name': {'required': True},
             'last_name': {'required': True},
         }
-    
+
     def validate(self, attrs):
-        """Valide que les mots de passe correspondent."""
         if attrs['password'] != attrs['password_confirm']:
-            raise serializers.ValidationError({
-                'password': 'Les mots de passe ne correspondent pas.'
-            })
+            raise serializers.ValidationError({'password': 'Les mots de passe ne correspondent pas.'})
         return attrs
-    
+
     def validate_role(self, value):
-        """Valide que le rôle est valide (pas ADMIN à l'inscription)."""
         if value == User.Role.ADMIN:
-            raise serializers.ValidationError(
-                'Vous ne pouvez pas créer un compte administrateur.'
-            )
+            raise serializers.ValidationError('Vous ne pouvez pas créer un compte administrateur.')
         return value
-    
+
     def create(self, validated_data):
-        """Crée un nouvel utilisateur."""
+        # Récupérer et supprimer le password
         validated_data.pop('password_confirm')
         password = validated_data.pop('password')
-        
-        user = User.objects.create_user(
-            password=password,
-            **validated_data
-        )
-        
+
+        # Extraire les champs patient
+        patient_fields = {}
+        if validated_data.get('role') == User.Role.PATIENT:
+            for field in ['smoking', 'diabetes', 'copd_asthma', 'immunosuppression']:
+                patient_fields[field] = validated_data.pop(field, False)
+
+        # Créer l'utilisateur
+        user = User.objects.create_user(password=password, **validated_data)
+
+        # Créer PatientData si rôle PATIENT
+        if user.role == User.Role.PATIENT:
+            from datetime import date
+            age = None
+            if user.date_of_birth:
+                today = date.today()
+                age = today.year - user.date_of_birth.year - (
+                    (today.month, today.day) < (user.date_of_birth.month, user.date_of_birth.day)
+                )
+
+            PatientData.objects.create(
+                user=user,
+                age=age if age else 0,
+                **patient_fields
+            )
+
+   
         return user
+    
 
 
 class LoginSerializer(serializers.Serializer):
@@ -163,3 +187,32 @@ class PasswordChangeSerializer(serializers.Serializer):
             raise serializers.ValidationError('L\'ancien mot de passe est incorrect.')
         return value
 
+
+
+  # Si ton UserSerializer est séparé
+
+class PatientDataSerializer(serializers.ModelSerializer):
+    """Serializer pour les données médicales d'un patient."""
+
+    user = UserSerializer(read_only=True)
+    user_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.filter(role='PATIENT'),
+        source='user',
+        write_only=True
+    )
+
+    class Meta:
+        model = PatientData
+        fields = [
+            'id',
+            'user',
+            'user_id',
+            'age',
+            'smoking',
+            'diabetes',
+            'copd_asthma',
+            'immunosuppression',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = ['id', 'user', 'created_at', 'updated_at']
