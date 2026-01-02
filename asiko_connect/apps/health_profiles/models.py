@@ -1,5 +1,9 @@
 """
 Modèles pour la gestion des profils de santé des patients.
+SPÉCIFIQUE À LA PRÉDICTION DE PNEUMONIE - ASIKO.
+
+Ce module gère les facteurs de risque et l'indice de vulnérabilité
+spécifiquement pour prédire le risque de développer une pneumonie.
 """
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -11,6 +15,9 @@ from datetime import date
 class Comorbidity(models.Model):
     """
     Modèle pour les comorbidités (maladies chroniques).
+    
+    SPÉCIFIQUE À LA PNEUMONIE : Liste des comorbidités qui sont
+    des facteurs de risque connus pour développer une pneumonie.
     """
     
     class ComorbidityType(models.TextChoices):
@@ -70,6 +77,10 @@ class Comorbidity(models.Model):
 class VaccinationStatus(models.Model):
     """
     Modèle pour le statut vaccinal.
+    
+    SPÉCIFIQUE À LA PNEUMONIE : Vaccins qui protègent contre
+    les infections respiratoires pouvant mener à la pneumonie
+    (pneumonie, COVID-19, grippe).
     """
     
     class VaccineType(models.TextChoices):
@@ -121,6 +132,11 @@ class HealthProfile(models.Model):
     """
     Modèle principal pour le profil de santé d'un patient.
     Lié à un User (OneToOne).
+    
+    SPÉCIFIQUE À LA PNEUMONIE : Ce profil contient uniquement
+    les informations nécessaires pour évaluer le risque de
+    développer une pneumonie (facteurs de risque, comorbidités,
+    statut vaccinal, indice de vulnérabilité à la pneumonie).
     """
     
     user = models.OneToOneField(
@@ -247,13 +263,15 @@ class HealthProfile(models.Model):
     
     def calculate_vulnerability_index(self):
         """
-        Calcule l'indice de vulnérabilité basé sur :
-        - Âge (0-30 points)
-        - Comorbidités (0-40 points)
-        - Statut vaccinal (0-20 points)
-        - Facteurs de risque (0-10 points)
+        Calcule l'indice de vulnérabilité SPÉCIFIQUE À LA PNEUMONIE.
         
-        Score total : 0-100 (plus élevé = plus vulnérable)
+        Basé sur les facteurs de risque connus pour la pneumonie :
+        - Âge (0-30 points) : les personnes âgées sont plus à risque
+        - Comorbidités respiratoires et systémiques (0-40 points)
+        - Statut vaccinal contre pneumonie/COVID/grippe (0-20 points de réduction)
+        - Facteurs de risque (tabagisme, alcool) (0-10 points)
+        
+        Score total : 0-100 (plus élevé = plus vulnérable à la pneumonie)
         """
         score = 0.0
         
@@ -344,7 +362,7 @@ class HealthProfile(models.Model):
     
     def get_vulnerability_level(self):
         """
-        Retourne le niveau de vulnérabilité basé sur l'indice.
+        Retourne le niveau de vulnérabilité à la PNEUMONIE basé sur l'indice.
         """
         if not self.vulnerability_index:
             return _('Non calculé')
