@@ -22,19 +22,8 @@ class User(AbstractUser):
         verbose_name=_('Rôle')
     )
 
-    phone = models.CharField(
-        max_length=20,
-        blank=True,
-        null=True,
-        verbose_name=_('Téléphone')
-    )
-
-    date_of_birth = models.DateField(
-        blank=True,
-        null=True,
-        verbose_name=_('Date de naissance')
-    )
-
+    phone = models.CharField(max_length=20, blank=True, null=True, verbose_name=_('Téléphone'))
+    date_of_birth = models.DateField(blank=True, null=True, verbose_name=_('Date de naissance'))
     is_verified = models.BooleanField(default=False, verbose_name=_('Compte vérifié'))
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -65,6 +54,14 @@ class PatientData(models.Model):
     Données STATIQUES du patient (créées une seule fois).
     """
 
+    class EmergencyRelation(models.TextChoices):
+        FATHER = 'FATHER', _('Père')
+        MOTHER = 'MOTHER', _('Mère')
+        SPOUSE = 'SPOUSE', _('Époux / Épouse')
+        BROTHER = 'BROTHER', _('Frère')
+        SISTER = 'SISTER', _('Sœur')
+        OTHER = 'OTHER', _('Autre')
+
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -78,6 +75,16 @@ class PatientData(models.Model):
     diabetes = models.BooleanField(default=False)
     copd_asthma = models.BooleanField(default=False)
     immunosuppression = models.BooleanField(default=False)
+
+    # Contact d'urgence
+    emergency_contact_name = models.CharField(max_length=100, blank=True, null=True)
+    emergency_contact_phone = models.CharField(max_length=20, blank=True, null=True)
+    emergency_contact_relation = models.CharField(
+        max_length=20,
+        choices=EmergencyRelation.choices,
+        blank=True,
+        null=True
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
