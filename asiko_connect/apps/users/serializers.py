@@ -49,33 +49,33 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     diabetes = serializers.BooleanField(required=False)
     copd_asthma = serializers.BooleanField(required=False)
     immunosuppression = serializers.BooleanField(required=False)
+    emergency_contact_name = serializers.CharField(write_only=True, required=False)
+    emergency_contact_phone = serializers.CharField(write_only=True, required=False)
+    emergency_contact_relation = serializers.ChoiceField(
+        choices=PatientData.EmergencyRelation.choices, write_only=True, required=False
+    )
 
     class Meta:
         model = User
         fields = [
-            'username',
-            'email',
-            'password',
-            'password_confirm',
-            'first_name',
-            'last_name',
-            'role',
-            'phone',
-            'date_of_birth',
-            'smoking',
-            'diabetes',
-            'copd_asthma',
-            'immunosuppression',
+            'username', 'email', 'password', 'password_confirm', 'first_name', 'last_name', 'role', 'phone',
+            'date_of_birth', 'smoking', 'diabetes', 'copd_asthma', 'immunosuppression',
+            'emergency_contact_name', 'emergency_contact_phone', 'emergency_contact_relation'
         ]
+
         extra_kwargs = {
-            'email': {'required': True},
-            'first_name': {'required': True},
-            'last_name': {'required': True},
-        }
+                'email': {'required': True},
+                'first_name': {'required': True},
+                'last_name': {'required': True},
+            }
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
             raise serializers.ValidationError({'password': 'Les mots de passe ne correspondent pas.'})
+        if attrs.get('role') == User.Role.PATIENT:
+            for field in ['emergency_contact_name', 'emergency_contact_phone', 'emergency_contact_relation']:
+                if not attrs.get(field):
+                    raise serializers.ValidationError({field: "Champ obligatoire pour un patient."})
         return attrs
 
     def validate_role(self, value):
@@ -89,10 +89,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password')
 
         # Extraire les champs patient
-        patient_fields = {}
-        if validated_data.get('role') == User.Role.PATIENT:
-            for field in ['smoking', 'diabetes', 'copd_asthma', 'immunosuppression']:
-                patient_fields[field] = validated_data.pop(field, False)
+        patient_fields = {field: validated_data.pop(field, None) for field in [
+            'smoking', 'diabetes', 'copd_asthma', 'immunosuppression',
+            'emergency_contact_name', 'emergency_contact_phone', 'emergency_contact_relation'
+        ]}
 
         # Créer l'utilisateur
         user = User.objects.create_user(password=password, **validated_data)
@@ -204,15 +204,10 @@ class PatientDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = PatientData
         fields = [
-            'id',
-            'user',
-            'user_id',
-            'age',
-            'smoking',
-            'diabetes',
-            'copd_asthma',
-            'immunosuppression',
-            'created_at',
-            'updated_at',
+            'id', 'user', 'user_id', 'age',
+            'smoking', 'diabetes', 'copd_asthma', 'immunosuppression',
+            'emergency_contact_name', 'emergency_contact_phone', 'emergency_contact_relation',
+            'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'user', 'created_at', 'updated_at']
+
