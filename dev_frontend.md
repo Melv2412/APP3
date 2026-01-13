@@ -8,10 +8,10 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 
 ### ✅ Phases Complètes
 - **Phase 0** : Configuration et Setup React.js ✅
+- **Phase 1** : Configuration de base (Design System, Routing, Services API) ✅
+- **Phase 2** : Authentification (Login, Register, Account Type Selection) ✅
 
 ### ❌ Phases Non Démarrées
-- **Phase 1** : Configuration de base (Design System, Routing, Services API)
-- **Phase 2** : Authentification (Login, Register, Account Type Selection)
 - **Phase 3** : Dashboard Patient (Accueil User)
 - **Phase 4** : Prédictions IA et Données Capteurs
 - **Phase 5** : Alertes
@@ -50,12 +50,13 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 ### 0.1 Setup Projet
 - [x] Créer projet Vite + React (JavaScript)
 - [x] Installer dépendances de base
-- [ ] Installer packages nécessaires :
-  - `axios` (appels API)
-  - `react-router-dom` (routing)
-  - `react-leaflet` ou `@react-google-maps/api` (cartographie)
-  - `recharts` ou `chart.js` (graphiques)
-  - `date-fns` (gestion dates)
+- [x] Installer packages nécessaires :
+  - [x] `axios` (appels API) ✅
+  - [x] `react-router-dom` (routing) ✅
+  - [x] `tailwindcss` + `postcss` + `autoprefixer` (styling) ✅
+  - [ ] `react-leaflet` ou `@react-google-maps/api` (cartographie) - à installer plus tard
+  - [ ] `recharts` ou `chart.js` (graphiques) - à installer plus tard
+  - [ ] `date-fns` (gestion dates) - à installer plus tard
 
 ### 0.2 Structure des Dossiers
 - [ ] Créer structure :
@@ -75,7 +76,11 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
   ```
 
 ### 0.3 Configuration Base
-- [ ] Configurer variables d'environnement (`.env`)
+- [x] Configurer Tailwind CSS ✅
+  - [x] Créer `tailwind.config.js` avec couleurs ASIKO ✅
+  - [x] Créer `postcss.config.js` ✅
+  - [x] Configurer `index.css` avec directives Tailwind ✅
+- [x] Configurer variables d'environnement (`.env` - à créer manuellement)
   - `VITE_API_BASE_URL=http://localhost:8000/api`
 - [ ] Configurer Vite proxy si nécessaire
 - [ ] Configurer ESLint/Prettier (optionnel)
@@ -87,93 +92,73 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 ### 1.1 Design System
 
 #### Palette de Couleurs
-- [ ] Définir variables CSS :
-  ```css
-  --primary-green: #00A651 (à confirmer depuis Figma)
-  --dark-green: #008040 (pour chat médecin, si gardé)
-  --light-green: #B8E6B8
-  --white: #FFFFFF
-  --red: #FF0000 (alerts, risque)
-  --blue: #0066FF (highlights, active states)
-  --gray: #CCCCCC (inactive, texte secondaire)
-  --gray-dark: #666666
-  ```
+- [x] Définir couleurs dans `tailwind.config.js` ✅
+  - `primary-green: #00A651`
+  - `dark-green: #008040`
+  - `light-green: #B8E6B8`
+  - `asiko-red: #FF0000` (alerts, risque)
+  - `asiko-blue: #0066FF` (highlights, active states)
+  - `asiko-gray: #CCCCCC` (inactive, texte secondaire)
+  - `asiko-gray-dark: #666666`
 
 #### Typographie
-- [ ] Définir hiérarchie :
-  - Titre principal : Gras, vert, 24-32px
-  - Sous-titres : Gras, noir, 18-20px
-  - Corps : Normal, noir, 14-16px
-  - Boutons : Gras, blanc, 16px
+- [x] Définir hiérarchie dans `tailwind.config.js` ✅
+  - Titre principal : Gras, vert, 24-32px (heading-xl, heading-lg)
+  - Sous-titres : Gras, noir, 18-20px (heading-md, heading-sm)
+  - Corps : Normal, noir, 14-16px (body-lg, body-md)
+  - Boutons : Gras, blanc, 16px (body-lg)
 
 #### Composants de Base
-- [ ] Créer `Button` (primaire, secondaire, carré)
-- [ ] Créer `Input` (text, email, password)
-- [ ] Créer `Card` (container arrondi)
-- [ ] Créer `Badge` (notifications)
-- [ ] Créer `Icon` (wrapper pour icônes)
+- [x] Créer `Button` (primaire, secondaire, carré) ✅
+- [x] Créer `Input` (text, email, password) ✅
+- [x] Créer `Card` (container arrondi) ✅
+- [x] Créer `Badge` (notifications) ✅
 
 ### 1.2 Routing
-- [ ] Installer et configurer `react-router-dom`
-- [ ] Créer routes principales :
-  - `/login`
-  - `/register`
-  - `/register/type` (sélection type compte)
-  - `/dashboard` (patient)
-  - `/dashboard/doctor` (médecin)
-  - `/predictions`
-  - `/alerts`
-  - `/map` (zones à risque)
-  - `/health-profile`
-  - `/sensors`
-  - `/journal` (carnet santé)
-  - `/actions` (actions préventives)
+- [x] Installer et configurer `react-router-dom` ✅
+- [x] Créer routes principales (routes de base) ✅ :
+  - [x] `/login` ✅
+  - [x] `/register` ✅
+  - [x] `/register/type` (sélection type compte) ✅
+  - [ ] `/dashboard` (patient) - À créer en Phase 3
+  - [ ] `/dashboard/doctor` (médecin) - À créer en Phase 9
+  - [ ] `/predictions` - À créer en Phase 4
+  - [ ] `/alerts` - À créer en Phase 5
+  - [ ] `/map` (zones à risque) - À créer en Phase 6
+  - [ ] `/health-profile` - À créer en Phase 8
+  - [ ] `/sensors` - À créer en Phase 4
+  - [ ] `/journal` (carnet santé) - À créer en Phase 10
+  - [ ] `/actions` (actions préventives) - À créer en Phase 7
 
 ### 1.3 Services API
-- [ ] Créer `src/services/api.js` :
-  ```javascript
-  import axios from 'axios';
-  
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-  
-  const api = axios.create({
-    baseURL: API_BASE_URL,
-  });
-  
-  // Intercepteur pour ajouter token JWT
-  api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  });
-  
-  export default api;
-  ```
+- [x] Créer `src/services/api.js` ✅
+  - Instance axios configurée
+  - Intercepteur pour token JWT
+  - Gestion erreurs 401
 
-- [ ] Créer services spécifiques :
-  - [ ] `src/services/auth.js` (login, register)
-  - [ ] `src/services/users.js` (profil utilisateur)
-  - [ ] `src/services/healthProfiles.js` (profil de santé)
-  - [ ] `src/services/sensors.js` (capteurs + prédictions)
-  - [ ] `src/services/environment.js` (données environnementales)
-  - [ ] `src/services/alerts.js` (alertes)
-  - [ ] `src/services/community.js` (zones à risque)
-  - [ ] `src/services/treatments.js` (actions préventives)
-  - [ ] `src/services/dashboard.js` (dashboard santé publique)
+- [x] Créer services spécifiques ✅ :
+  - [x] `src/services/auth.js` (login, register) ✅
+  - [x] `src/services/users.js` (profil utilisateur) ✅
+  - [x] `src/services/healthProfiles.js` (profil de santé) ✅
+  - [x] `src/services/sensors.js` (capteurs + prédictions) ✅
+  - [x] `src/services/environment.js` (données environnementales) ✅
+  - [x] `src/services/alerts.js` (alertes) ✅
+  - [x] `src/services/community.js` (zones à risque) ✅
+  - [x] `src/services/treatments.js` (actions préventives) ✅
+  - [x] `src/services/dashboard.js` (dashboard santé publique) ✅
 
 ### 1.4 Context API
-- [ ] Créer `src/context/AuthContext.js` :
-  - Gestion authentification (token, user, login, logout)
-  - Vérification token valide
-  - Redirection si non authentifié
+- [x] Créer `src/context/AuthContext.js` ✅ :
+  - Gestion authentification (token, user, login, logout) ✅
+  - Vérification token valide ✅
+  - Chargement utilisateur depuis localStorage ✅
 
 - [ ] Créer `src/context/ThemeContext.js` (optionnel)
 
 ### 1.5 Layout Components
-- [ ] Créer `Header` (avec menu hamburger, notifications)
-- [ ] Créer `BottomNav` (navigation mobile)
+- [x] Créer `Header` (avec menu hamburger, notifications) ✅
+- [x] Créer `BottomNav` (navigation mobile) ✅
+- [x] Créer `Layout` (wrapper avec Header + BottomNav) ✅
 - [ ] Créer `Sidebar` (menu latéral, optionnel desktop)
 
 ---
@@ -181,47 +166,47 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 ## Phase 2 : Authentification (Semaine 1-2)
 
 ### 2.1 Page Login
-- [ ] Créer `src/pages/Login.jsx`
-- [ ] Formulaire :
-  - Input Email
-  - Input Password
-  - Checkbox "Remember me"
-  - Lien "Forgot password"
-  - Bouton "Connexion" (vert, arrondi)
-  - Lien "Don't have an account? Register"
-  - Social login (Facebook, Apple, Google) - optionnel
-- [ ] Appel API : `POST /api/users/login/`
-- [ ] Stockage token JWT dans localStorage
-- [ ] Redirection vers dashboard après login
+- [x] Créer `src/pages/Login.jsx` ✅
+- [x] Formulaire :
+  - [x] Input Email ✅
+  - [x] Input Password ✅
+  - [x] Checkbox "Remember me" ✅
+  - [x] Lien "Forgot password" ✅
+  - [x] Bouton "Connexion" (vert, arrondi) ✅
+  - [x] Lien "Don't have an account? Register" ✅
+  - [x] Social login (Facebook, Apple, Google) ✅
+- [x] Appel API : `POST /api/auth/login/` ✅
+- [x] Stockage token JWT dans localStorage ✅
+- [x] Redirection vers dashboard après login ✅
 
 ### 2.2 Page Register (Sélection Type Compte)
-- [ ] Créer `src/pages/RegisterType.jsx`
-- [ ] Deux cartes pour sélection :
-  - Carte "user/patient" (vert plein)
-  - Carte "professionals" (vert clair)
-- [ ] Bouton "continue"
-- [ ] Lien "Already have an account? login"
-- [ ] Redirection vers formulaire d'inscription avec type sélectionné
+- [x] Créer `src/pages/RegisterType.jsx` ✅
+- [x] Deux cartes pour sélection :
+  - [x] Carte "user/patient" (vert plein) ✅
+  - [x] Carte "professionals" (vert clair) ✅
+- [x] Bouton "continue" ✅
+- [x] Lien "Already have an account? login" ✅
+- [x] Redirection vers formulaire d'inscription avec type sélectionné ✅
 
 ### 2.3 Page Inscription (Formulaire)
-- [ ] Créer `src/pages/Register.jsx`
-- [ ] Formulaire :
-  - Input "Nom et Prénom"
-  - Input "Lieu de fonction" (ex: ESATIC)
-  - Input "E-mail"
-  - Input "fonction" (ex: Étudiant)
-  - Checkbox "Agree to terms and privacy policy"
-  - Icône cœur (visuel)
-  - Bouton "Inscription" (vert)
-- [ ] Appel API : `POST /api/users/register/`
-- [ ] Validation formulaire
-- [ ] Redirection vers login après inscription
+- [x] Créer `src/pages/Register.jsx` ✅
+- [x] Formulaire :
+  - [x] Input "Nom et Prénom" ✅
+  - [x] Input "Lieu de fonction" (ex: ESATIC) ✅
+  - [x] Input "E-mail" ✅
+  - [x] Input "fonction" (ex: Étudiant) ✅
+  - [x] Checkbox "Agree to terms and privacy policy" ✅
+  - [x] Icône cœur (visuel) ✅
+  - [x] Bouton "Inscription" (vert) ✅
+- [x] Appel API : `POST /api/auth/register/` ✅
+- [x] Validation formulaire ✅
+- [x] Redirection vers login après inscription ✅
 
 ### 2.4 Protected Routes
-- [ ] Créer `ProtectedRoute` component
-- [ ] Vérifier token JWT
-- [ ] Rediriger vers login si non authentifié
-- [ ] Gérer permissions (patient vs doctor)
+- [x] Créer `ProtectedRoute` component ✅
+- [x] Vérifier token JWT ✅
+- [x] Rediriger vers login si non authentifié ✅
+- [x] Gérer permissions (patient vs doctor) ✅
 
 ### 2.5 Tests
 - [ ] Tests de connexion/déconnexion
