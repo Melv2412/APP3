@@ -59,4 +59,6 @@ logs/
 # !*/migrations/__init__.py
 
 # Fichiers de développement (modifications locales ignorées)
-dev_backend.md
+
+Struct_ASIKO.md
+AVIS_PROJET.md

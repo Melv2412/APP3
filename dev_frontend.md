@@ -1,0 +1,741 @@
+# Plan d'Implémentation Frontend React.js ASIKO
+
+## Vue d'ensemble
+
+Ce document détaille le plan d'implémentation complet du frontend React.js pour le projet ASIKO (Système Prédictif pour Anticiper la Pneumonie), basé sur les maquettes Figma et intégré avec le backend Django REST Framework.
+
+## 📊 État Actuel du Projet (Dernière mise à jour)
+
+### ✅ Phases Complètes
+- **Phase 0** : Configuration et Setup React.js ✅
+
+### ❌ Phases Non Démarrées
+- **Phase 1** : Configuration de base (Design System, Routing, Services API)
+- **Phase 2** : Authentification (Login, Register, Account Type Selection)
+- **Phase 3** : Dashboard Patient (Accueil User)
+- **Phase 4** : Prédictions IA et Données Capteurs
+- **Phase 5** : Alertes
+- **Phase 6** : Cartographie et Zones à Risque
+- **Phase 7** : Actions Préventives
+- **Phase 8** : Profil de Santé
+- **Phase 9** : Dashboard Médecin (Santé Publique)
+- **Phase 10** : Carnet Santé Connecté
+- **Phase 11** : Optimisations et Finalisation
+
+### 🔄 Modifications depuis Figma
+
+**Écrans Figma à Supprimer :**
+- ❌ Message avec médecin (chat) - Télémédecine supprimée du backend
+- ❌ Historique consultations - Remplacé par "Historique Prédictions"
+- ❌ Agenda/Rendez-vous - Pas dans le backend
+- ❌ Services en ligne (Pharmacy, Physiotherapy, Shop) - Pas d'API backend (peut rester comme liens externes)
+
+**Écrans Figma à Transformer :**
+- ⚠️ "Espace docteur" → "Mon Profil de Santé" (utilise HealthProfile au lieu de médecin assigné)
+- ⚠️ "Historique" → "Historique de Prédictions" (utilise Prediction au lieu de consultations)
+
+**Écrans à Créer (manquants dans Figma) :**
+- ➕ Page Prédictions IA
+- ➕ Page Alertes
+- ➕ Page Actions Préventives
+- ➕ Page Zones à Risque / Carte complète
+- ➕ Page Données Capteurs
+- ➕ Page Carnet Santé
+- ➕ Dashboard Santé Publique (pour médecin)
+
+---
+
+## Phase 0 : Configuration de Base React.js (Semaine 1)
+
+### 0.1 Setup Projet
+- [x] Créer projet Vite + React (JavaScript)
+- [x] Installer dépendances de base
+- [ ] Installer packages nécessaires :
+  - `axios` (appels API)
+  - `react-router-dom` (routing)
+  - `react-leaflet` ou `@react-google-maps/api` (cartographie)
+  - `recharts` ou `chart.js` (graphiques)
+  - `date-fns` (gestion dates)
+
+### 0.2 Structure des Dossiers
+- [ ] Créer structure :
+  ```
+  src/
+  ├── assets/           # Images, icônes
+  ├── components/       # Composants réutilisables
+  │   ├── common/      # Boutons, Inputs, Cards
+  │   └── layout/      # Header, Footer, Nav
+  ├── pages/           # Pages de l'application
+  ├── services/        # Appels API vers backend
+  ├── context/         # Context API (Auth, Theme)
+  ├── hooks/           # Custom hooks
+  ├── utils/           # Utilitaires
+  ├── styles/          # CSS globaux, variables
+  └── App.jsx
+  ```
+
+### 0.3 Configuration Base
+- [ ] Configurer variables d'environnement (`.env`)
+  - `VITE_API_BASE_URL=http://localhost:8000/api`
+- [ ] Configurer Vite proxy si nécessaire
+- [ ] Configurer ESLint/Prettier (optionnel)
+
+---
+
+## Phase 1 : Configuration de Base (Semaine 1)
+
+### 1.1 Design System
+
+#### Palette de Couleurs
+- [ ] Définir variables CSS :
+  ```css
+  --primary-green: #00A651 (à confirmer depuis Figma)
+  --dark-green: #008040 (pour chat médecin, si gardé)
+  --light-green: #B8E6B8
+  --white: #FFFFFF
+  --red: #FF0000 (alerts, risque)
+  --blue: #0066FF (highlights, active states)
+  --gray: #CCCCCC (inactive, texte secondaire)
+  --gray-dark: #666666
+  ```
+
+#### Typographie
+- [ ] Définir hiérarchie :
+  - Titre principal : Gras, vert, 24-32px
+  - Sous-titres : Gras, noir, 18-20px
+  - Corps : Normal, noir, 14-16px
+  - Boutons : Gras, blanc, 16px
+
+#### Composants de Base
+- [ ] Créer `Button` (primaire, secondaire, carré)
+- [ ] Créer `Input` (text, email, password)
+- [ ] Créer `Card` (container arrondi)
+- [ ] Créer `Badge` (notifications)
+- [ ] Créer `Icon` (wrapper pour icônes)
+
+### 1.2 Routing
+- [ ] Installer et configurer `react-router-dom`
+- [ ] Créer routes principales :
+  - `/login`
+  - `/register`
+  - `/register/type` (sélection type compte)
+  - `/dashboard` (patient)
+  - `/dashboard/doctor` (médecin)
+  - `/predictions`
+  - `/alerts`
+  - `/map` (zones à risque)
+  - `/health-profile`
+  - `/sensors`
+  - `/journal` (carnet santé)
+  - `/actions` (actions préventives)
+
+### 1.3 Services API
+- [ ] Créer `src/services/api.js` :
+  ```javascript
+  import axios from 'axios';
+  
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  
+  const api = axios.create({
+    baseURL: API_BASE_URL,
+  });
+  
+  // Intercepteur pour ajouter token JWT
+  api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  });
+  
+  export default api;
+  ```
+
+- [ ] Créer services spécifiques :
+  - [ ] `src/services/auth.js` (login, register)
+  - [ ] `src/services/users.js` (profil utilisateur)
+  - [ ] `src/services/healthProfiles.js` (profil de santé)
+  - [ ] `src/services/sensors.js` (capteurs + prédictions)
+  - [ ] `src/services/environment.js` (données environnementales)
+  - [ ] `src/services/alerts.js` (alertes)
+  - [ ] `src/services/community.js` (zones à risque)
+  - [ ] `src/services/treatments.js` (actions préventives)
+  - [ ] `src/services/dashboard.js` (dashboard santé publique)
+
+### 1.4 Context API
+- [ ] Créer `src/context/AuthContext.js` :
+  - Gestion authentification (token, user, login, logout)
+  - Vérification token valide
+  - Redirection si non authentifié
+
+- [ ] Créer `src/context/ThemeContext.js` (optionnel)
+
+### 1.5 Layout Components
+- [ ] Créer `Header` (avec menu hamburger, notifications)
+- [ ] Créer `BottomNav` (navigation mobile)
+- [ ] Créer `Sidebar` (menu latéral, optionnel desktop)
+
+---
+
+## Phase 2 : Authentification (Semaine 1-2)
+
+### 2.1 Page Login
+- [ ] Créer `src/pages/Login.jsx`
+- [ ] Formulaire :
+  - Input Email
+  - Input Password
+  - Checkbox "Remember me"
+  - Lien "Forgot password"
+  - Bouton "Connexion" (vert, arrondi)
+  - Lien "Don't have an account? Register"
+  - Social login (Facebook, Apple, Google) - optionnel
+- [ ] Appel API : `POST /api/users/login/`
+- [ ] Stockage token JWT dans localStorage
+- [ ] Redirection vers dashboard après login
+
+### 2.2 Page Register (Sélection Type Compte)
+- [ ] Créer `src/pages/RegisterType.jsx`
+- [ ] Deux cartes pour sélection :
+  - Carte "user/patient" (vert plein)
+  - Carte "professionals" (vert clair)
+- [ ] Bouton "continue"
+- [ ] Lien "Already have an account? login"
+- [ ] Redirection vers formulaire d'inscription avec type sélectionné
+
+### 2.3 Page Inscription (Formulaire)
+- [ ] Créer `src/pages/Register.jsx`
+- [ ] Formulaire :
+  - Input "Nom et Prénom"
+  - Input "Lieu de fonction" (ex: ESATIC)
+  - Input "E-mail"
+  - Input "fonction" (ex: Étudiant)
+  - Checkbox "Agree to terms and privacy policy"
+  - Icône cœur (visuel)
+  - Bouton "Inscription" (vert)
+- [ ] Appel API : `POST /api/users/register/`
+- [ ] Validation formulaire
+- [ ] Redirection vers login après inscription
+
+### 2.4 Protected Routes
+- [ ] Créer `ProtectedRoute` component
+- [ ] Vérifier token JWT
+- [ ] Rediriger vers login si non authentifié
+- [ ] Gérer permissions (patient vs doctor)
+
+### 2.5 Tests
+- [ ] Tests de connexion/déconnexion
+- [ ] Tests de redirection
+
+---
+
+## Phase 3 : Dashboard Patient (Semaine 2)
+
+### 3.1 Page Accueil User
+- [ ] Créer `src/pages/Dashboard.jsx`
+- [ ] Header :
+  - Menu hamburger (gauche)
+  - "Asikoconect" (centre, vert)
+  - Upload icon + Notifications (droite)
+
+- [ ] Section Welcome Banner :
+  - Photo de profil circulaire
+  - "Welcome back! [Nom utilisateur]"
+  - Fond vert
+
+- [ ] Section "Ma localisation" (Widget Carte) :
+  - [ ] Composant `MapWidget`
+  - Carte interactive (React Leaflet ou Google Maps)
+  - Cercle vert avec point bleu (position utilisateur)
+  - Texte "sain" dans le cercle
+  - Texte "Qualité de l'air: [Excellente/Bonne/Modérée/Mauvaise]"
+  - Légende : Point vert "Sain", Point rouge "Risque"
+  - Appel API : `GET /api/environment/current/{lat}/{lng}/`
+
+- [ ] Section "facteurs autour & services" :
+  - [ ] Trois boutons carrés verts :
+    - "facteurs" (icône soleil)
+    - "Hôpitaux Généraux" (icône H)
+    - "Centres de pneumologies" (icône cœur/poumons)
+  - [ ] Tabs : "services en ligne", "service 24x7", "Autres services"
+  - [ ] Boutons services (optionnel, liens externes) :
+    - HommeCall, Pharmacy, Physiotherapy, Shop
+
+- [ ] Section Prédiction Actuelle (À AJOUTER) :
+  - [ ] Widget prédiction
+  - Probabilité pneumonie 72h
+  - Niveau de risque (Faible/Modéré/Élevé)
+  - Appel API : `GET /api/sensors/predictions/latest/`
+
+- [ ] Bottom Navigation :
+  - [ ] Composant `BottomNav`
+  - Icônes : Home (actif), Stats, Cart, Heart, Profile
+
+### 3.2 Layout Dashboard
+- [ ] Wrapper avec Header + BottomNav
+- [ ] Scrollable content
+- [ ] Gestion responsive
+
+### 3.3 Tests
+- [ ] Tests d'affichage dashboard
+- [ ] Tests de widget carte
+
+---
+
+## Phase 4 : Prédictions IA et Données Capteurs (Semaine 2-3)
+
+### 4.1 Page Prédictions IA
+- [ ] Créer `src/pages/Predictions.jsx`
+- [ ] Section Prédiction Actuelle :
+  - Carte grande avec probabilité (0-100%)
+  - Niveau de risque (Faible/Modéré/Élevé) avec couleur
+  - Fenêtre de prédiction (72h)
+  - Date de dernière prédiction
+  - Appel API : `GET /api/sensors/predictions/latest/`
+
+- [ ] Section Historique Prédictions :
+  - [ ] Liste des prédictions (remplace "Historique consultations")
+  - Graphique évolution probabilité dans le temps
+  - Filtres : dernière semaine, mois, année
+  - Appel API : `GET /api/sensors/predictions/`
+
+- [ ] Section Facteurs Explicatifs :
+  - Liste des facteurs utilisés (features)
+  - Contribution de chaque facteur (si backend fournit)
+
+- [ ] Section Score d'Évolution du Risque :
+  - Tendance (INCREASING, DECREASING, STABLE)
+  - Pourcentage de changement
+  - Graphique tendance
+  - Appel API : `GET /api/sensors/risk-evolution/`
+
+### 4.2 Page Données Capteurs
+- [ ] Créer `src/pages/Sensors.jsx`
+- [ ] Section Mesures Actuelles :
+  - SpO₂ (avec graphique)
+  - Température
+  - Rythme respiratoire
+  - Fréquence cardiaque
+  - Tension artérielle
+  - WBC
+  - Appel API : `GET /api/sensors/measurements/` (dernières mesures)
+
+- [ ] Section Graphiques :
+  - [ ] Graphiques temporels (Recharts)
+  - Evolution SpO₂
+  - Evolution température
+  - Evolution rythme respiratoire
+  - Tendances (rr_trend, spo2_trend)
+
+- [ ] Section Upload Audio Toux (si Phase 3 complétée) :
+  - Bouton upload fichier audio
+  - Liste des enregistrements
+  - Appel API : `POST /api/sensors/cough-audio/`
+
+### 4.3 Composants Réutilisables
+- [ ] Créer `PredictionCard` (carte de prédiction)
+- [ ] Créer `SensorValueCard` (valeur capteur avec graphique)
+- [ ] Créer `RiskLevelBadge` (badge niveau de risque)
+- [ ] Créer `LineChart` (graphique évolution)
+
+### 4.4 Tests
+- [ ] Tests d'affichage prédictions
+- [ ] Tests de graphiques
+
+---
+
+## Phase 5 : Alertes (Semaine 3)
+
+### 5.1 Page Alertes
+- [ ] Créer `src/pages/Alerts.jsx`
+- [ ] Header avec badge nombre non lues
+- [ ] Liste des alertes :
+  - [ ] Carte alerte avec :
+    - Type d'alerte (pollution, SpO2, risque, toux)
+    - Sévérité (basse, moyenne, haute) avec couleur
+    - Message
+    - Date/heure
+    - Badge "Non lue" ou "Lue"
+    - Bouton "Marquer comme lue"
+  - Filtres : Toutes, Non lues, Par type
+  - Tri : Plus récentes, Par sévérité
+- [ ] Appel API : `GET /api/alerts/`
+- [ ] Appel API : `PATCH /api/alerts/{id}/mark-read/`
+- [ ] Appel API : `GET /api/alerts/unread-count/`
+
+### 5.2 Composant Notification Bell
+- [ ] Créer `NotificationBell` component
+- [ ] Badge rouge avec nombre non lues
+- [ ] Dropdown liste alertes récentes
+- [ ] Lien vers page Alertes complète
+
+### 5.3 Alertes Communautaires
+- [ ] Section alertes communautaires (si user=None)
+- [ ] Affichage spécial pour alertes de zone
+
+### 5.4 Tests
+- [ ] Tests d'affichage alertes
+- [ ] Tests de marquer comme lue
+
+---
+
+## Phase 6 : Cartographie et Zones à Risque (Semaine 3-4)
+
+### 6.1 Widget Carte (Dashboard)
+- [ ] Composant `MapWidget` pour accueil (déjà dans Phase 3)
+- [ ] Affichage position GPS utilisateur
+- [ ] Affichage qualité de l'air actuelle
+- [ ] Légende sain/risque
+
+### 6.2 Page Carte Complète
+- [ ] Créer `src/pages/Map.jsx`
+- [ ] Carte plein écran
+- [ ] Intégration bibliothèque (React Leaflet recommandé) :
+  - [ ] Installer `react-leaflet` et `leaflet`
+  - [ ] Configurer tiles (OpenStreetMap ou autre)
+- [ ] Affichage zones :
+  - [ ] Zones vertes (saines)
+  - [ ] Zones rouges (à risque)
+  - [ ] Cercles avec niveau de risque
+  - [ ] Popups avec détails zone
+- [ ] Appel API : `GET /api/community/risk-zones/nearby/`
+- [ ] Appel API : `GET /api/community/risk-map/`
+
+### 6.3 Marqueurs et Layers
+- [ ] Marqueur position utilisateur (cercle vert + point bleu)
+- [ ] Layer zones de risque (polygones ou cercles)
+- [ ] Layer pollution (heatmap ou cercles colorés)
+- [ ] Légende interactive
+
+### 6.4 Filtres Carte
+- [ ] Toggle : Afficher/Masquer zones à risque
+- [ ] Toggle : Afficher/Masquer pollution
+- [ ] Slider : Rayon de recherche
+- [ ] Filtre : Niveau de risque (Faible, Modéré, Élevé)
+
+### 6.5 Tests
+- [ ] Tests d'affichage carte
+- [ ] Tests de filtres
+
+---
+
+## Phase 7 : Actions Préventives (Semaine 4)
+
+### 7.1 Page Actions Préventives
+- [ ] Créer `src/pages/PreventionActions.jsx`
+- [ ] Liste des actions recommandées :
+  - [ ] Carte action avec :
+    - Type d'action (icône)
+    - Texte recommandation
+    - Priorité (Haute, Moyenne, Basse)
+    - Statut : À faire / Complétée
+    - Bouton "Marquer comme complétée"
+    - Date de création
+  - Filtres : Toutes, À faire, Complétées, Par priorité
+- [ ] Appel API : `GET /api/treatments/prevention-actions/`
+- [ ] Appel API : `POST /api/treatments/prevention-actions/{id}/complete/`
+
+### 7.2 Widget Actions (Dashboard)
+- [ ] Widget sur accueil avec 3 actions prioritaires
+- [ ] Lien vers page complète
+
+### 7.3 Tests
+- [ ] Tests d'affichage actions
+- [ ] Tests de complétion action
+
+---
+
+## Phase 8 : Profil de Santé (Semaine 4)
+
+### 8.1 Page Profil de Santé
+- [ ] Créer `src/pages/HealthProfile.jsx`
+- [ ] Transformer "Espace docteur" en "Mon Profil de Santé"
+- [ ] Section Informations Personnelles :
+  - Âge, Taille, Poids
+  - IMC calculé
+  - Statut tabagique
+  - Consommation d'alcool
+- [ ] Section Indice de Vulnérabilité :
+  - Score (0-100) avec barre de progression
+  - Niveau textuel (Très faible, Faible, Modéré, Élevé, Très élevé)
+  - Bouton "Recalculer"
+  - Facteurs expliqués
+- [ ] Section Comorbidités :
+  - Liste des comorbidités sélectionnées
+  - Bouton "Ajouter comorbidité"
+  - Appel API : `GET /api/comorbidities/`
+- [ ] Section Statuts Vaccinaux :
+  - Liste des vaccinations
+  - Bouton "Ajouter vaccination"
+  - Appel API : `GET /api/vaccination-statuses/`
+- [ ] Appel API : `GET /api/health-profiles/` (profil utilisateur)
+- [ ] Appel API : `POST /api/health-profiles/` (création)
+- [ ] Appel API : `PATCH /api/health-profiles/{id}/` (mise à jour)
+
+### 8.2 Formulaire Profil
+- [ ] Créer composant formulaire avec validation
+- [ ] Champs : taille, poids, statut tabagique, etc.
+- [ ] Sélection multiple comorbidités
+- [ ] Sélection multiple vaccinations
+
+### 8.3 Tests
+- [ ] Tests d'affichage profil
+- [ ] Tests de mise à jour profil
+
+---
+
+## Phase 9 : Dashboard Médecin (Santé Publique) (Semaine 5)
+
+### 9.1 Page Dashboard Médecin
+- [ ] Créer `src/pages/DashboardDoctor.jsx`
+- [ ] Header similaire patient
+- [ ] Section Welcome Banner (avec nom médecin)
+- [ ] Section Statistiques Population :
+  - Nombre total de patients
+  - Nombre de patients à risque élevé
+  - Répartition des niveaux de risque (graphique)
+  - Appel API : `GET /api/dashboard/public-health/stats/`
+
+- [ ] Section Zones à Risque :
+  - Liste des zones actives
+  - Niveau de risque par zone
+  - Nombre de signaux respiratoires
+  - Appel API : `GET /api/dashboard/risk-zones/`
+
+- [ ] Section Clusters :
+  - Détection de clusters de risque
+  - Carte avec clusters
+  - Appel API : `GET /api/dashboard/clusters/`
+
+- [ ] Section Tendances Épidémiologiques :
+  - Graphiques tendances
+  - Evolution temporelle
+  - Appel API : `GET /api/dashboard/trends/`
+
+### 9.2 Carte Santé Publique
+- [ ] Section carte pollution (plein écran ou widget)
+- [ ] Affichage zones polluées
+- [ ] Affichage clusters respiratoires
+- [ ] Appel API : `GET /api/dashboard/pollution-map/`
+
+### 9.3 Permissions
+- [ ] Vérifier que seul DOCTOR peut accéder
+- [ ] Redirection si PATIENT accède
+
+### 9.4 Tests
+- [ ] Tests d'accès (doctor seulement)
+- [ ] Tests d'affichage statistiques
+
+---
+
+## Phase 10 : Carnet Santé Connecté (Semaine 5)
+
+### 10.1 Page Carnet Santé
+- [ ] Créer `src/pages/HealthJournal.jsx`
+- [ ] Vue agrégée de toutes les données :
+  - Timeline verticale ou liste chronologique
+  - Prédictions (avec date, probabilité)
+  - Données capteurs (avec graphiques mini)
+  - Données environnementales (qualité de l'air)
+  - Alertes déclenchées
+  - Actions préventives complétées
+- [ ] Filtres temporels :
+  - Dernière semaine
+  - Dernier mois
+  - Dernière année
+  - Personnalisé (date_from, date_to)
+- [ ] Appel API : `GET /api/health-journal/`
+
+### 10.2 Section Résumé
+- [ ] Page résumé période
+- [ ] Statistiques agrégées
+- [ ] Graphiques synthétiques
+- [ ] Appel API : `GET /api/health-journal/summary/`
+
+### 10.3 Export
+- [ ] Bouton "Exporter"
+- [ ] Options : PDF ou JSON
+- [ ] Appel API : `GET /api/health-journal/export/`
+
+### 10.4 Tests
+- [ ] Tests d'affichage carnet
+- [ ] Tests de filtres temporels
+
+---
+
+## Phase 11 : Optimisations et Finalisation (Semaine 6)
+
+### 11.1 Performance
+- [ ] Lazy loading des routes
+- [ ] Memoization des composants lourds
+- [ ] Optimisation des images
+- [ ] Code splitting
+
+### 11.2 Gestion d'Erreurs
+- [ ] Composant ErrorBoundary
+- [ ] Messages d'erreur utilisateur-friendly
+- [ ] Gestion erreurs API (toast notifications)
+
+### 11.3 Loading States
+- [ ] Skeleton loaders
+- [ ] Spinners pour actions
+- [ ] États de chargement cohérents
+
+### 11.4 Responsive Design
+- [ ] Mobile-first approach
+- [ ] Breakpoints (mobile, tablet, desktop)
+- [ ] Navigation adaptée (bottom nav mobile, sidebar desktop)
+
+### 11.5 Accessibilité
+- [ ] Alt text pour images
+- [ ] ARIA labels
+- [ ] Navigation clavier
+- [ ] Contraste couleurs (WCAG)
+
+### 11.6 Tests
+- [ ] Tests unitaires (Jest + React Testing Library)
+- [ ] Tests d'intégration
+- [ ] Tests E2E (optionnel, Cypress)
+
+---
+
+## Design System Complet
+
+### Couleurs (Variables CSS)
+```css
+:root {
+  /* Primary Colors */
+  --primary-green: #00A651;
+  --dark-green: #008040;
+  --light-green: #B8E6B8;
+  
+  /* Neutral Colors */
+  --white: #FFFFFF;
+  --black: #000000;
+  --gray-light: #F5F5F5;
+  --gray: #CCCCCC;
+  --gray-dark: #666666;
+  
+  /* Semantic Colors */
+  --red: #FF0000;        /* Alerts, Risque */
+  --blue: #0066FF;       /* Highlights, Active */
+  --yellow: #FFCC00;     /* Warning */
+  --green-light: #90EE90; /* Success */
+}
+```
+
+### Typographie
+```css
+/* Headings */
+--font-heading-size-xl: 32px;
+--font-heading-size-lg: 24px;
+--font-heading-size-md: 20px;
+--font-heading-size-sm: 18px;
+
+/* Body */
+--font-body-size-lg: 16px;
+--font-body-size-md: 14px;
+--font-body-size-sm: 12px;
+
+/* Weights */
+--font-weight-bold: 700;
+--font-weight-semibold: 600;
+--font-weight-normal: 400;
+```
+
+### Composants Styles
+- [ ] Boutons : Arrondis 8-12px, padding généreux
+- [ ] Inputs : Bordure verte fine, focus vert plus foncé
+- [ ] Cards : Fond blanc, ombre légère, arrondi 12px
+- [ ] Badges : Arrondi complet, petit padding
+
+---
+
+## Intégration avec Backend Django
+
+### Endpoints API Utilisés
+
+#### Authentification (Phase 1)
+- `POST /api/users/register/`
+- `POST /api/users/login/`
+- `GET /api/users/me/`
+
+#### Profils de Santé (Phase 2)
+- `GET /api/health-profiles/`
+- `POST /api/health-profiles/`
+- `PATCH /api/health-profiles/{id}/`
+- `GET /api/comorbidities/`
+- `GET /api/vaccination-statuses/`
+
+#### Capteurs et Prédictions (Phase 3)
+- `GET /api/sensors/measurements/`
+- `GET /api/sensors/predictions/`
+- `GET /api/sensors/predictions/latest/`
+- `GET /api/sensors/risk-evolution/`
+
+#### Environnement (Phase 4)
+- `GET /api/environment/current/{lat}/{lng}/`
+- `GET /api/environment/nearby/`
+
+#### Alertes (Phase 5)
+- `GET /api/alerts/`
+- `GET /api/alerts/unread-count/`
+- `PATCH /api/alerts/{id}/mark-read/`
+
+#### Zones à Risque (Phase 6)
+- `GET /api/community/risk-zones/nearby/`
+- `GET /api/community/risk-map/`
+
+#### Actions Préventives (Phase 7)
+- `GET /api/treatments/prevention-actions/`
+- `POST /api/treatments/prevention-actions/{id}/complete/`
+
+#### Dashboard Santé Publique (Phase 8)
+- `GET /api/dashboard/public-health/stats/`
+- `GET /api/dashboard/risk-zones/`
+- `GET /api/dashboard/clusters/`
+- `GET /api/dashboard/trends/`
+- `GET /api/dashboard/pollution-map/`
+
+#### Carnet Santé (Phase 9)
+- `GET /api/health-journal/`
+- `GET /api/health-journal/summary/`
+- `GET /api/health-journal/export/`
+
+---
+
+## Ordre de Priorité Recommandé
+
+### MVP (Minimum Viable Product)
+1. Phase 0 : Configuration ✅
+2. Phase 1 : Configuration de base (Design System, Routing, Services)
+3. Phase 2 : Authentification
+4. Phase 3 : Dashboard Patient (avec widget carte basique)
+5. Phase 4 : Prédictions IA
+
+### V1 Complète
+6. Phase 5 : Alertes
+7. Phase 6 : Cartographie complète
+8. Phase 7 : Actions Préventives
+9. Phase 8 : Profil de Santé
+
+### V2
+10. Phase 9 : Dashboard Médecin
+11. Phase 10 : Carnet Santé
+12. Phase 11 : Optimisations
+
+---
+
+## Checklist Finale Avant Production
+
+- [ ] Toutes les pages créées
+- [ ] Tous les composants réutilisables créés
+- [ ] Toutes les intégrations API testées
+- [ ] Design System cohérent appliqué
+- [ ] Responsive design vérifié
+- [ ] Gestion d'erreurs complète
+- [ ] Loading states partout
+- [ ] Accessibilité vérifiée
+- [ ] Tests écrits
+- [ ] Performance optimisée
+- [ ] Documentation composants (Storybook optionnel)

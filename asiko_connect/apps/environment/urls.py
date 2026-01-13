@@ -1,5 +1,13 @@
-"""URLs placeholder for `environment` app — left empty intentionally."""
+"""
+URLs pour l'app environment.
+"""
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import EnvironmentDataViewSet
 
-from django.urls import path
+router = DefaultRouter()
+router.register(r'environment', EnvironmentDataViewSet, basename='environment')
 
-urlpatterns = []
+urlpatterns = [
+    path('', include(router.urls)),
+]
