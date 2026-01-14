@@ -10,9 +10,9 @@ const BottomNav = () => {
 
   const navItems = [
     { path: '/dashboard', icon: 'home', label: 'Accueil' },
-    { path: '/stats', icon: 'stats', label: 'Stats' },
-    { path: '/cart', icon: 'cart', label: 'Panier' },
-    { path: '/favorites', icon: 'heart', label: 'Favoris' },
+    { path: '/predictions', icon: 'stats', label: 'Prédictions' },
+    { path: '/sensors', icon: 'sensor', label: 'Capteurs' },
+    { path: '/alerts', icon: 'bell', label: 'Alertes' },
     { path: '/profile', icon: 'profile', label: 'Profil' },
   ];
 
@@ -36,16 +36,16 @@ const BottomNav = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
         );
-      case 'cart':
+      case 'sensor':
         return (
           <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
           </svg>
         );
-      case 'heart':
+      case 'bell':
         return (
           <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
           </svg>
         );
       case 'profile':

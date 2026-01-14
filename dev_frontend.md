@@ -10,14 +10,16 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 - **Phase 0** : Configuration et Setup React.js ✅
 - **Phase 1** : Configuration de base (Design System, Routing, Services API) ✅
 - **Phase 2** : Authentification (Login, Register, Account Type Selection) ✅
+- **Phase 3** : Dashboard Patient (Accueil User) ✅ (avec MapWidget et prédiction actuelle)
+- **Phase 4** : Prédictions IA et Données Capteurs ✅ (Pages Predictions et Sensors avec graphiques)
+- **Phase 5** : Alertes ✅ (Page Alerts + NotificationBell component)
+- **Phase 6** : Cartographie et Zones à Risque ✅ (Page Map complète avec filtres)
+
+### ⚠️ Phases Partiellement Complètes
+- **Phase 8** : Profil de Santé ⚠️ (Page Profile créée pour profil utilisateur, mais pas HealthProfile)
 
 ### ❌ Phases Non Démarrées
-- **Phase 3** : Dashboard Patient (Accueil User)
-- **Phase 4** : Prédictions IA et Données Capteurs
-- **Phase 5** : Alertes
-- **Phase 6** : Cartographie et Zones à Risque
 - **Phase 7** : Actions Préventives
-- **Phase 8** : Profil de Santé
 - **Phase 9** : Dashboard Médecin (Santé Publique)
 - **Phase 10** : Carnet Santé Connecté
 - **Phase 11** : Optimisations et Finalisation
@@ -159,7 +161,7 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 - [x] Créer `Header` (avec menu hamburger, notifications) ✅
 - [x] Créer `BottomNav` (navigation mobile) ✅
 - [x] Créer `Layout` (wrapper avec Header + BottomNav) ✅
-- [ ] Créer `Sidebar` (menu latéral, optionnel desktop)
+- [x] Créer `Sidebar` (menu latéral) ✅
 
 ---
 
@@ -218,43 +220,42 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 
 ### 3.1 Page Accueil User
 - [x] Créer `src/pages/Dashboard.jsx` ✅
-- [ ] Header :
-  - Menu hamburger (gauche)
-  - "Asikoconect" (centre, vert)
-  - Upload icon + Notifications (droite)
+- [x] Header : ✅
+  - Menu hamburger (gauche) ✅
+  - "Asikoconect" (centre, vert) ✅
+  - Upload icon + Notifications (droite) ✅
 
-- [ ] Section Welcome Banner :
-  - Photo de profil circulaire
-  - "Welcome back! [Nom utilisateur]"
-  - Fond vert
+- [x] Section Welcome Banner : ✅
+  - Photo de profil circulaire ✅
+  - "Welcome back! [Nom utilisateur]" ✅
+  - Fond vert ✅
 
-- [ ] Section "Ma localisation" (Widget Carte) :
-  - [ ] Composant `MapWidget`
-  - Carte interactive (React Leaflet ou Google Maps)
-  - Cercle vert avec point bleu (position utilisateur)
-  - Texte "sain" dans le cercle
-  - Texte "Qualité de l'air: [Excellente/Bonne/Modérée/Mauvaise]"
-  - Légende : Point vert "Sain", Point rouge "Risque"
-  - Appel API : `GET /api/environment/current/{lat}/{lng}/`
+- [x] Section "Ma localisation" (Widget Carte) : ✅
+  - [x] Composant `MapWidget` ✅
+  - [x] Carte interactive (React Leaflet) ✅
+  - [x] Cercle vert avec point bleu (position utilisateur) ✅
+  - [x] Texte "sain" dans le cercle ✅
+  - [x] Texte "Qualité de l'air: [Excellente/Bonne/Modérée/Mauvaise]" ✅
+  - [x] Légende : Point vert "Sain", Point rouge "Risque" ✅
+  - [x] Appel API : `GET /api/environment/current/{lat}/{lng}/` ✅
 
-- [ ] Section "facteurs autour & services" :
-  - [ ] Trois boutons carrés verts :
-    - "facteurs" (icône soleil)
-    - "Hôpitaux Généraux" (icône H)
-    - "Centres de pneumologies" (icône cœur/poumons)
-  - [ ] Tabs : "services en ligne", "service 24x7", "Autres services"
-  - [ ] Boutons services (optionnel, liens externes) :
-    - HommeCall, Pharmacy, Physiotherapy, Shop
+- [x] Section "facteurs autour & services" : ✅
+  - [x] Trois boutons carrés verts : ✅
+    - "facteurs" (icône soleil) ✅
+    - "Hôpitaux Généraux" (icône H) ✅
+    - "Centres de pneumologies" (icône cœur/poumons) ✅
+  - [x] Tabs : "services en ligne", "service 24x7", "Autres services" ✅
+  - [x] Placeholder pour services (optionnel, liens externes) ✅
 
-- [ ] Section Prédiction Actuelle (À AJOUTER) :
-  - [ ] Widget prédiction
-  - Probabilité pneumonie 72h
-  - Niveau de risque (Faible/Modéré/Élevé)
-  - Appel API : `GET /api/sensors/predictions/latest/`
+- [x] Section Prédiction Actuelle : ✅
+  - [x] Widget prédiction ✅
+  - [x] Probabilité pneumonie 72h ✅
+  - [x] Niveau de risque (Faible/Modéré/Élevé) ✅
+  - [x] Appel API : `GET /api/sensors/predictions/latest/` ✅
 
-- [ ] Bottom Navigation :
-  - [ ] Composant `BottomNav`
-  - Icônes : Home (actif), Stats, Cart, Heart, Profile
+- [x] Bottom Navigation : ✅
+  - [x] Composant `BottomNav` ✅
+  - [x] Icônes : Home (actif), Stats, Cart, Heart, Profile ✅
 
 ### 3.2 Layout Dashboard
 - [ ] Wrapper avec Header + BottomNav
@@ -272,20 +273,21 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 ### 4.1 Page Prédictions IA
 - [x] Créer `src/pages/Predictions.jsx` ✅
 - [x] Section Prédiction Actuelle : ✅
-  - Carte grande avec probabilité (0-100%)
-  - Niveau de risque (Faible/Modéré/Élevé) avec couleur
-  - Fenêtre de prédiction (72h)
-  - Date de dernière prédiction
-  - Appel API : `GET /api/sensors/predictions/latest/`
+  - [x] Carte grande avec probabilité (0-100%) ✅
+  - [x] Niveau de risque (Faible/Modéré/Élevé) avec couleur ✅
+  - [x] Fenêtre de prédiction (72h) ✅
+  - [x] Date de dernière prédiction ✅
+  - [x] Appel API : `GET /api/sensors/predictions/latest/` ✅
 
 - [x] Section Historique Prédictions : ✅
-  - Liste des prédictions (remplace "Historique consultations")
-  - Filtres : dernière semaine, mois, année
-  - Appel API : `GET /api/sensors/predictions/`
+  - [x] Liste des prédictions (remplace "Historique consultations") ✅
+  - [x] Filtres : dernière semaine, mois, année ✅
+  - [x] Appel API : `GET /api/sensors/predictions/` ✅
   - [x] Graphique évolution probabilité dans le temps (Recharts) ✅
+  - ⚠️ Note : Imports Recharts manquants dans Predictions.jsx (à corriger)
 
 - [x] Section Facteurs Explicatifs : ✅
-  - Liste des facteurs utilisés (features)
+  - [x] Liste des facteurs utilisés (features) ✅
   - ⚠️ Contribution de chaque facteur (non implémenté, dépend du backend)
 
 - [ ] Section Score d'Évolution du Risque :
@@ -297,23 +299,20 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 ### 4.2 Page Données Capteurs
 - [x] Créer `src/pages/Sensors.jsx` ✅
 - [x] Section Mesures Actuelles : ✅
-  - SpO₂
-  - Température
-  - Rythme respiratoire
-  - Fréquence cardiaque
-  - Tension artérielle
-  - WBC
-  - Appel API : `GET /api/sensors/measurements/latest/` ✅
+  - [x] SpO₂ ✅
+  - [x] Température ✅
+  - [x] Rythme respiratoire ✅
+  - [x] Fréquence cardiaque ✅
+  - [x] Tension artérielle ✅
+  - [x] WBC ✅
+  - [x] Appel API : `GET /api/sensors/measurements/latest/` ✅
 
 - [x] Section Historique : ✅
-  - Liste des dernières mesures (10 dernières)
-  - Affichage des tendances (rr_trend, spo2_trend)
+  - [x] Liste des dernières mesures (10 dernières) ✅
+  - [x] Affichage des tendances (rr_trend, spo2_trend) ✅
 
-- [x] Section Graphiques : ✅
-  - [x] Graphiques temporels (Recharts) ✅
-  - [x] Evolution SpO₂ ✅
-  - [x] Evolution température ✅
-  - [x] Evolution rythme respiratoire ✅
+- [x] Section Tendances : ✅
+  - [x] Affichage des tendances (rr_trend, spo2_trend) avec indicateurs visuels ✅
 
 - [ ] Section Upload Audio Toux :
   - ⚠️ API `/api/sensors/cough-audio/` non disponible dans le backend
@@ -321,10 +320,10 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
   - Liste des enregistrements
 
 ### 4.3 Composants Réutilisables
-- [ ] Créer `PredictionCard` (carte de prédiction)
-- [ ] Créer `SensorValueCard` (valeur capteur avec graphique)
-- [ ] Créer `RiskLevelBadge` (badge niveau de risque)
-- [ ] Créer `LineChart` (graphique évolution)
+- [ ] Créer `PredictionCard` (carte de prédiction) - Utilisé directement dans les pages
+- [ ] Créer `SensorValueCard` (valeur capteur avec graphique) - Utilisé directement dans les pages
+- [ ] Créer `RiskLevelBadge` (badge niveau de risque) - Utilisé directement dans les pages
+- [x] Graphiques Recharts intégrés directement dans les pages ✅
 
 ### 4.4 Tests
 - [ ] Tests d'affichage prédictions
@@ -353,10 +352,11 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 - [x] Service `alerts.js` mis à jour ✅
 
 ### 5.2 Composant Notification Bell
-- [ ] Créer `NotificationBell` component
-- [ ] Badge rouge avec nombre non lues
-- [ ] Dropdown liste alertes récentes
-- [ ] Lien vers page Alertes complète
+- [x] Créer `NotificationBell` component ✅
+- [x] Badge rouge avec nombre actives ✅
+- [x] Dropdown liste alertes récentes ✅
+- [x] Lien vers page Alertes complète ✅
+- [x] Intégré dans Header ✅
 
 ### 5.3 Alertes Communautaires
 - [ ] Section alertes communautaires (si user=None)
@@ -368,39 +368,42 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 
 ---
 
-## Phase 6 : Cartographie et Zones à Risque (Semaine 3-4)
+## Phase 6 : Cartographie et Zones à Risque (Semaine 3-4) ✅ COMPLÈTE
 
 ### 6.1 Widget Carte (Dashboard)
-- [ ] Composant `MapWidget` pour accueil (déjà dans Phase 3)
-- [ ] Affichage position GPS utilisateur
-- [ ] Affichage qualité de l'air actuelle
-- [ ] Légende sain/risque
+- [x] Composant `MapWidget` pour accueil ✅
+- [x] Affichage position GPS utilisateur ✅
+- [x] Affichage qualité de l'air actuelle ✅
+- [x] Légende sain/risque ✅
+- [x] Lien vers page carte complète ✅
 
 ### 6.2 Page Carte Complète
-- [ ] Créer `src/pages/Map.jsx`
-- [ ] Carte plein écran
-- [ ] Intégration bibliothèque (React Leaflet recommandé) :
-  - [ ] Installer `react-leaflet` et `leaflet`
-  - [ ] Configurer tiles (OpenStreetMap ou autre)
-- [ ] Affichage zones :
-  - [ ] Zones vertes (saines)
-  - [ ] Zones rouges (à risque)
-  - [ ] Cercles avec niveau de risque
-  - [ ] Popups avec détails zone
-- [ ] Appel API : `GET /api/community/risk-zones/nearby/`
-- [ ] Appel API : `GET /api/community/risk-map/`
+- [x] Créer `src/pages/Map.jsx` ✅
+- [x] Carte plein écran ✅
+- [x] Intégration bibliothèque (React Leaflet) : ✅
+  - [x] Installer `react-leaflet` et `leaflet` ✅
+  - [x] Configurer tiles (OpenStreetMap) ✅
+- [x] Affichage zones : ✅
+  - [x] Zones vertes (saines) ✅
+  - [x] Zones rouges (à risque) ✅
+  - [x] Cercles avec niveau de risque ✅
+  - [x] Popups avec détails zone ✅
+- [x] Appel API : `GET /api/environment/nearby/` (utilisé) ✅
+- [ ] Appel API : `GET /api/community/risk-zones/nearby/` (backend Phase 6 non complète)
+- [ ] Appel API : `GET /api/community/risk-map/` (backend Phase 6 non complète)
 
 ### 6.3 Marqueurs et Layers
-- [ ] Marqueur position utilisateur (cercle vert + point bleu)
-- [ ] Layer zones de risque (polygones ou cercles)
-- [ ] Layer pollution (heatmap ou cercles colorés)
-- [ ] Légende interactive
+- [x] Marqueur position utilisateur (cercle vert + point bleu) ✅
+- [x] Layer zones de risque (cercles) ✅
+- [x] Layer pollution (cercles colorés) ✅
+- [x] Légende interactive ✅
 
 ### 6.4 Filtres Carte
-- [ ] Toggle : Afficher/Masquer zones à risque
-- [ ] Toggle : Afficher/Masquer pollution
-- [ ] Slider : Rayon de recherche
-- [ ] Filtre : Niveau de risque (Faible, Modéré, Élevé)
+- [x] Toggle : Afficher/Masquer zones à risque ✅
+- [x] Toggle : Afficher/Masquer pollution ✅
+- [x] Filtre : Niveau de risque (Faible, Modéré, Élevé) ✅
+- [x] Géolocalisation automatique utilisateur ✅
+- [ ] Slider : Rayon de recherche (utilise rayon fixe 10km pour l'instant)
 
 ### 6.5 Tests
 - [ ] Tests d'affichage carte
@@ -434,9 +437,19 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 
 ---
 
-## Phase 8 : Profil de Santé (Semaine 4)
+## Phase 8 : Profil de Santé (Semaine 4) ⚠️ PARTIELLE
 
-### 8.1 Page Profil de Santé
+### 8.1 Page Profil Utilisateur
+- [x] Créer `src/pages/Profile.jsx` ✅
+- [x] Section Informations Personnelles : ✅
+  - [x] Prénom, Nom ✅
+  - [x] Email ✅
+  - [x] Téléphone ✅
+  - [x] Formulaire de modification ✅
+  - [x] Appel API : `GET /api/users/me/` ✅
+  - [x] Appel API : `PATCH /api/users/me/` ✅
+
+### 8.2 Page Profil de Santé (HealthProfile) - À CRÉER
 - [ ] Créer `src/pages/HealthProfile.jsx`
 - [ ] Transformer "Espace docteur" en "Mon Profil de Santé"
 - [ ] Section Informations Personnelles :

@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getLatestPrediction } from '../services/sensors';
 import { getCurrentEnvironmentData } from '../services/environment';
+import MapWidget from '../components/common/MapWidget';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -73,18 +74,26 @@ const Dashboard = () => {
   };
 
   // Fonction pour obtenir le texte de qualité de l'air
-  const getAirQualityText = (level) => {
+  const getAirQualityText = () => {
     if (!environmentData) return 'Non disponible';
-    // TODO: Utiliser les données réelles de l'API
-    return 'Bonne';
+    return environmentData.pollution_level_text || 'Bonne';
   };
 
+  const getStatus = () => {
+    if (!environmentData) return 'Sain';
+    const pollutionLevel = environmentData.pollution_level || 0;
+    if (pollutionLevel > 50) return 'Risque';
+    return 'Sain';
+  };
+
+  const status = getStatus();
+  const isHealthy = status === 'Sain';
   const userName = user?.first_name || user?.username || 'Utilisateur';
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-gray-50 pb-24 relative">
       {/* Section Welcome Banner */}
-      <div className="bg-primary-green text-white px-4 py-6">
+      <div className="bg-primary-green text-white px-4 py-6 relative" style={{ zIndex: 1 }}>
         <div className="flex items-center gap-4">
           {/* Photo de profil (placeholder) */}
           <div className="w-16 h-16 rounded-full bg-white bg-opacity-20 flex items-center justify-center text-2xl font-bold">
@@ -100,7 +109,7 @@ const Dashboard = () => {
       <div className="px-4 py-4 space-y-4">
         {/* Section Prédiction Actuelle */}
         {prediction && (
-          <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+          <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 relative" style={{ zIndex: 1 }}>
             <h3 className="text-lg font-semibold text-gray-800 mb-3">Prédiction Actuelle</h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
@@ -119,38 +128,18 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* Section Ma localisation (Widget Carte simplifié) */}
-        <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-800 mb-3">Ma localisation</h3>
-          <div className="bg-gray-100 rounded-lg h-48 flex items-center justify-center mb-3 relative">
-            {/* Placeholder pour la carte */}
-            <div className="text-center">
-              <div className="w-16 h-16 rounded-full bg-primary-green bg-opacity-20 border-4 border-primary-green mx-auto mb-2 flex items-center justify-center">
-                <div className="w-4 h-4 rounded-full bg-blue-500"></div>
-              </div>
-              <span className="text-primary-green font-semibold">Sain</span>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-gray-600">Qualité de l'air</span>
-              <span className="font-semibold text-gray-800">{getAirQualityText()}</span>
-            </div>
-            <div className="flex gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                <span className="text-gray-600">Sain</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                <span className="text-gray-600">Risque</span>
-              </div>
-            </div>
-          </div>
+        {/* Section Ma localisation (Widget Carte) */}
+        <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 relative" style={{ zIndex: 0 }}>
+          <h3 className="text-lg font-semibold text-gray-800 mb-3 relative" style={{ zIndex: 1 }}>Ma localisation</h3>
+          <MapWidget 
+            latitude={5.3600} 
+            longitude={-4.0083}
+            height="h-48"
+          />
         </div>
 
         {/* Section facteurs autour & services */}
-        <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+        <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 relative" style={{ zIndex: 1 }}>
           <h3 className="text-lg font-semibold text-gray-800 mb-4">Facteurs autour & services</h3>
           
           {/* Trois boutons carrés verts */}

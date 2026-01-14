@@ -1,6 +1,28 @@
+/* Styles Leaflet pour les cartes (doit être avant @tailwind) */
+@import 'leaflet/dist/leaflet.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Correction du z-index pour les cartes Leaflet */
+.leaflet-container {
+  position: relative !important;
+  z-index: 0 !important;
+}
+
+.leaflet-pane {
+  z-index: 0 !important;
+}
+
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 1 !important;
+}
+
+.leaflet-control {
+  z-index: 1 !important;
+}
 
 /* Styles de base pour ASIKO */
 @layer base {

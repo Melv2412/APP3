@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getLatestPrediction, getPredictions } from '../services/sensors';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const Predictions = () => {
   const { user } = useAuth();

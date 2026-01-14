@@ -267,14 +267,16 @@ Phase 11 (Optimisations) ← Production-ready
 - **Phase 0** : Configuration et Setup React.js ✅
 - **Phase 1** : Configuration de base (Design System, Routing, Services API) ✅
 - **Phase 2** : Authentification (Login, Register, Account Type Selection) ✅
+- **Phase 3** : Dashboard Patient (Accueil User) ✅
+- **Phase 4** : Prédictions IA et Données Capteurs ✅
+- **Phase 5** : Alertes ✅
+- **Phase 6** : Cartographie et Zones à Risque ✅
+
+### ⚠️ Phases Partiellement Complètes
+- **Phase 8** : Profil de Santé ⚠️ (Page Profile créée, mais pas HealthProfile)
 
 ### ❌ Phases Non Démarrées
-- **Phase 3** : Dashboard Patient (Accueil User)
-- **Phase 4** : Prédictions IA et Données Capteurs
-- **Phase 5** : Alertes
-- **Phase 6** : Cartographie et Zones à Risque
 - **Phase 7** : Actions Préventives
-- **Phase 8** : Profil de Santé
 - **Phase 9** : Dashboard Médecin (Santé Publique)
 - **Phase 10** : Carnet Santé Connecté
 - **Phase 11** : Optimisations et Finalisation

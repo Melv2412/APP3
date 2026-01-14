@@ -14,6 +14,8 @@ import Dashboard from './pages/Dashboard';
 import Predictions from './pages/Predictions';
 import Sensors from './pages/Sensors';
 import Alerts from './pages/Alerts';
+import Map from './pages/Map';
+import Profile from './pages/Profile';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -55,15 +57,31 @@ function App() {
                 </ProtectedRoute>
               } 
             />
-            <Route 
-              path="/alerts" 
-              element={
-                <ProtectedRoute>
-                  <Alerts />
-                </ProtectedRoute>
-              } 
-            />
-          </Route>
+                     <Route 
+                       path="/alerts" 
+                       element={
+                         <ProtectedRoute>
+                           <Alerts />
+                         </ProtectedRoute>
+                       } 
+                     />
+                     <Route 
+                       path="/map" 
+                       element={
+                         <ProtectedRoute>
+                           <Map />
+                         </ProtectedRoute>
+                       } 
+                     />
+                     <Route 
+                       path="/profile" 
+                       element={
+                         <ProtectedRoute>
+                           <Profile />
+                         </ProtectedRoute>
+                       } 
+                     />
+                   </Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>
