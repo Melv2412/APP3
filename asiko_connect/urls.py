@@ -13,6 +13,7 @@ urlpatterns = [
     path('api/sensors/', include('asiko_connect.apps.sensors.urls')),
     path('api/', include('asiko_connect.apps.environment.urls')),  # Phase 4 : Environment
     path('api/', include('asiko_connect.apps.alerts.urls')),  # Phase 5 : Alertes
+    path('api/treatments/', include('asiko_connect.apps.treatments.urls')),  # Phase 7 : Actions Préventives
 ]
 
 # Servir les fichiers médias en développement

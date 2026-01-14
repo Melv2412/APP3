@@ -376,6 +376,14 @@ class SensorDataAPIView(APIView):
             )
             notify_frontend(MESSAGE_A_VOCAL)
 
+            # 🎯 Génération d'actions préventives pour Phase 1 (avertissement)
+            try:
+                from asiko_connect.apps.treatments.services import generate_prevention_actions_for_alert
+                actions = generate_prevention_actions_for_alert(alert)
+                print(f"[ACTIONS] {len(actions)} action(s) préventive(s) générée(s) pour Phase 1")
+            except Exception as e:
+                print(f"[ACTIONS] Erreur lors de la génération d'actions: {e}")
+
             # ⏱️ TIMER PHASE 1 → 15 secondes ou PASSAGE_PHASE_1
             if phase1_timer_task is not None:
                 phase1_timer_task.apply_async(

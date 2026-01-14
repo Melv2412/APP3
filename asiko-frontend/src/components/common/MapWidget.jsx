@@ -10,15 +10,59 @@ import { Link } from 'react-router-dom';
 const MapWidget = ({ latitude, longitude, height = 'h-48' }) => {
   const [environmentData, setEnvironmentData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [userPosition, setUserPosition] = useState({ 
+    lat: latitude || 5.3600, 
+    lng: longitude || -4.0083 
+  });
 
-  // Coordonnées par défaut (Abidjan) si non fournies
-  const defaultLat = latitude || 5.3600;
-  const defaultLng = longitude || -4.0083;
+  // Récupérer la position GPS de l'utilisateur
+  useEffect(() => {
+    let watchId = null;
+    
+    if (navigator.geolocation && !latitude && !longitude) {
+      // Si latitude/longitude ne sont pas fournies, récupérer la position GPS
+      const geoOptions = {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 5000
+      };
+      
+      const onSuccess = (position) => {
+        const newPosition = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        };
+        console.log('📍 MapWidget - Position GPS:', newPosition);
+        setUserPosition(newPosition);
+      };
+      
+      const onError = (err) => {
+        console.error('❌ MapWidget - Erreur géolocalisation:', err);
+        // Utiliser position par défaut (Abidjan)
+      };
+      
+      // Obtenir la position actuelle
+      navigator.geolocation.getCurrentPosition(onSuccess, onError, geoOptions);
+      
+      // Suivre les changements (pour le widget, on peut utiliser watchPosition aussi)
+      watchId = navigator.geolocation.watchPosition(onSuccess, onError, geoOptions);
+    } else if (latitude && longitude) {
+      // Si latitude/longitude sont fournies, les utiliser
+      setUserPosition({ lat: latitude, lng: longitude });
+    }
+    
+    return () => {
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+      }
+    };
+  }, [latitude, longitude]);
 
   useEffect(() => {
     const fetchEnvironmentData = async () => {
       try {
-        const data = await getCurrentEnvironmentData(defaultLat, defaultLng);
+        setLoading(true);
+        const data = await getCurrentEnvironmentData(userPosition.lat, userPosition.lng);
         setEnvironmentData(data);
       } catch (err) {
         console.log('Données environnementales non disponibles');
@@ -28,7 +72,7 @@ const MapWidget = ({ latitude, longitude, height = 'h-48' }) => {
     };
 
     fetchEnvironmentData();
-  }, [defaultLat, defaultLng]);
+  }, [userPosition.lat, userPosition.lng]);
 
   // Déterminer le statut (Sain/Risque) basé sur les données environnementales
   const getStatus = () => {
@@ -51,7 +95,7 @@ const MapWidget = ({ latitude, longitude, height = 'h-48' }) => {
       {/* Carte */}
       <div className={`${height} rounded-lg overflow-hidden border border-gray-200 mb-3 relative`} style={{ zIndex: 0, isolation: 'isolate' }}>
         <MapContainer
-          center={[defaultLat, defaultLng]}
+          center={[userPosition.lat, userPosition.lng]}
           zoom={13}
           style={{ height: '100%', width: '100%', position: 'relative' }}
           scrollWheelZoom={false}
@@ -64,7 +108,7 @@ const MapWidget = ({ latitude, longitude, height = 'h-48' }) => {
           
           {/* Marqueur position utilisateur */}
           <CircleMarker
-            center={[defaultLat, defaultLng]}
+            center={[userPosition.lat, userPosition.lng]}
             radius={15}
             pathOptions={{
               color: isHealthy ? '#00A651' : '#FF0000',
@@ -77,13 +121,16 @@ const MapWidget = ({ latitude, longitude, height = 'h-48' }) => {
               <div className="text-center">
                 <div className="font-semibold text-gray-800">{status}</div>
                 <div className="text-sm text-gray-600">Votre position</div>
+                <div className="text-xs text-gray-500 mt-1">
+                  {userPosition.lat.toFixed(4)}, {userPosition.lng.toFixed(4)}
+                </div>
               </div>
             </Popup>
           </CircleMarker>
           
           {/* Point bleu au centre */}
           <CircleMarker
-            center={[defaultLat, defaultLng]}
+            center={[userPosition.lat, userPosition.lng]}
             radius={5}
             pathOptions={{
               color: '#0066FF',

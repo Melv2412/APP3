@@ -17,6 +17,30 @@ const Dashboard = () => {
   const [preventionActions, setPreventionActions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [userPosition, setUserPosition] = useState({ lat: 5.3600, lng: -4.0083 }); // Abidjan par défaut
+
+  // Récupérer la position GPS de l'utilisateur
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserPosition({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (err) => {
+          console.log('Erreur géolocalisation dans Dashboard:', err);
+          // Utiliser position par défaut (Abidjan)
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 60000 // Accepter une position mise en cache de moins de 1 minute
+        }
+      );
+    }
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,13 +56,9 @@ const Dashboard = () => {
           console.log('Aucune prédiction disponible');
         }
 
-        // Récupérer les données environnementales (si position disponible)
-        // Pour l'instant, utiliser des coordonnées par défaut (Abidjan)
-        // TODO: Récupérer la position GPS réelle
-        const defaultLat = 5.3600;
-        const defaultLng = -4.0083;
+        // Récupérer les données environnementales avec la position GPS réelle
         try {
-          const envData = await getCurrentEnvironmentData(defaultLat, defaultLng);
+          const envData = await getCurrentEnvironmentData(userPosition.lat, userPosition.lng);
           setEnvironmentData(envData);
         } catch (err) {
           console.log('Données environnementales non disponibles');
@@ -70,7 +90,7 @@ const Dashboard = () => {
     };
 
     fetchData();
-  }, []);
+  }, [userPosition.lat, userPosition.lng]);
 
   // Fonction pour obtenir le texte du niveau de risque
   const getRiskLevelText = (level) => {
@@ -153,8 +173,8 @@ const Dashboard = () => {
         <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 relative" style={{ zIndex: 0 }}>
           <h3 className="text-lg font-semibold text-gray-800 mb-3 relative" style={{ zIndex: 1 }}>Ma localisation</h3>
           <MapWidget 
-            latitude={5.3600} 
-            longitude={-4.0083}
+            latitude={userPosition.lat}
+            longitude={userPosition.lng}
             height="h-48"
           />
         </div>

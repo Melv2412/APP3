@@ -5,6 +5,14 @@ from asiko_connect.utils.variables import *
 from .models import Alert
 from .services import compute_average_iqa
 
+# Import pour génération d'actions préventives
+try:
+    from asiko_connect.apps.treatments.services import generate_prevention_actions_for_alert
+except ImportError:
+    # Si l'app treatments n'est pas encore migrée, on ignore
+    def generate_prevention_actions_for_alert(alert):
+        return []
+
 # Import celery optionnel (pour éviter erreur si celery n'est pas installé)
 try:
     from celery import shared_task
@@ -60,6 +68,13 @@ def phase1_timer_task(self, alert_id):
 
     print(f"[PHASE 1 → PHASE 2] Alerte {alert.id}")
     notify_esp(alert)
+    
+    # 🎯 Génération d'actions préventives pour Phase 2
+    try:
+        actions = generate_prevention_actions_for_alert(alert)
+        print(f"[ACTIONS] {len(actions)} action(s) préventive(s) générée(s) pour Phase 2")
+    except Exception as e:
+        print(f"[ACTIONS] Erreur lors de la génération d'actions: {e}")
 
     # ⏱ Lancement du timer phase 2 (PAS immédiat)
     phase2_timer_task.apply_async(
@@ -97,6 +112,13 @@ def phase2_timer_task(self, alert_id):
 
         notify_esp(alert)
         print(f"[PHASE 2 → PHASE 3] Alerte {alert.id}")
+        
+        # 🎯 Génération d'actions préventives pour Phase 3 (critique)
+        try:
+            actions = generate_prevention_actions_for_alert(alert)
+            print(f"[ACTIONS] {len(actions)} action(s) préventive(s) générée(s) pour Phase 3 (CRITIQUE)")
+        except Exception as e:
+            print(f"[ACTIONS] Erreur lors de la génération d'actions: {e}")
 
         # ⏱ Désactivation automatique après PHASE 3 (5 minutes)
         phase3_timer_task.apply_async(

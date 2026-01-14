@@ -14,12 +14,8 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 - **Phase 4** : Prédictions IA et Données Capteurs ✅ (Pages Predictions et Sensors avec graphiques)
 - **Phase 5** : Alertes ✅ (Page Alerts + NotificationBell component)
 - **Phase 6** : Cartographie et Zones à Risque ✅ (Page Map complète avec filtres)
-
-### ✅ Phases Complètes
-- **Phase 8** : Profil de Santé ✅ (Page HealthProfile complète avec indice de vulnérabilité, comorbidités, vaccinations)
-
-### ✅ Phases Complètes
 - **Phase 7** : Actions Préventives ✅ (Page PreventionActions + Widget Dashboard)
+- **Phase 8** : Profil de Santé ✅ (Page HealthProfile complète avec indice de vulnérabilité, comorbidités, vaccinations + Page Profile utilisateur)
 
 ### ❌ Phases Non Démarrées
 - **Phase 9** : Dashboard Médecin (Santé Publique)
@@ -448,15 +444,19 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 
 ## Phase 8 : Profil de Santé (Semaine 4) ✅ COMPLÈTE
 
-### 8.1 Page Profil Utilisateur
+### 8.1 Page Profil Utilisateur ✅ COMPLÈTE
 - [x] Créer `src/pages/Profile.jsx` ✅
 - [x] Section Informations Personnelles : ✅
   - [x] Prénom, Nom ✅
   - [x] Email ✅
   - [x] Téléphone ✅
   - [x] Formulaire de modification ✅
+  - [x] Bouton "Modifier" / "Enregistrer" ✅
+  - [x] Gestion d'erreurs et messages de succès ✅
   - [x] Appel API : `GET /api/users/me/` ✅
   - [x] Appel API : `PATCH /api/users/me/` ✅
+- [x] Route `/profile` ajoutée dans App.jsx ✅
+- [x] Navigation mise à jour (Sidebar) ✅
 
 ### 8.2 Page Profil de Santé (HealthProfile) ✅ COMPLÈTE
 - [x] Créer `src/pages/HealthProfile.jsx` ✅
@@ -488,15 +488,11 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 - [x] Route `/health-profile` ajoutée dans App.jsx ✅
 - [x] Navigation mise à jour (Sidebar) ✅
 
-### 8.2 Formulaire Profil
-- [ ] Créer composant formulaire avec validation
-- [ ] Champs : taille, poids, statut tabagique, etc.
-- [ ] Sélection multiple comorbidités
-- [ ] Sélection multiple vaccinations
-
 ### 8.3 Tests
-- [ ] Tests d'affichage profil
-- [ ] Tests de mise à jour profil
+- [ ] Tests d'affichage profil utilisateur
+- [ ] Tests de mise à jour profil utilisateur
+- [ ] Tests d'affichage profil de santé
+- [ ] Tests de mise à jour profil de santé
 
 ---
 
@@ -671,40 +667,56 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 
 ### Endpoints API Utilisés
 
-#### Authentification (Phase 1)
-- `POST /api/users/register/`
-- `POST /api/users/login/`
-- `GET /api/users/me/`
+#### Authentification (Phase 1) ✅
+- `POST /api/users/register/` ✅
+- `POST /api/users/login/` ✅
+- `GET /api/users/me/` ✅
+- `PATCH /api/users/me/` ✅
 
-#### Profils de Santé (Phase 2)
-- `GET /api/health-profiles/`
-- `POST /api/health-profiles/`
-- `PATCH /api/health-profiles/{id}/`
-- `GET /api/comorbidities/`
-- `GET /api/vaccination-statuses/`
+#### Profils de Santé (Phase 2) ✅
+- `GET /api/health-profiles/` ✅
+- `POST /api/health-profiles/` ✅
+- `PATCH /api/health-profiles/{id}/` ✅
+- `GET /api/health-profiles/{id}/vulnerability-index/` ✅
+- `POST /api/health-profiles/{id}/recalculate-vulnerability/` ✅
+- `GET /api/comorbidities/` ✅
+- `GET /api/vaccination-statuses/` ✅
 
-#### Capteurs et Prédictions (Phase 3)
-- `GET /api/sensors/measurements/`
-- `GET /api/sensors/predictions/`
-- `GET /api/sensors/predictions/latest/`
-- `GET /api/sensors/risk-evolution/`
+#### Capteurs et Prédictions (Phase 3) ✅
+- `GET /api/sensors/measurements/` ✅
+- `GET /api/sensors/measurements/{id}/` ✅
+- `GET /api/sensors/measurements/latest/` ✅
+- `GET /api/sensors/measurements/trends/` ✅
+- `GET /api/sensors/predictions/` ✅
+- `GET /api/sensors/predictions/{id}/` ✅
+- `GET /api/sensors/predictions/latest/` ✅
+- `POST /api/sensors/measurements/` ✅ (crée mesure + prédiction ML automatique)
 
-#### Environnement (Phase 4)
-- `GET /api/environment/current/{lat}/{lng}/`
-- `GET /api/environment/nearby/`
+#### Environnement (Phase 4) ✅
+- `GET /api/environment/` ✅
+- `GET /api/environment/{id}/` ✅
+- `GET /api/environment/current/{lat}/{lng}/` ✅
+- `GET /api/environment/nearby/` ✅
+- `POST /api/environment/` ✅
 
-#### Alertes (Phase 5)
-- `GET /api/alerts/`
-- `GET /api/alerts/unread-count/`
-- `PATCH /api/alerts/{id}/mark-read/`
+#### Alertes (Phase 5) ✅
+- `GET /api/alerts/` ✅
+- `GET /api/alerts/{id}/` ✅
+- `GET /api/alerts/active/` ✅
+- `GET /api/alerts/active-count/` ✅
+- `PATCH /api/alerts/{id}/deactivate/` ✅
 
-#### Zones à Risque (Phase 6)
-- `GET /api/community/risk-zones/nearby/`
-- `GET /api/community/risk-map/`
+#### Zones à Risque (Phase 6) ⚠️
+- `GET /api/community/risk-zones/nearby/` (backend non implémenté, frontend utilise données mockées)
+- `GET /api/community/risk-map/` (backend non implémenté, frontend utilise données mockées)
 
-#### Actions Préventives (Phase 7)
-- `GET /api/treatments/prevention-actions/`
-- `POST /api/treatments/prevention-actions/{id}/complete/`
+#### Actions Préventives (Phase 7) ✅
+- `GET /api/treatments/prevention-actions/` ✅
+- `GET /api/treatments/prevention-actions/{id}/` ✅
+- `POST /api/treatments/prevention-actions/{id}/complete/` ✅
+- `GET /api/treatments/prevention-actions/pending/` ✅
+- `GET /api/treatments/prevention-actions/priority/` ✅
+- `POST /api/treatments/prevention-actions/generate/` ✅
 
 #### Dashboard Santé Publique (Phase 8)
 - `GET /api/dashboard/public-health/stats/`
@@ -724,16 +736,16 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 
 ### MVP (Minimum Viable Product)
 1. Phase 0 : Configuration ✅
-2. Phase 1 : Configuration de base (Design System, Routing, Services)
-3. Phase 2 : Authentification
-4. Phase 3 : Dashboard Patient (avec widget carte basique)
-5. Phase 4 : Prédictions IA
+2. Phase 1 : Configuration de base (Design System, Routing, Services) ✅
+3. Phase 2 : Authentification ✅
+4. Phase 3 : Dashboard Patient (avec widget carte basique) ✅
+5. Phase 4 : Prédictions IA ✅
 
 ### V1 Complète
-6. Phase 5 : Alertes
-7. Phase 6 : Cartographie complète
-8. Phase 7 : Actions Préventives
-9. Phase 8 : Profil de Santé
+6. Phase 5 : Alertes ✅
+7. Phase 6 : Cartographie complète ✅
+8. Phase 7 : Actions Préventives ✅
+9. Phase 8 : Profil de Santé ✅
 
 ### V2
 10. Phase 9 : Dashboard Médecin
