@@ -13,11 +13,33 @@ export const AuthProvider = ({ children }) => {
 
   // Charger l'utilisateur depuis localStorage au démarrage
   useEffect(() => {
-    const currentUser = authService.getCurrentUser();
-    if (currentUser && authService.isAuthenticated()) {
-      setUser(currentUser);
-    }
-    setLoading(false);
+    const loadUser = async () => {
+      try {
+        const currentUser = authService.getCurrentUser();
+        const token = authService.getToken();
+        
+        // Vérifier que le token existe et n'est pas vide
+        if (currentUser && token && token.trim() !== '') {
+          // Vérifier que le token ne contient pas déjà "Bearer"
+          const cleanToken = token.startsWith('Bearer ') ? token.replace('Bearer ', '') : token;
+          if (cleanToken !== token) {
+            // Corriger le token dans localStorage
+            localStorage.setItem('token', cleanToken);
+          }
+          setUser(currentUser);
+        } else {
+          // Nettoyer si token invalide
+          authService.logout();
+        }
+      } catch (error) {
+        // En cas d'erreur, nettoyer
+        authService.logout();
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadUser();
   }, []);
 
   /**

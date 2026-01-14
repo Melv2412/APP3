@@ -8,20 +8,25 @@ export default {
     extend: {
       colors: {
         // Couleurs primaires (vert) - ASIKO
-        'primary-green': '#00A651',
-        'dark-green': '#008040',
-        'light-green': '#B8E6B8',
+        'primary-green': '#00A651',      // Vert principal médical
+        'dark-green': '#008040',         // Vert foncé (hover, accents)
+        'light-green': '#B8E6B8',       // Vert clair (fond, états)
         
-        // Couleurs sémantiques
-        'asiko-red': '#FF0000',      // Alerts, Risque
-        'asiko-blue': '#0066FF',     // Highlights, Active states
-        'asiko-yellow': '#FFCC00',   // Warning
-        'asiko-green-light': '#90EE90', // Success
+        // Couleurs sémantiques - AMÉLIORÉES
+        'asiko-red': '#DC2626',          // Rouge moins agressif (alerts, risque)
+        'asiko-red-light': '#FEE2E2',    // Fond rouge clair pour alertes
+        'asiko-blue': '#2563EB',         // Bleu plus professionnel (highlights, active states)
+        'asiko-blue-light': '#DBEAFE',   // Fond bleu clair
+        'asiko-yellow': '#F59E0B',       // Jaune plus doux (warning)
+        'asiko-yellow-light': '#FEF3C7', // Fond jaune clair
+        'asiko-green-light': '#10B981', // Vert succès moderne
+        'asiko-green-success': '#D1FAE5', // Fond vert succès
         
-        // Neutres
-        'asiko-gray-light': '#F5F5F5',
-        'asiko-gray': '#CCCCCC',
-        'asiko-gray-dark': '#666666',
+        // Neutres - AMÉLIORÉES
+        'asiko-gray-light': '#F9FAFB',   // Fond gris très clair
+        'asiko-gray': '#D1D5DB',         // Gris moderne (borders, inactive)
+        'asiko-gray-dark': '#6B7280',    // Gris foncé (texte secondaire)
+        'asiko-gray-darker': '#374151',  // Gris très foncé (texte principal)
       },
       fontFamily: {
         sans: ['system-ui', 'Avenir', 'Helvetica', 'Arial', 'sans-serif'],

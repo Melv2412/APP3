@@ -19,7 +19,9 @@ api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      // Nettoyer le token s'il contient déjà "Bearer"
+      const cleanToken = token.startsWith('Bearer ') ? token.replace('Bearer ', '') : token;
+      config.headers.Authorization = `Bearer ${cleanToken}`;
     }
     return config;
   },
@@ -34,13 +36,23 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Gérer les erreurs 401 (non authentifié)
+    // Gérer les erreurs 401 (non authentifié) ou erreurs de token
     if (error.response?.status === 401) {
       // Supprimer le token invalide
       localStorage.removeItem('token');
+      localStorage.removeItem('refresh');
       localStorage.removeItem('user');
+      
+      // Améliorer le message d'erreur pour les problèmes de token
+      if (error.response?.data?.detail) {
+        const errorDetail = error.response.data.detail;
+        if (errorDetail.includes('token') || errorDetail.includes('jeton')) {
+          error.response.data.detail = 'Session expirée. Veuillez vous reconnecter.';
+        }
+      }
+      
       // Rediriger vers login si pas déjà sur la page login
-      if (window.location.pathname !== '/login') {
+      if (window.location.pathname !== '/login' && window.location.pathname !== '/register' && window.location.pathname !== '/register/type') {
         window.location.href = '/login';
       }
     }

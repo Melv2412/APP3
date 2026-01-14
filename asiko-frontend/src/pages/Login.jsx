@@ -35,7 +35,22 @@ const Login = () => {
       await login(formData.email, formData.password);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Erreur de connexion');
+      // Gérer différents types d'erreurs
+      let errorMessage = 'Erreur de connexion';
+      
+      if (err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      } else if (err.response?.data?.detail) {
+        errorMessage = err.response.data.detail;
+      } else if (err.message) {
+        errorMessage = err.message;
+      } else if (err.response?.status === 401) {
+        errorMessage = 'Identifiants invalides. Vérifiez votre email et mot de passe.';
+      } else if (err.response?.status === 400) {
+        errorMessage = 'Données invalides. Vérifiez vos informations.';
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -95,7 +110,9 @@ const Login = () => {
 
         {/* Error message */}
         {error && (
-          <div className="text-red-500 text-sm text-center">{error}</div>
+          <div className="bg-asiko-red-light border border-asiko-red text-asiko-red px-4 py-3 rounded-lg text-sm text-center">
+            {error}
+          </div>
         )}
 
         {/* Bouton Connexion */}

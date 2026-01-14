@@ -11,20 +11,58 @@ import api from './api';
  * @returns {Promise} Token JWT et données utilisateur
  */
 export const login = async (username, password) => {
-  const response = await api.post('/auth/login/', {
-    username,
-    password,
-  });
-  
-  const { tokens, user } = response.data;
-  const { access, refresh } = tokens;
-  
-  // Stocker le token et l'utilisateur
-  localStorage.setItem('token', access);
-  localStorage.setItem('refresh', refresh);
-  localStorage.setItem('user', JSON.stringify(user));
-  
-  return { access, refresh, user };
+  try {
+    // Nettoyer les anciens tokens avant de se connecter
+    localStorage.removeItem('token');
+    localStorage.removeItem('refresh');
+    localStorage.removeItem('user');
+    
+    const response = await api.post('/auth/login/', {
+      username,
+      password,
+    });
+    
+    // Vérifier que la réponse contient bien les tokens
+    if (!response.data || !response.data.tokens) {
+      throw new Error('Format de réponse invalide du serveur');
+    }
+    
+    const { tokens, user } = response.data;
+    
+    if (!tokens || !tokens.access || !tokens.refresh) {
+      throw new Error('Tokens manquants dans la réponse');
+    }
+    
+    const { access, refresh } = tokens;
+    
+    // Vérifier que les tokens sont valides (non vides)
+    if (!access || !refresh) {
+      throw new Error('Tokens invalides reçus du serveur');
+    }
+    
+    // Stocker le token et l'utilisateur
+    localStorage.setItem('token', access);
+    localStorage.setItem('refresh', refresh);
+    localStorage.setItem('user', JSON.stringify(user));
+    
+    return { access, refresh, user };
+  } catch (error) {
+    // Nettoyer en cas d'erreur
+    localStorage.removeItem('token');
+    localStorage.removeItem('refresh');
+    localStorage.removeItem('user');
+    
+    // Propager l'erreur avec un message plus clair
+    if (error.response?.data?.error) {
+      throw new Error(error.response.data.error);
+    } else if (error.response?.data?.detail) {
+      throw new Error(error.response.data.detail);
+    } else if (error.message) {
+      throw error;
+    } else {
+      throw new Error('Erreur de connexion. Veuillez réessayer.');
+    }
+  }
 };
 
 /**
