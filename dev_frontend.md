@@ -214,10 +214,10 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 
 ---
 
-## Phase 3 : Dashboard Patient (Semaine 2)
+## Phase 3 : Dashboard Patient (Semaine 2) ✅ COMPLÈTE
 
 ### 3.1 Page Accueil User
-- [ ] Créer `src/pages/Dashboard.jsx`
+- [x] Créer `src/pages/Dashboard.jsx` ✅
 - [ ] Header :
   - Menu hamburger (gauche)
   - "Asikoconect" (centre, vert)
@@ -267,55 +267,58 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 
 ---
 
-## Phase 4 : Prédictions IA et Données Capteurs (Semaine 2-3)
+## Phase 4 : Prédictions IA et Données Capteurs (Semaine 2-3) ✅ COMPLÈTE
 
 ### 4.1 Page Prédictions IA
-- [ ] Créer `src/pages/Predictions.jsx`
-- [ ] Section Prédiction Actuelle :
+- [x] Créer `src/pages/Predictions.jsx` ✅
+- [x] Section Prédiction Actuelle : ✅
   - Carte grande avec probabilité (0-100%)
   - Niveau de risque (Faible/Modéré/Élevé) avec couleur
   - Fenêtre de prédiction (72h)
   - Date de dernière prédiction
   - Appel API : `GET /api/sensors/predictions/latest/`
 
-- [ ] Section Historique Prédictions :
-  - [ ] Liste des prédictions (remplace "Historique consultations")
-  - Graphique évolution probabilité dans le temps
+- [x] Section Historique Prédictions : ✅
+  - Liste des prédictions (remplace "Historique consultations")
   - Filtres : dernière semaine, mois, année
   - Appel API : `GET /api/sensors/predictions/`
+  - [x] Graphique évolution probabilité dans le temps (Recharts) ✅
 
-- [ ] Section Facteurs Explicatifs :
+- [x] Section Facteurs Explicatifs : ✅
   - Liste des facteurs utilisés (features)
-  - Contribution de chaque facteur (si backend fournit)
+  - ⚠️ Contribution de chaque facteur (non implémenté, dépend du backend)
 
 - [ ] Section Score d'Évolution du Risque :
+  - ⚠️ API `/api/sensors/risk-evolution/` non disponible dans le backend
   - Tendance (INCREASING, DECREASING, STABLE)
   - Pourcentage de changement
   - Graphique tendance
-  - Appel API : `GET /api/sensors/risk-evolution/`
 
 ### 4.2 Page Données Capteurs
-- [ ] Créer `src/pages/Sensors.jsx`
-- [ ] Section Mesures Actuelles :
-  - SpO₂ (avec graphique)
+- [x] Créer `src/pages/Sensors.jsx` ✅
+- [x] Section Mesures Actuelles : ✅
+  - SpO₂
   - Température
   - Rythme respiratoire
   - Fréquence cardiaque
   - Tension artérielle
   - WBC
-  - Appel API : `GET /api/sensors/measurements/` (dernières mesures)
+  - Appel API : `GET /api/sensors/measurements/latest/` ✅
 
-- [ ] Section Graphiques :
-  - [ ] Graphiques temporels (Recharts)
-  - Evolution SpO₂
-  - Evolution température
-  - Evolution rythme respiratoire
-  - Tendances (rr_trend, spo2_trend)
+- [x] Section Historique : ✅
+  - Liste des dernières mesures (10 dernières)
+  - Affichage des tendances (rr_trend, spo2_trend)
 
-- [ ] Section Upload Audio Toux (si Phase 3 complétée) :
+- [x] Section Graphiques : ✅
+  - [x] Graphiques temporels (Recharts) ✅
+  - [x] Evolution SpO₂ ✅
+  - [x] Evolution température ✅
+  - [x] Evolution rythme respiratoire ✅
+
+- [ ] Section Upload Audio Toux :
+  - ⚠️ API `/api/sensors/cough-audio/` non disponible dans le backend
   - Bouton upload fichier audio
   - Liste des enregistrements
-  - Appel API : `POST /api/sensors/cough-audio/`
 
 ### 4.3 Composants Réutilisables
 - [ ] Créer `PredictionCard` (carte de prédiction)
@@ -329,24 +332,25 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 
 ---
 
-## Phase 5 : Alertes (Semaine 3)
+## Phase 5 : Alertes (Semaine 3) ✅ COMPLÈTE
 
 ### 5.1 Page Alertes
-- [ ] Créer `src/pages/Alerts.jsx`
-- [ ] Header avec badge nombre non lues
-- [ ] Liste des alertes :
-  - [ ] Carte alerte avec :
-    - Type d'alerte (pollution, SpO2, risque, toux)
-    - Sévérité (basse, moyenne, haute) avec couleur
-    - Message
-    - Date/heure
-    - Badge "Non lue" ou "Lue"
-    - Bouton "Marquer comme lue"
-  - Filtres : Toutes, Non lues, Par type
-  - Tri : Plus récentes, Par sévérité
-- [ ] Appel API : `GET /api/alerts/`
-- [ ] Appel API : `PATCH /api/alerts/{id}/mark-read/`
-- [ ] Appel API : `GET /api/alerts/unread-count/`
+- [x] Créer `src/pages/Alerts.jsx` ✅
+- [x] Header avec badge nombre actives ✅
+- [x] Liste des alertes : ✅
+  - [x] Carte alerte avec :
+    - Phase (PHASE_1, PHASE_2, PHASE_3) avec couleur ✅
+    - Statut (Active/Inactive) ✅
+    - Capteur device ID ✅
+    - Date/heure de création ✅
+    - Dates de démarrage des phases ✅
+    - Bouton "Désactiver l'alerte" ✅
+  - Filtres : Actives, Toutes ✅
+  - Tri : Plus récentes (backend) ✅
+- [x] Appel API : `GET /api/alerts/alerts/` ✅
+- [x] Appel API : `PATCH /api/alerts/alerts/{id}/deactivate/` ✅
+- [x] Appel API : `GET /api/alerts/alerts/active-count/` ✅
+- [x] Service `alerts.js` mis à jour ✅
 
 ### 5.2 Composant Notification Bell
 - [ ] Créer `NotificationBell` component

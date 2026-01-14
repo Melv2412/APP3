@@ -79,85 +79,107 @@ const Register = () => {
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 py-8">
-      {/* Titre Asikoconect */}
+      {/* Titre AsikoConnect */}
       <h1 className="text-4xl font-bold text-primary-green mb-4">
-        Asikoconect
+        AsikoConnect
       </h1>
 
       {/* Titre Inscription */}
-      <h2 className="text-2xl font-bold text-primary-green mb-2">
-        inscription
-      </h2>
+      <div className="mb-2">
+        <h2 className="text-2xl font-bold text-primary-green inline-block border-b-2 border-primary-green pb-1">
+          inscription
+        </h2>
+      </div>
 
       {/* Instruction */}
       <p className="text-gray-600 mb-8 text-center">
-        veillez renseigner les champs
+        veuillez renseigner les champs
       </p>
 
       {/* Formulaire d'inscription */}
       <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
         {/* Nom et Prénom */}
         <div>
+          <label htmlFor="full_name" className="block text-sm font-medium text-gray-700 mb-1">
+            Nom et Prénom
+          </label>
           <input
             type="text"
+            id="full_name"
             name="full_name"
             value={formData.full_name}
             onChange={handleChange}
             placeholder="Ex: Ouattara Tiéba"
             required
-            className="w-full px-4 py-3 border border-primary-green rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green"
+            className="w-full px-4 py-3 bg-green-50 border border-primary-green rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green"
           />
         </div>
 
         {/* Lieu de fonction */}
         <div>
+          <label htmlFor="lieu_fonction" className="block text-sm font-medium text-gray-700 mb-1">
+            Lieu de fonction
+          </label>
           <input
             type="text"
+            id="lieu_fonction"
             name="lieu_fonction"
             value={formData.lieu_fonction}
             onChange={handleChange}
             placeholder="Ex: ESATIC"
             required
-            className="w-full px-4 py-3 border border-primary-green rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green"
+            className="w-full px-4 py-3 bg-green-50 border border-primary-green rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green"
           />
         </div>
 
         {/* E-mail */}
         <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            E-mail
+          </label>
           <input
             type="email"
+            id="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
             placeholder="Ex: Ouattara@gmail.com"
             required
-            className="w-full px-4 py-3 border border-primary-green rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green"
+            className="w-full px-4 py-3 bg-green-50 border border-primary-green rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green"
           />
         </div>
 
         {/* fonction */}
         <div>
+          <label htmlFor="fonction" className="block text-sm font-medium text-gray-700 mb-1">
+            fonction
+          </label>
           <input
             type="text"
+            id="fonction"
             name="fonction"
             value={formData.fonction}
             onChange={handleChange}
             placeholder="Ex: Étudiant"
             required
-            className="w-full px-4 py-3 border border-primary-green rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green"
+            className="w-full px-4 py-3 bg-green-50 border border-primary-green rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green"
           />
         </div>
 
         {/* Password (ajouté pour le backend) */}
         <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            Mot de passe
+          </label>
           <input
             type="password"
+            id="password"
             name="password"
             value={formData.password}
             onChange={handleChange}
             placeholder="Mot de passe"
             required
-            className="w-full px-4 py-3 border border-primary-green rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green"
+            className="w-full px-4 py-3 bg-green-50 border border-primary-green rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green"
           />
         </div>
 
@@ -171,13 +193,13 @@ const Register = () => {
             className="mt-1 w-4 h-4 text-primary-green border-primary-green rounded focus:ring-primary-green"
           />
           <label htmlFor="agreeTerms" className="text-sm text-gray-700">
-            Agree to our{' '}
-            <Link to="/terms" className="text-red-500 hover:underline">
-              terms
+            J'accepte les{' '}
+            <Link to="/terms" className="text-orange-600 font-bold hover:underline">
+              conditions
             </Link>
-            {' '}and{' '}
-            <Link to="/privacy" className="text-red-500 hover:underline">
-              privacy policy
+            {' '}et la{' '}
+            <Link to="/privacy" className="text-orange-600 font-bold hover:underline">
+              politique de confidentialité
             </Link>
           </label>
         </div>

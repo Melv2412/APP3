@@ -45,7 +45,7 @@ const Login = () => {
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 py-8">
       {/* Titre Asikoconect */}
       <h1 className="text-4xl font-bold text-primary-green mb-8">
-        Asikoconect
+        AsikoConnect
       </h1>
 
       {/* Formulaire de connexion */}
@@ -57,7 +57,7 @@ const Login = () => {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="Example@gmail.com"
+            placeholder="Exemple@gmail.com"
             required
             className="w-full px-4 py-3 border border-primary-green rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green"
           />
@@ -70,7 +70,7 @@ const Login = () => {
             name="password"
             value={formData.password}
             onChange={handleChange}
-            placeholder="your password"
+            placeholder="Votre mot de passe"
             required
             className="w-full px-4 py-3 border border-primary-green rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-green"
           />
@@ -86,10 +86,10 @@ const Login = () => {
               onChange={handleChange}
               className="mr-2 w-4 h-4 text-primary-green border-primary-green rounded focus:ring-primary-green"
             />
-            <span className="text-gray-700">Remember me</span>
+            <span className="text-gray-700">Se souvenir de moi</span>
           </label>
           <Link to="/forgot-password" className="text-primary-green hover:underline">
-            Forgot password
+            Mot de passe oublié
           </Link>
         </div>
 
@@ -109,15 +109,15 @@ const Login = () => {
 
         {/* Lien Register */}
         <p className="text-center text-gray-700">
-          Don't have an account yet?{' '}
+          Vous n'avez pas encore de compte ?{' '}
           <Link to="/register/type" className="text-primary-green font-semibold hover:underline">
-            Register
+            S'inscrire
           </Link>
         </p>
 
         {/* Social login */}
         <div className="pt-4 border-t border-gray-200">
-          <p className="text-center text-gray-600 mb-4">or sign up with</p>
+          <p className="text-center text-gray-600 mb-4">ou s'inscrire avec</p>
           <div className="flex justify-center gap-4">
             {/* Facebook */}
             <button
@@ -157,9 +157,9 @@ const Login = () => {
 
         {/* Footer */}
         <div className="text-center text-sm text-gray-500 pt-4">
-          <p>Powered by KENHILI</p>
+          <p>Propulsé par KENHILI</p>
           <p className="mt-2">
-            Terms & Conditions and Privacy Policy for new accounts
+            Conditions générales et politique de confidentialité pour les nouveaux comptes
           </p>
         </div>
       </form>

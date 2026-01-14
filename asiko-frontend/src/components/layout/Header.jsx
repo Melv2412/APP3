@@ -38,7 +38,7 @@ const Header = ({ onMenuClick, showNotifications = true }) => {
             onClick={() => navigate('/')}
             className="text-xl font-bold text-primary-green cursor-pointer"
           >
-            Asikoconect
+            AsikoConnect
           </h1>
 
           {/* Actions droite */}

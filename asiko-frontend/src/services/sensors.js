@@ -44,6 +44,14 @@ export const getLatestPrediction = async () => {
 };
 
 /**
+ * Obtenir la dernière mesure de capteur
+ */
+export const getLatestMeasurement = async () => {
+  const response = await api.get('/sensors/measurements/latest/');
+  return response.data;
+};
+
+/**
  * Obtenir l'évolution du risque
  */
 export const getRiskEvolution = async () => {

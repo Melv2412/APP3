@@ -1,22 +1,30 @@
-from rest_framework import generics, status
+from rest_framework import generics, status, viewsets
 from rest_framework.response import Response
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
-from asiko_connect.utils.variables import PASSAGE_PHASE_1,MESSAGE_A_VOCAL
-from .models import Prediction
-from .serializers import SensorMeasurementSerializer
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import OrderingFilter, SearchFilter
+from django.db.models import Q
+from datetime import datetime, timedelta
+
+from asiko_connect.utils.variables import PASSAGE_PHASE_1, MESSAGE_A_VOCAL
+from .models import Prediction, SensorMeasurement, Sensor, AirQualityMeasurement
+from .serializers import SensorMeasurementSerializer, PredictionSerializer
 from asiko_connect.utils.calculs import calculate_trend, calculate_curb65, risk_level, calculate_air_quality_index
 from asiko_connect.apps.alerts.models import Alert
 from asiko_connect.apps.sensors.ml_model import ml_model
 from asiko_connect.apps.users.models import User
+from asiko_connect.apps.users.permissions import IsOwnerOrDoctor
 from rest_framework.views import APIView
-from .models import Sensor, AirQualityMeasurement
-from asiko_connect.apps.alerts.models import Alert
+
 # Import phase1_timer_task optionnel (nécessite Celery)
 try:
     from asiko_connect.apps.alerts.tasks import phase1_timer_task
 except (ImportError, AttributeError):
     phase1_timer_task = None
-from asiko_connect.utils.calculs import calculate_air_quality_index, SEUIL_CRITIQUE
+
+from asiko_connect.utils.calculs import SEUIL_CRITIQUE
 from asiko_connect.utils.notify import notify_frontend
 from django.http import StreamingHttpResponse
 from queue import Queue
@@ -132,6 +140,209 @@ class SensorMeasurementCreateView(generics.CreateAPIView):
             },
             "features_used": X
         }, status=status.HTTP_201_CREATED)
+
+
+class SensorMeasurementViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet pour la gestion des mesures de capteurs.
+    
+    Permissions :
+    - Patients : peuvent voir et modifier uniquement leurs propres mesures
+    - Médecins : peuvent voir toutes les mesures
+    """
+    serializer_class = SensorMeasurementSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrDoctor]
+    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
+    filterset_fields = ['user', 'created_at']
+    ordering_fields = ['created_at', 'temperature', 'respiratory_rate', 'spo2']
+    ordering = ['-created_at']
+    search_fields = ['user__username', 'user__email']
+    
+    def get_queryset(self):
+        """Retourne les mesures selon les permissions."""
+        user = self.request.user
+        
+        queryset = SensorMeasurement.objects.select_related('user').all()
+        
+        # Filtres par date
+        date_from = self.request.query_params.get('date_from')
+        date_to = self.request.query_params.get('date_to')
+        
+        if date_from:
+            try:
+                date_from = datetime.fromisoformat(date_from.replace('Z', '+00:00'))
+                queryset = queryset.filter(created_at__gte=date_from)
+            except (ValueError, AttributeError):
+                pass
+        
+        if date_to:
+            try:
+                date_to = datetime.fromisoformat(date_to.replace('Z', '+00:00'))
+                queryset = queryset.filter(created_at__lte=date_to)
+            except (ValueError, AttributeError):
+                pass
+        
+        # Permissions
+        if user.is_doctor or user.is_admin:
+            # Les médecins voient toutes les mesures
+            return queryset
+        else:
+            # Les patients voient uniquement leurs propres mesures
+            return queryset.filter(user=user)
+    
+    def perform_create(self, serializer):
+        """Crée une nouvelle mesure."""
+        # Si user_id n'est pas fourni, utiliser l'utilisateur connecté
+        if 'user_id' not in serializer.validated_data:
+            serializer.save(user=self.request.user)
+        else:
+            serializer.save()
+    
+    @action(detail=False, methods=['get'], url_path='latest')
+    def latest(self, request):
+        """
+        Retourne la dernière mesure de l'utilisateur connecté.
+        GET /api/sensors/measurements/latest/
+        """
+        user = request.user
+        if not user.is_authenticated:
+            return Response(
+                {"error": "Authentification requise"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        queryset = self.get_queryset()
+        if not user.is_doctor:
+            queryset = queryset.filter(user=user)
+        
+        latest_measurement = queryset.first()
+        
+        if not latest_measurement:
+            return Response(
+                {"message": "Aucune mesure trouvée"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = self.get_serializer(latest_measurement)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'], url_path='trends')
+    def trends(self, request):
+        """
+        Retourne les tendances des mesures sur une période.
+        GET /api/sensors/measurements/trends/?days=7
+        """
+        user = request.user
+        if not user.is_authenticated:
+            return Response(
+                {"error": "Authentification requise"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        days = int(request.query_params.get('days', 7))
+        start_date = timezone.now() - timedelta(days=days)
+        
+        queryset = self.get_queryset().filter(created_at__gte=start_date)
+        if not user.is_doctor:
+            queryset = queryset.filter(user=user)
+        
+        measurements = queryset.order_by('created_at')
+        
+        # Calculer les tendances
+        trends = {
+            'respiratory_rate': {
+                'values': [m.respiratory_rate for m in measurements],
+                'trend': calculate_trend([m.respiratory_rate for m in measurements[:-1]], measurements[-1].respiratory_rate) if len(measurements) > 1 else 0
+            },
+            'spo2': {
+                'values': [m.spo2 for m in measurements],
+                'trend': calculate_trend([m.spo2 for m in measurements[:-1]], measurements[-1].spo2) if len(measurements) > 1 else 0
+            },
+            'temperature': {
+                'values': [m.temperature for m in measurements],
+                'trend': calculate_trend([m.temperature for m in measurements[:-1]], measurements[-1].temperature) if len(measurements) > 1 else 0
+            },
+        }
+        
+        return Response({
+            'period_days': days,
+            'measurements_count': measurements.count(),
+            'trends': trends
+        })
+
+
+class PredictionViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    ViewSet pour la consultation des prédictions ML.
+    
+    Permissions :
+    - Patients : peuvent voir uniquement leurs propres prédictions
+    - Médecins : peuvent voir toutes les prédictions
+    """
+    serializer_class = PredictionSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrDoctor]
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_fields = ['user', 'created_at']
+    ordering_fields = ['created_at']
+    ordering = ['-created_at']
+    
+    def get_queryset(self):
+        """Retourne les prédictions selon les permissions."""
+        user = self.request.user
+        
+        queryset = Prediction.objects.select_related('user').all()
+        
+        # Filtres par date
+        date_from = self.request.query_params.get('date_from')
+        date_to = self.request.query_params.get('date_to')
+        
+        if date_from:
+            try:
+                date_from = datetime.fromisoformat(date_from.replace('Z', '+00:00'))
+                queryset = queryset.filter(created_at__gte=date_from)
+            except (ValueError, AttributeError):
+                pass
+        
+        if date_to:
+            try:
+                date_to = datetime.fromisoformat(date_to.replace('Z', '+00:00'))
+                queryset = queryset.filter(created_at__lte=date_to)
+            except (ValueError, AttributeError):
+                pass
+        
+        # Permissions
+        if user.is_doctor or user.is_admin:
+            return queryset
+        else:
+            return queryset.filter(user=user)
+    
+    @action(detail=False, methods=['get'], url_path='latest')
+    def latest(self, request):
+        """
+        Retourne la dernière prédiction de l'utilisateur connecté.
+        GET /api/sensors/predictions/latest/
+        """
+        user = request.user
+        if not user.is_authenticated:
+            return Response(
+                {"error": "Authentification requise"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        
+        queryset = self.get_queryset()
+        if not user.is_doctor:
+            queryset = queryset.filter(user=user)
+        
+        latest_prediction = queryset.first()
+        
+        if not latest_prediction:
+            return Response(
+                {"message": "Aucune prédiction trouvée"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = self.get_serializer(latest_prediction)
+        return Response(serializer.data)
 
 
 class SensorDataAPIView(APIView):

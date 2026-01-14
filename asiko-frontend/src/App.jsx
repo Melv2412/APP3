@@ -10,7 +10,11 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import RegisterType from './pages/RegisterType';
 import Layout from './components/layout/Layout';
-// import Dashboard from './pages/Dashboard';
+import Dashboard from './pages/Dashboard';
+import Predictions from './pages/Predictions';
+import Sensors from './pages/Sensors';
+import Alerts from './pages/Alerts';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -27,8 +31,38 @@ function App() {
           
           {/* Routes avec layout (protégées) */}
           <Route element={<Layout />}>
-            {/* Les routes protégées iront ici */}
-            {/* <Route path="/dashboard" element={<Dashboard />} /> */}
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/predictions" 
+              element={
+                <ProtectedRoute>
+                  <Predictions />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/sensors" 
+              element={
+                <ProtectedRoute>
+                  <Sensors />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/alerts" 
+              element={
+                <ProtectedRoute>
+                  <Alerts />
+                </ProtectedRoute>
+              } 
+            />
           </Route>
         </Routes>
       </BrowserRouter>
