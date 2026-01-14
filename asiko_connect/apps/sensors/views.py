@@ -11,7 +11,11 @@ from asiko_connect.apps.users.models import User
 from rest_framework.views import APIView
 from .models import Sensor, AirQualityMeasurement
 from asiko_connect.apps.alerts.models import Alert
-from asiko_connect.apps.alerts.tasks import phase1_timer_task
+# Import phase1_timer_task optionnel (nécessite Celery)
+try:
+    from asiko_connect.apps.alerts.tasks import phase1_timer_task
+except (ImportError, AttributeError):
+    phase1_timer_task = None
 from asiko_connect.utils.calculs import calculate_air_quality_index, SEUIL_CRITIQUE
 from asiko_connect.utils.notify import notify_frontend
 from django.http import StreamingHttpResponse
@@ -94,6 +98,12 @@ class SensorMeasurementCreateView(generics.CreateAPIView):
         ]
 
         # Calcul de la prédiction ML avec probabilité + niveau de risque
+        if ml_model is None:
+            return Response(
+                {"error": "ML model not available. Please install xgboost and ensure the model file exists."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+        
         try:
             prob = float(ml_model.predict_proba([X])[0][1])
             risk = risk_level(prob)
@@ -156,10 +166,14 @@ class SensorDataAPIView(APIView):
             notify_frontend(MESSAGE_A_VOCAL)
 
             # ⏱️ TIMER PHASE 1 → 15 secondes ou PASSAGE_PHASE_1
-            phase1_timer_task.apply_async(
-                args=[alert.id],
-                countdown=PASSAGE_PHASE_1
-            )
+            if phase1_timer_task is not None:
+                phase1_timer_task.apply_async(
+                    args=[alert.id],
+                    countdown=PASSAGE_PHASE_1
+                )
+            else:
+                # Celery n'est pas disponible, les tâches asynchrones sont désactivées
+                print(f"[WARNING] Celery not available. Alert {alert.id} created but async task not started.")
         else:
             alert = active_alert  # Peut être None si aucune alerte n'est active
 

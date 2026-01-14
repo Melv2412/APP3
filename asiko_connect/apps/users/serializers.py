@@ -72,10 +72,8 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if attrs['password'] != attrs['password_confirm']:
             raise serializers.ValidationError({'password': 'Les mots de passe ne correspondent pas.'})
-        if attrs.get('role') == User.Role.PATIENT:
-            for field in ['emergency_contact_name', 'emergency_contact_phone', 'emergency_contact_relation']:
-                if not attrs.get(field):
-                    raise serializers.ValidationError({field: "Champ obligatoire pour un patient."})
+        # Les champs emergency_contact sont optionnels (blank=True, null=True dans le modèle)
+        # Pas besoin de validation stricte ici
         return attrs
 
     def validate_role(self, value):

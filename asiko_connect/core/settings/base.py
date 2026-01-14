@@ -5,7 +5,12 @@ Contient les paramètres communs à tous les environnements.
 import os
 from pathlib import Path
 from decouple import config, Csv
-from celery.schedules import crontab
+# Import celery optionnel (pour éviter erreur si celery n'est pas installé)
+try:
+    from celery.schedules import crontab
+except ImportError:
+    # Celery n'est pas installé, crontab n'est pas utilisé
+    pass
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -41,7 +46,7 @@ INSTALLED_APPS = [
     'asiko_connect.apps.health_profiles',
     'asiko_connect.apps.sensors',
     'asiko_connect.apps.predictions',
-    'asiko_connect.apps.environments',
+    'asiko_connect.apps.environment',
     'asiko_connect.apps.alerts',
     'asiko_connect.apps.telemedicine',
     'asiko_connect.apps.treatments',

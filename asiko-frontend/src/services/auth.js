@@ -6,7 +6,7 @@ import api from './api';
 
 /**
  * Connexion utilisateur
- * @param {string} email 
+ * @param {string} username - Username ou email (le backend accepte l'email comme username)
  * @param {string} password 
  * @returns {Promise} Token JWT et données utilisateur
  */

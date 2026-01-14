@@ -1,12 +1,24 @@
 # alerts/tasks.py (VERSION FINALE STRUCTURÉE)
-from celery import shared_task
 from django.utils import timezone
 from asiko_connect.utils.notify import notify_esp
 from asiko_connect.utils.variables import *
 from .models import Alert
 from .services import compute_average_iqa
-from celery import shared_task
-from django.utils import timezone
+
+# Import celery optionnel (pour éviter erreur si celery n'est pas installé)
+try:
+    from celery import shared_task
+except ImportError:
+    # Celery n'est pas installé, créer un décorateur factice
+    def shared_task(*args, **kwargs):
+        # Si appelé avec des arguments (@shared_task(...))
+        if args and callable(args[0]):
+            # Décorateur sans arguments : @shared_task
+            return args[0]
+        # Décorateur avec arguments : @shared_task(...)
+        def decorator(func):
+            return func
+        return decorator
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=10, retry_kwargs={"max_retries": 3})
