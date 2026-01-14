@@ -6,12 +6,15 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getLatestPrediction } from '../services/sensors';
 import { getCurrentEnvironmentData } from '../services/environment';
+import { getPreventionActions } from '../services/treatments';
+import { Link } from 'react-router-dom';
 import MapWidget from '../components/common/MapWidget';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const [prediction, setPrediction] = useState(null);
   const [environmentData, setEnvironmentData] = useState(null);
+  const [preventionActions, setPreventionActions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -39,6 +42,24 @@ const Dashboard = () => {
           setEnvironmentData(envData);
         } catch (err) {
           console.log('Données environnementales non disponibles');
+        }
+
+        // Récupérer les actions préventives prioritaires (3 premières)
+        try {
+          const actionsData = await getPreventionActions();
+          const actions = Array.isArray(actionsData) 
+            ? actionsData 
+            : (actionsData.results || actionsData.data || []);
+          
+          // Filtrer les actions non complétées et prioritaires, prendre les 3 premières
+          const priorityActions = actions
+            .filter(a => !a.completed && (a.priority === 'HIGH' || a.priority === 'HAUTE'))
+            .slice(0, 3);
+          
+          setPreventionActions(priorityActions);
+        } catch (err) {
+          // Si le backend n'est pas encore implémenté, on ignore silencieusement
+          console.log('Actions préventives non disponibles');
         }
       } catch (err) {
         setError('Erreur lors du chargement des données');
@@ -137,6 +158,45 @@ const Dashboard = () => {
             height="h-48"
           />
         </div>
+
+        {/* Section Actions Préventives Prioritaires */}
+        {preventionActions.length > 0 && (
+          <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 relative" style={{ zIndex: 1 }}>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold text-gray-800">Actions Préventives Prioritaires</h3>
+              <Link 
+                to="/actions" 
+                className="text-primary-green text-sm font-semibold hover:underline"
+              >
+                Voir tout
+              </Link>
+            </div>
+            <div className="space-y-2">
+              {preventionActions.map((action) => (
+                <div
+                  key={action.id}
+                  className="border border-red-200 rounded-lg p-3 bg-red-50"
+                >
+                  <div className="flex items-start gap-2">
+                    <span className="text-xl">
+                      {action.action_type === 'AVOID_ZONE' ? '🚫' :
+                       action.action_type === 'WEAR_MASK' ? '😷' :
+                       action.action_type === 'CHECK_SPO2' ? '📊' :
+                       action.action_type === 'CONSULT_DOCTOR' ? '👨‍⚕️' :
+                       action.action_type === 'STAY_HOME' ? '🏠' : '📋'}
+                    </span>
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-gray-800">
+                        {action.recommendation_text || action.text || 'Action préventive'}
+                      </p>
+                      <span className="text-xs text-red-600 font-semibold">Priorité Haute</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Section facteurs autour & services */}
         <div className="bg-white rounded-lg shadow-sm p-4 border border-gray-200 relative" style={{ zIndex: 1 }}>

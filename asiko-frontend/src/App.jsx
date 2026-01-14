@@ -16,6 +16,8 @@ import Sensors from './pages/Sensors';
 import Alerts from './pages/Alerts';
 import Map from './pages/Map';
 import Profile from './pages/Profile';
+import HealthProfile from './pages/HealthProfile';
+import PreventionActions from './pages/PreventionActions';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -78,6 +80,22 @@ function App() {
                        element={
                          <ProtectedRoute>
                            <Profile />
+                         </ProtectedRoute>
+                       } 
+                     />
+                     <Route 
+                       path="/health-profile" 
+                       element={
+                         <ProtectedRoute>
+                           <HealthProfile />
+                         </ProtectedRoute>
+                       } 
+                     />
+                     <Route 
+                       path="/actions" 
+                       element={
+                         <ProtectedRoute>
+                           <PreventionActions />
                          </ProtectedRoute>
                        } 
                      />

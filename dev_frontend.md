@@ -15,11 +15,13 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 - **Phase 5** : Alertes ✅ (Page Alerts + NotificationBell component)
 - **Phase 6** : Cartographie et Zones à Risque ✅ (Page Map complète avec filtres)
 
-### ⚠️ Phases Partiellement Complètes
-- **Phase 8** : Profil de Santé ⚠️ (Page Profile créée pour profil utilisateur, mais pas HealthProfile)
+### ✅ Phases Complètes
+- **Phase 8** : Profil de Santé ✅ (Page HealthProfile complète avec indice de vulnérabilité, comorbidités, vaccinations)
+
+### ✅ Phases Complètes
+- **Phase 7** : Actions Préventives ✅ (Page PreventionActions + Widget Dashboard)
 
 ### ❌ Phases Non Démarrées
-- **Phase 7** : Actions Préventives
 - **Phase 9** : Dashboard Médecin (Santé Publique)
 - **Phase 10** : Carnet Santé Connecté
 - **Phase 11** : Optimisations et Finalisation
@@ -411,33 +413,40 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 
 ---
 
-## Phase 7 : Actions Préventives (Semaine 4)
+## Phase 7 : Actions Préventives (Semaine 4) ✅ COMPLÈTE
 
-### 7.1 Page Actions Préventives
-- [ ] Créer `src/pages/PreventionActions.jsx`
-- [ ] Liste des actions recommandées :
-  - [ ] Carte action avec :
-    - Type d'action (icône)
-    - Texte recommandation
-    - Priorité (Haute, Moyenne, Basse)
-    - Statut : À faire / Complétée
-    - Bouton "Marquer comme complétée"
-    - Date de création
-  - Filtres : Toutes, À faire, Complétées, Par priorité
-- [ ] Appel API : `GET /api/treatments/prevention-actions/`
-- [ ] Appel API : `POST /api/treatments/prevention-actions/{id}/complete/`
+### 7.1 Page Actions Préventives ✅ COMPLÈTE
+- [x] Créer `src/pages/PreventionActions.jsx` ✅
+- [x] Liste des actions recommandées : ✅
+  - [x] Carte action avec : ✅
+    - [x] Type d'action (icône) ✅
+    - [x] Texte recommandation ✅
+    - [x] Priorité (Haute, Moyenne, Basse) ✅
+    - [x] Statut : À faire / Complétée ✅
+    - [x] Bouton "Marquer comme complétée" ✅
+    - [x] Date de création ✅
+  - [x] Filtres : Toutes, À faire, Complétées, Par priorité ✅
+  - [x] Tri par priorité et date ✅
+  - [x] Compteurs d'actions par statut ✅
+- [x] Appel API : `GET /api/treatments/prevention-actions/` ✅
+- [x] Appel API : `POST /api/treatments/prevention-actions/{id}/complete/` ✅
+- [x] Gestion d'erreurs si backend non disponible ✅
+- [x] Route `/actions` ajoutée dans App.jsx ✅
+- [x] Navigation mise à jour (Sidebar) ✅
 
-### 7.2 Widget Actions (Dashboard)
-- [ ] Widget sur accueil avec 3 actions prioritaires
-- [ ] Lien vers page complète
+### 7.2 Widget Actions (Dashboard) ✅ COMPLÈTE
+- [x] Widget sur accueil avec 3 actions prioritaires ✅
+- [x] Lien vers page complète ✅
+- [x] Affichage conditionnel (seulement si actions disponibles) ✅
+- [x] Intégration dans Dashboard.jsx ✅
 
 ### 7.3 Tests
-- [ ] Tests d'affichage actions
-- [ ] Tests de complétion action
+- [ ] Tests d'affichage actions (à faire)
+- [ ] Tests de complétion action (à faire)
 
 ---
 
-## Phase 8 : Profil de Santé (Semaine 4) ⚠️ PARTIELLE
+## Phase 8 : Profil de Santé (Semaine 4) ✅ COMPLÈTE
 
 ### 8.1 Page Profil Utilisateur
 - [x] Créer `src/pages/Profile.jsx` ✅
@@ -449,30 +458,35 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
   - [x] Appel API : `GET /api/users/me/` ✅
   - [x] Appel API : `PATCH /api/users/me/` ✅
 
-### 8.2 Page Profil de Santé (HealthProfile) - À CRÉER
-- [ ] Créer `src/pages/HealthProfile.jsx`
-- [ ] Transformer "Espace docteur" en "Mon Profil de Santé"
-- [ ] Section Informations Personnelles :
-  - Âge, Taille, Poids
-  - IMC calculé
-  - Statut tabagique
-  - Consommation d'alcool
-- [ ] Section Indice de Vulnérabilité :
-  - Score (0-100) avec barre de progression
-  - Niveau textuel (Très faible, Faible, Modéré, Élevé, Très élevé)
-  - Bouton "Recalculer"
-  - Facteurs expliqués
-- [ ] Section Comorbidités :
-  - Liste des comorbidités sélectionnées
-  - Bouton "Ajouter comorbidité"
-  - Appel API : `GET /api/comorbidities/`
-- [ ] Section Statuts Vaccinaux :
-  - Liste des vaccinations
-  - Bouton "Ajouter vaccination"
-  - Appel API : `GET /api/vaccination-statuses/`
-- [ ] Appel API : `GET /api/health-profiles/` (profil utilisateur)
-- [ ] Appel API : `POST /api/health-profiles/` (création)
-- [ ] Appel API : `PATCH /api/health-profiles/{id}/` (mise à jour)
+### 8.2 Page Profil de Santé (HealthProfile) ✅ COMPLÈTE
+- [x] Créer `src/pages/HealthProfile.jsx` ✅
+- [x] Section Informations Personnelles : ✅
+  - [x] Âge, Taille, Poids ✅
+  - [x] IMC calculé ✅
+  - [x] Statut tabagique ✅
+  - [x] Consommation d'alcool ✅
+  - [x] Historique médical ✅
+- [x] Section Indice de Vulnérabilité : ✅
+  - [x] Score (0-100) avec barre de progression ✅
+  - [x] Niveau textuel (Très faible, Faible, Modéré, Élevé, Très élevé) ✅
+  - [x] Bouton "Recalculer" ✅
+  - [x] Affichage visuel avec couleurs selon le niveau ✅
+- [x] Section Comorbidités : ✅
+  - [x] Liste des comorbidités disponibles ✅
+  - [x] Sélection multiple avec checkboxes ✅
+  - [x] Affichage des comorbidités sélectionnées ✅
+  - [x] Appel API : `GET /api/comorbidities/` ✅
+- [x] Section Statuts Vaccinaux : ✅
+  - [x] Liste des vaccinations disponibles ✅
+  - [x] Sélection multiple avec checkboxes ✅
+  - [x] Affichage des vaccinations sélectionnées ✅
+  - [x] Appel API : `GET /api/vaccination-statuses/` ✅
+- [x] Appel API : `GET /api/health-profiles/` (profil utilisateur) ✅
+- [x] Appel API : `POST /api/health-profiles/` (création) ✅
+- [x] Appel API : `PATCH /api/health-profiles/{id}/` (mise à jour) ✅
+- [x] Appel API : `POST /api/health-profiles/{id}/recalculate-vulnerability/` ✅
+- [x] Route `/health-profile` ajoutée dans App.jsx ✅
+- [x] Navigation mise à jour (Sidebar) ✅
 
 ### 8.2 Formulaire Profil
 - [ ] Créer composant formulaire avec validation

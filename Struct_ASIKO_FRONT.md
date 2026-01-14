@@ -272,11 +272,13 @@ Phase 11 (Optimisations) ← Production-ready
 - **Phase 5** : Alertes ✅
 - **Phase 6** : Cartographie et Zones à Risque ✅
 
-### ⚠️ Phases Partiellement Complètes
-- **Phase 8** : Profil de Santé ⚠️ (Page Profile créée, mais pas HealthProfile)
+### ✅ Phases Complètes
+- **Phase 8** : Profil de Santé ✅ (Page HealthProfile complète)
+
+### ✅ Phases Complètes
+- **Phase 7** : Actions Préventives ✅ (Page PreventionActions + Widget Dashboard)
 
 ### ❌ Phases Non Démarrées
-- **Phase 7** : Actions Préventives
 - **Phase 9** : Dashboard Médecin (Santé Publique)
 - **Phase 10** : Carnet Santé Connecté
 - **Phase 11** : Optimisations et Finalisation
