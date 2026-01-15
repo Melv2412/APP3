@@ -1,0 +1,55 @@
+/* Styles Leaflet pour les cartes (doit être avant @tailwind) */
+@import 'leaflet/dist/leaflet.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Correction du z-index pour les cartes Leaflet */
+.leaflet-container {
+  position: relative !important;
+  z-index: 0 !important;
+}
+
+.leaflet-pane {
+  z-index: 0 !important;
+}
+
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 1 !important;
+}
+
+.leaflet-control {
+  z-index: 1 !important;
+}
+
+/* Styles de base pour ASIKO */
+@layer base {
+  body {
+    @apply bg-white text-gray-900;
+  }
+}
+
+/* Composants réutilisables ASIKO */
+@layer components {
+  /* Bouton principal (vert) */
+  .btn-primary {
+    @apply bg-primary-green text-white font-bold px-6 py-3 rounded-lg hover:bg-dark-green transition-colors;
+  }
+  
+  /* Bouton carré (services) */
+  .btn-square {
+    @apply bg-primary-green text-white p-4 rounded-lg aspect-square flex flex-col items-center justify-center hover:bg-dark-green transition-colors;
+  }
+  
+  /* Input */
+  .input-asiko {
+    @apply border border-primary-green rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-green;
+  }
+  
+  /* Card */
+  .card-asiko {
+    @apply bg-white rounded-xl shadow-sm p-4;
+  }
+}

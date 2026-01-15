@@ -3,6 +3,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
+from asiko_connect.apps.community.models import Zone
 
 from asiko_connect.utils.calculs import calculate_air_quality_index
 
@@ -70,18 +71,14 @@ class Prediction(models.Model):
         return f"Prédiction pour {self.user.username} à {self.created_at}"
 
 
-# sensors/models.py
-
-class Zone(models.Model):
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
-
 
 class Sensor(models.Model):
     device_id = models.CharField(max_length=100, unique=True)
-    zone = models.ForeignKey(Zone, on_delete=models.CASCADE)
+    zone = models.ForeignKey(
+        Zone,
+        on_delete=models.CASCADE,
+        related_name="sensors"
+    )
 
     def __str__(self):
         return self.device_id

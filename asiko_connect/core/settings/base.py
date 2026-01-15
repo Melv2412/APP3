@@ -18,7 +18,7 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-me-in-producti
 DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
-
+ASGI_APPLICATION = 'asiko_connect.asgi.application'
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'asiko_connect.apps.health_profiles',
     'asiko_connect.apps.sensors',
     'asiko_connect.apps.predictions',
-    'asiko_connect.apps.environments',
+    'asiko_connect.apps.environment',
+    'asiko_connect.apps.community',
     'asiko_connect.apps.alerts',
     'asiko_connect.apps.telemedicine',
     'asiko_connect.apps.treatments',

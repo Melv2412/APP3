@@ -2,4 +2,10 @@
 
 from django.urls import path
 
-urlpatterns = []
+from asiko_connect.apps.community.views import ZoneRiskRankingAPIView
+
+urlpatterns = [
+
+        path("zones/ranking/", ZoneRiskRankingAPIView.as_view()),
+
+]
