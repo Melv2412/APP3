@@ -1,0 +1,73 @@
+<svg
+  width="400"
+  height="420"
+  viewBox="0 0 400 420"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <defs>
+    <!-- Dégradé du cSur -->
+    <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1565C0"/>
+      <stop offset="100%" stop-color="#42A5F5"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Ondes WiFi (séparées et au-dessus) -->
+  <path
+    d="M130 70 Q200 30 270 70"
+    fill="none"
+    stroke="#4CAF50"
+    stroke-width="10"
+    stroke-linecap="round"
+  />
+  <path
+    d="M150 95 Q200 60 250 95"
+    fill="none"
+    stroke="#66BB6A"
+    stroke-width="10"
+    stroke-linecap="round"
+  />
+  <path
+    d="M170 120 Q200 95 230 120"
+    fill="none"
+    stroke="#81C784"
+    stroke-width="10"
+    stroke-linecap="round"
+  />
+
+  <!-- CSur (descendu pour séparation claire) -->
+  <path
+    d="
+      M200 260
+      C200 260 135 215 135 170
+      C135 135 165 115 195 130
+      C200 135 200 135 205 130
+      C235 115 265 135 265 170
+      C265 215 200 260 200 260
+    "
+    fill="url(#heartGradient)"
+  />
+
+  <!-- ECG -->
+  <polyline
+    points="155,190 180,190 190,170 205,215 220,190 245,190"
+    fill="none"
+    stroke="#FFFFFF"
+    stroke-width="6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Texte -->
+  <text
+    x="200"
+    y="360"
+    text-anchor="middle"
+    font-family="Arial, Helvetica, sans-serif"
+    font-size="42"
+    font-weight="bold"
+  >
+    <tspan fill="#1565C0">asiko</tspan>
+    <tspan fill="#4CAF50">Connect</tspan>
+  </text>
+</svg>

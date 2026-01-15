@@ -349,6 +349,16 @@ class SensorDataAPIView(APIView):
     def post(self, request):
         sensor = Sensor.objects.get(device_id=request.data["device_id"])
 
+        # 🆕 Mise à jour de la position GPS de la zone si fournie
+        if "latitude" in request.data and "longitude" in request.data:
+            latitude = request.data.get("latitude")
+            longitude = request.data.get("longitude")
+            if latitude is not None and longitude is not None:
+                sensor.zone.latitude = float(latitude)
+                sensor.zone.longitude = float(longitude)
+                sensor.zone.save()
+                print(f"[GPS] Zone '{sensor.zone.name}' mise à jour: ({latitude}, {longitude})")
+
         result = calculate_air_quality_index(
             request.data["pm25"],
             request.data["pm10"],

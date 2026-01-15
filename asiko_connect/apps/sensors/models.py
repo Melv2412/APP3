@@ -74,6 +74,8 @@ class Prediction(models.Model):
 
 class Zone(models.Model):
     name = models.CharField(max_length=100)
+    latitude = models.FloatField(null=True, blank=True, verbose_name=_("Latitude"))
+    longitude = models.FloatField(null=True, blank=True, verbose_name=_("Longitude"))
 
     def __str__(self):
         return self.name
