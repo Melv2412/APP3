@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
+from django.conf import settings
 from .models import User
 from .serializers import (
     UserSerializer,
@@ -27,21 +28,43 @@ class UserRegistrationView(generics.CreateAPIView):
     permission_classes = [AllowAny]
     
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        
-        # Générer les tokens JWT
-        refresh = RefreshToken.for_user(user)
-        
-        return Response({
-            'user': UserSerializer(user).data,
-            'tokens': {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            },
-            'message': 'Inscription réussie.'
-        }, status=status.HTTP_201_CREATED)
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            user = serializer.save()
+            
+            # Vérifier que le HealthProfile a été créé pour les patients
+            if user.role == User.Role.PATIENT:
+                from asiko_connect.apps.health_profiles.models import HealthProfile
+                if not hasattr(user, 'health_profile'):
+                    # Si le HealthProfile n'existe pas, le créer avec des valeurs par défaut
+                    HealthProfile.objects.create(
+                        user=user,
+                        age=user.patient_data.age if hasattr(user, 'patient_data') else None,
+                        smoking_status='NEVER'
+                    )
+            
+            # Générer les tokens JWT
+            refresh = RefreshToken.for_user(user)
+            
+            return Response({
+                'user': UserSerializer(user).data,
+                'tokens': {
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                },
+                'message': 'Inscription réussie.'
+            }, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            import traceback
+            error_trace = traceback.format_exc()
+            print(f"[ERROR] Erreur lors de l'inscription: {e}")
+            print(error_trace)
+            # Retourner une erreur détaillée en mode développement
+            return Response({
+                'error': str(e),
+                'detail': error_trace if settings.DEBUG else 'Erreur lors de l\'inscription'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class LoginView(generics.GenericAPIView):

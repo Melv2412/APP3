@@ -23,6 +23,7 @@ class Comorbidity(models.Model):
     class ComorbidityType(models.TextChoices):
         ASTHMA = 'ASTHMA', _('Asthme')
         DIABETES = 'DIABETES', _('Diabète')
+        DEPRESSION = 'DEPRESSION', _('Dépression')
         HEART_DISEASE = 'HEART_DISEASE', _('Maladie cardiaque')
         COPD = 'COPD', _('BPCO (Bronchopneumopathie chronique obstructive)')
         KIDNEY_DISEASE = 'KIDNEY_DISEASE', _('Maladie rénale')
@@ -89,10 +90,21 @@ class VaccinationStatus(models.Model):
         FLU = 'FLU', _('Vaccin grippe')
         OTHER = 'OTHER', _('Autre')
     
+    class VaccinationStatusChoice(models.TextChoices):
+        OK = 'OK', _('OK')
+        EN_RETARD = 'EN_RETARD', _('EN RETARD')
+    
     vaccine_type = models.CharField(
         max_length=20,
         choices=VaccineType.choices,
         verbose_name=_('Type de vaccin')
+    )
+    
+    status = models.CharField(
+        max_length=20,
+        choices=VaccinationStatusChoice.choices,
+        default=VaccinationStatusChoice.OK,
+        verbose_name=_('Statut vaccinal')
     )
     
     is_vaccinated = models.BooleanField(

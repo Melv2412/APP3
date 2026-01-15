@@ -482,7 +482,6 @@ const HealthProfile = () => {
                           />
                           <span className="text-sm text-gray-700">
                             {comorbidity.name_display || comorbidity.name || comorbidity.get_name_display?.() || 'Comorbidité'}
-                            {comorbidity.severity && ` (${comorbidity.severity_display || comorbidity.get_severity_display?.() || comorbidity.severity})`}
                           </span>
                         </label>
                       );
@@ -493,38 +492,41 @@ const HealthProfile = () => {
                 </div>
               </div>
 
-              {/* Section Vaccinations */}
+              {/* Section Vaccinations - Seulement le vaccin de la pneumonie */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Statuts Vaccinaux
+                  Statut Vaccinal (Pneumonie)
                 </label>
-                <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-3">
-                  {vaccinationStatuses.length > 0 ? (
-                    vaccinationStatuses.map((vaccination) => {
+                <div className="space-y-2">
+                  {(() => {
+                    // Filtrer pour ne garder que le vaccin de la pneumonie
+                    const pneumoniaVaccination = vaccinationStatuses.find(
+                      v => v.vaccine_type === 'PNEUMONIA'
+                    );
+                    
+                    if (pneumoniaVaccination) {
                       const isSelected = formData.selected_vaccinations.some(
-                        v => (v.id || v) === (vaccination.id || vaccination)
+                        v => (v.id || v) === (pneumoniaVaccination.id || pneumoniaVaccination)
                       );
                       return (
-                        <label
-                          key={vaccination.id}
-                          className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded"
-                        >
+                        <label className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded border border-gray-200">
                           <input
                             type="checkbox"
                             checked={isSelected}
-                            onChange={() => handleVaccinationToggle(vaccination)}
+                            onChange={() => handleVaccinationToggle(pneumoniaVaccination)}
                             className="w-4 h-4 text-primary-green focus:ring-primary-green border-gray-300 rounded"
                           />
                           <span className="text-sm text-gray-700">
-                            {vaccination.vaccine_type_display || vaccination.vaccine_type || vaccination.get_vaccine_type_display?.() || 'Vaccination'}
-                            {vaccination.is_vaccinated && ' ✓ Vacciné'}
+                            Vaccin Pneumonie
+                            {pneumoniaVaccination.is_vaccinated && ' ✓ Vacciné'}
+                            {pneumoniaVaccination.status_display && ` (${pneumoniaVaccination.status_display})`}
                           </span>
                         </label>
                       );
-                    })
-                  ) : (
-                    <p className="text-sm text-gray-500">Aucun statut vaccinal disponible</p>
-                  )}
+                    } else {
+                      return <p className="text-sm text-gray-500">Aucun statut vaccinal disponible</p>;
+                    }
+                  })()}
                 </div>
               </div>
 
@@ -592,39 +594,56 @@ const HealthProfile = () => {
               )}
               
               {/* Comorbidités sélectionnées */}
-              {healthProfile?.comorbidities && healthProfile.comorbidities.length > 0 && (
-                <div>
-                  <span className="text-sm text-gray-600">Comorbidités</span>
-                  <div className="mt-1 space-y-1">
-                    {healthProfile.comorbidities.map((comorbidity, index) => (
+              <div>
+                <span className="text-sm text-gray-600">Comorbidités</span>
+                <div className="mt-1 space-y-1">
+                  {healthProfile?.comorbidities && healthProfile.comorbidities.length > 0 ? (
+                    healthProfile.comorbidities.map((comorbidity, index) => (
                       <span
                         key={comorbidity.id || index}
                         className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs mr-2 mb-1"
                       >
                         {comorbidity.name_display || comorbidity.name || comorbidity.get_name_display?.() || 'Comorbidité'}
                       </span>
-                    ))}
-                  </div>
+                    ))
+                  ) : (
+                    <span className="text-gray-500 text-sm">Aucune comorbidité</span>
+                  )}
                 </div>
-              )}
+              </div>
 
-              {/* Vaccinations sélectionnées */}
-              {healthProfile?.vaccination_statuses && healthProfile.vaccination_statuses.length > 0 && (
-                <div>
-                  <span className="text-sm text-gray-600">Statuts Vaccinaux</span>
-                  <div className="mt-1 space-y-1">
-                    {healthProfile.vaccination_statuses.map((vaccination, index) => (
-                      <span
-                        key={vaccination.id || index}
-                        className="inline-block px-2 py-1 bg-green-100 text-green-800 rounded text-xs mr-2 mb-1"
-                      >
-                        {vaccination.vaccine_type_display || vaccination.vaccine_type || vaccination.get_vaccine_type_display?.() || 'Vaccination'}
-                        {vaccination.is_vaccinated && ' ✓'}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* Vaccinations sélectionnées - Seulement le vaccin de la pneumonie */}
+              <div>
+                <span className="text-sm text-gray-600">Statuts Vaccinaux</span>
+                {healthProfile?.vaccination_statuses && healthProfile.vaccination_statuses.length > 0 ? (
+                  (() => {
+                    // Filtrer pour ne garder que le statut vaccinal de la pneumonie
+                    const pneumoniaVaccination = healthProfile.vaccination_statuses.find(
+                      v => v.vaccine_type === 'PNEUMONIA'
+                    );
+                    
+                    if (pneumoniaVaccination) {
+                      return (
+                        <div className="mt-1 space-y-1">
+                          <span
+                            className={`inline-block px-2 py-1 rounded text-xs mr-2 mb-1 ${
+                              pneumoniaVaccination.status === 'OK'
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}
+                          >
+                            {pneumoniaVaccination.status_display || pneumoniaVaccination.status || 'OK'}
+                          </span>
+                        </div>
+                      );
+                    } else {
+                      return <p className="text-gray-500 text-sm mt-1">Aucun statut vaccinal renseigné</p>;
+                    }
+                  })()
+                ) : (
+                  <p className="text-gray-500 text-sm mt-1">Aucun statut vaccinal renseigné</p>
+                )}
+              </div>
             </div>
           )}
         </div>
