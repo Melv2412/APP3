@@ -14,6 +14,8 @@ urlpatterns = [
     path('api/', include('asiko_connect.apps.environment.urls')),  # Phase 4 : Environment
     path('api/', include('asiko_connect.apps.alerts.urls')),  # Phase 5 : Alertes
     path('api/treatments/', include('asiko_connect.apps.treatments.urls')),  # Phase 7 : Actions Préventives
+    path('api/community/', include('asiko_connect.apps.community.urls')),  # Phase 6 : Zones à Risque
+    path('api/dashboard/', include('asiko_connect.apps.dashboard.urls')),  # Phase 8 : Dashboard Santé Publique
 ]
 
 # Servir les fichiers médias en développement

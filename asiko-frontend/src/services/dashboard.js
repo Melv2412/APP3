@@ -43,3 +43,12 @@ export const getPollutionMap = async () => {
   const response = await api.get('/dashboard/pollution-map/');
   return response.data;
 };
+
+/**
+ * Obtenir le carnet santé agrégé
+ * @param {Object} params { date_from, date_to, user_id }
+ */
+export const getHealthJournal = async (params = {}) => {
+  const response = await api.get('/dashboard/health-journal/', { params });
+  return response.data;
+};

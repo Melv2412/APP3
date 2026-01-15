@@ -13,12 +13,12 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 - **Phase 3** : Dashboard Patient (Accueil User) ✅ (avec MapWidget et prédiction actuelle)
 - **Phase 4** : Prédictions IA et Données Capteurs ✅ (Pages Predictions et Sensors avec graphiques)
 - **Phase 5** : Alertes ✅ (Page Alerts + NotificationBell component)
-- **Phase 6** : Cartographie et Zones à Risque ✅ (Page Map complète avec filtres)
+- **Phase 6** : Cartographie et Zones à Risque ✅ (Page Map complète avec filtres - Backend Phase 6 complète ✅, à connecter)
 - **Phase 7** : Actions Préventives ✅ (Page PreventionActions + Widget Dashboard)
 - **Phase 8** : Profil de Santé ✅ (Page HealthProfile complète avec indice de vulnérabilité, comorbidités, vaccinations + Page Profile utilisateur)
+- **Phase 9** : Dashboard Médecin (Santé Publique) ✅ (Page DashboardDoctor + route protégée DOCTOR)
 
 ### ❌ Phases Non Démarrées
-- **Phase 9** : Dashboard Médecin (Santé Publique)
 - **Phase 10** : Carnet Santé Connecté
 - **Phase 11** : Optimisations et Finalisation
 
@@ -387,8 +387,8 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
   - [x] Cercles avec niveau de risque ✅
   - [x] Popups avec détails zone ✅
 - [x] Appel API : `GET /api/environment/nearby/` (utilisé) ✅
-- [ ] Appel API : `GET /api/community/risk-zones/nearby/` (backend Phase 6 non complète)
-- [ ] Appel API : `GET /api/community/risk-map/` (backend Phase 6 non complète)
+- [x] Appel API : `GET /api/community/risk-zones/nearby/` (connecté)
+- [x] Appel API : `GET /api/community/risk-map/` (données disponibles pour carte)
 
 ### 6.3 Marqueurs et Layers
 - [x] Marqueur position utilisateur (cercle vert + point bleu) ✅
@@ -496,43 +496,23 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 
 ---
 
-## Phase 9 : Dashboard Médecin (Santé Publique) (Semaine 5)
+## Phase 9 : Dashboard Médecin (Santé Publique) (Semaine 5) ✅
 
 ### 9.1 Page Dashboard Médecin
-- [ ] Créer `src/pages/DashboardDoctor.jsx`
-- [ ] Header similaire patient
-- [ ] Section Welcome Banner (avec nom médecin)
-- [ ] Section Statistiques Population :
-  - Nombre total de patients
-  - Nombre de patients à risque élevé
-  - Répartition des niveaux de risque (graphique)
-  - Appel API : `GET /api/dashboard/public-health/stats/`
-
-- [ ] Section Zones à Risque :
-  - Liste des zones actives
-  - Niveau de risque par zone
-  - Nombre de signaux respiratoires
-  - Appel API : `GET /api/dashboard/risk-zones/`
-
-- [ ] Section Clusters :
-  - Détection de clusters de risque
-  - Carte avec clusters
-  - Appel API : `GET /api/dashboard/clusters/`
-
-- [ ] Section Tendances Épidémiologiques :
-  - Graphiques tendances
-  - Evolution temporelle
-  - Appel API : `GET /api/dashboard/trends/`
+- [x] Créer `src/pages/DashboardDoctor.jsx`
+- [x] Statistiques population (patients, médecins, alertes actives, prédictions 7j, high risk 7j)
+- [x] Distribution vulnérabilité (vulnerability_distribution)
+- [x] Zones à risque : `GET /api/dashboard/risk-zones/`
+- [x] Clusters : `GET /api/dashboard/clusters/`
+- [x] Tendances 14 jours : `GET /api/dashboard/trends/`
+- [x] Résumé pollution : `GET /api/dashboard/pollution-map/`
 
 ### 9.2 Carte Santé Publique
-- [ ] Section carte pollution (plein écran ou widget)
-- [ ] Affichage zones polluées
-- [ ] Affichage clusters respiratoires
-- [ ] Appel API : `GET /api/dashboard/pollution-map/`
+- [ ] Carte interactive (optionnel) — les données pollution/risques sont disponibles pour un widget ou un graphe
 
 ### 9.3 Permissions
-- [ ] Vérifier que seul DOCTOR peut accéder
-- [ ] Redirection si PATIENT accède
+- [x] Accès protégé DOCTOR via `ProtectedRoute requireRole="DOCTOR"`
+- [ ] Redirection post-login pour DOCTOR (optionnel)
 
 ### 9.4 Tests
 - [ ] Tests d'accès (doctor seulement)
@@ -706,9 +686,12 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 - `GET /api/alerts/active-count/` ✅
 - `PATCH /api/alerts/{id}/deactivate/` ✅
 
-#### Zones à Risque (Phase 6) ⚠️
-- `GET /api/community/risk-zones/nearby/` (backend non implémenté, frontend utilise données mockées)
-- `GET /api/community/risk-map/` (backend non implémenté, frontend utilise données mockées)
+#### Zones à Risque (Phase 6) ✅
+- `GET /api/community/risk-zones/` ✅ (liste zones à risque)
+- `GET /api/community/risk-zones/{id}/` ✅ (détail zone)
+- `GET /api/community/risk-zones/nearby/?latitude=X&longitude=Y&radius=5000` ✅ (zones proches)
+- `GET /api/community/risk-zones/map/` ✅ (données simplifiées pour carte)
+- `POST /api/community/risk-zones/update-all/` ✅ (force mise à jour)
 
 #### Actions Préventives (Phase 7) ✅
 - `GET /api/treatments/prevention-actions/` ✅

@@ -22,3 +22,4 @@ PASSAGE_PHASE_2_TO_3=180  # en secondes  TASK ALERTS
 par le frontend lors de la création d'une alerte'''
 
 MESSAGE_A_VOCAL="Bonsoir monsieur, Attention, un niveau de pollution élevé a été détecté. Veuillez prendre les précautions nécessaires pour votre santé."
+

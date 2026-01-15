@@ -1,11 +1,26 @@
 /**
  * Service API pour les zones à risque et communauté
- * (À compléter quand Phase 6 backend sera implémentée)
  */
 import api from './api';
 
 /**
- * Obtenir les zones à risque proches
+ * Obtenir toutes les zones à risque
+ */
+export const getRiskZones = async (params = {}) => {
+  const response = await api.get('/community/risk-zones/', { params });
+  return response.data;
+};
+
+/**
+ * Obtenir une zone à risque par ID
+ */
+export const getRiskZoneById = async (id) => {
+  const response = await api.get(`/community/risk-zones/${id}/`);
+  return response.data;
+};
+
+/**
+ * Obtenir les zones à risque proches d'un point GPS
  */
 export const getNearbyRiskZones = async (latitude, longitude, radius = 5000) => {
   const response = await api.get('/community/risk-zones/nearby/', {
@@ -15,9 +30,17 @@ export const getNearbyRiskZones = async (latitude, longitude, radius = 5000) => 
 };
 
 /**
- * Obtenir la carte des zones à risque
+ * Obtenir la carte des zones à risque (données simplifiées pour affichage)
  */
-export const getRiskMap = async (params = {}) => {
-  const response = await api.get('/community/risk-map/', { params });
+export const getRiskZonesMap = async () => {
+  const response = await api.get('/community/risk-zones/map/');
+  return response.data;
+};
+
+/**
+ * Forcer la mise à jour de toutes les zones à risque
+ */
+export const updateAllRiskZones = async () => {
+  const response = await api.post('/community/risk-zones/update-all/');
   return response.data;
 };

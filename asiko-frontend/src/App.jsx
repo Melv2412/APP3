@@ -11,6 +11,7 @@ import Register from './pages/Register';
 import RegisterType from './pages/RegisterType';
 import Layout from './components/layout/Layout';
 import Dashboard from './pages/Dashboard';
+import DashboardDoctor from './pages/DashboardDoctor';
 import Predictions from './pages/Predictions';
 import Sensors from './pages/Sensors';
 import Alerts from './pages/Alerts';
@@ -18,6 +19,7 @@ import Map from './pages/Map';
 import Profile from './pages/Profile';
 import HealthProfile from './pages/HealthProfile';
 import PreventionActions from './pages/PreventionActions';
+import HealthJournal from './pages/HealthJournal';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -50,6 +52,14 @@ function App() {
                   <Predictions />
                 </ProtectedRoute>
               } 
+            />
+            <Route
+              path="/dashboard/doctor"
+              element={
+                <ProtectedRoute requireRole="DOCTOR">
+                  <DashboardDoctor />
+                </ProtectedRoute>
+              }
             />
             <Route 
               path="/sensors" 
@@ -99,6 +109,14 @@ function App() {
                          </ProtectedRoute>
                        } 
                      />
+            <Route 
+              path="/journal" 
+              element={
+                <ProtectedRoute>
+                  <HealthJournal />
+                </ProtectedRoute>
+              } 
+            />
                    </Route>
         </Routes>
       </BrowserRouter>

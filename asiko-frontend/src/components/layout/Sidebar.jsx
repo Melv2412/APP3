@@ -11,6 +11,9 @@ const Sidebar = ({ isOpen, onClose }) => {
   const { user, logout } = useAuth();
 
   const menuItems = [
+    ...(user?.role === 'DOCTOR'
+      ? [{ path: '/dashboard/doctor', label: 'Dashboard Médecin', icon: 'stats' }]
+      : []),
     { path: '/dashboard', label: 'Accueil', icon: 'home' },
     { path: '/predictions', label: 'Prédictions', icon: 'stats' },
     { path: '/sensors', label: 'Capteurs', icon: 'sensor' },
@@ -18,6 +21,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { path: '/actions', label: 'Actions Préventives', icon: 'actions' },
     { path: '/map', label: 'Carte', icon: 'map' },
     { path: '/health-profile', label: 'Profil de Santé', icon: 'health' },
+    { path: '/journal', label: 'Carnet Santé', icon: 'journal' },
     { path: '/profile', label: 'Profil', icon: 'profile' },
   ];
 
@@ -81,6 +85,12 @@ const Sidebar = ({ isOpen, onClose }) => {
         return (
           <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+        );
+      case 'journal':
+        return (
+          <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5v14a2 2 0 002 2h10M5 5a2 2 0 012-2h8a2 2 0 012 2v12M5 5h14M9 9h6M9 13h4" />
           </svg>
         );
       default:

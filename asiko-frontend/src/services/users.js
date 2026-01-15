@@ -22,10 +22,11 @@ export const updateUserProfile = async (userData) => {
 /**
  * Changer le mot de passe
  */
-export const changePassword = async (oldPassword, newPassword) => {
+export const changePassword = async (oldPassword, newPassword, newPasswordConfirm) => {
   const response = await api.post('/users/change-password/', {
     old_password: oldPassword,
     new_password: newPassword,
+    new_password_confirm: newPasswordConfirm || newPassword, // Si non fourni, utiliser newPassword
   });
   return response.data;
 };

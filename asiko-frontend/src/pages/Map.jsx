@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Circle, Popup, useMap } from 'react-leaflet';
 import { getNearbyEnvironmentData } from '../services/environment';
+import { getNearbyRiskZones, getRiskZonesMap } from '../services/community';
 
 // Composant pour centrer la carte sur la position de l'utilisateur
 function MapCenter({ center, zoom, animate = true }) {
@@ -49,6 +50,7 @@ function MapCenter({ center, zoom, animate = true }) {
 const Map = () => {
   const [userPosition, setUserPosition] = useState({ lat: 5.3600, lng: -4.0083 }); // Abidjan par défaut
   const [environmentData, setEnvironmentData] = useState([]);
+  const [riskZones, setRiskZones] = useState([]); // Zones à risque depuis l'API
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [trackingEnabled, setTrackingEnabled] = useState(true); // Suivi de position activé par défaut
@@ -59,7 +61,7 @@ const Map = () => {
   // Filtres
   const [showRiskZones, setShowRiskZones] = useState(true);
   const [showPollution, setShowPollution] = useState(true);
-  const [riskLevelFilter, setRiskLevelFilter] = useState('all'); // all, low, moderate, high
+  const [riskLevelFilter, setRiskLevelFilter] = useState('all'); // all, low, moderate, high, critical
 
   // Récupérer les données environnementales proches
   const fetchEnvironmentData = async (lat, lng) => {
@@ -78,12 +80,41 @@ const Map = () => {
     }
   };
 
+  // Récupérer les zones à risque proches
+  const fetchRiskZones = async (lat, lng) => {
+    try {
+      // Récupérer les zones à risque dans un rayon de 10km
+      const data = await getNearbyRiskZones(lat, lng, 10000);
+      const zonesArray = Array.isArray(data) ? data : (data.results || []);
+      setRiskZones(zonesArray);
+      console.log('✅ Zones à risque récupérées:', zonesArray.length);
+    } catch (err) {
+      console.error('Erreur lors de la récupération des zones à risque:', err);
+      // Ne pas bloquer l'affichage si les zones à risque ne sont pas disponibles
+      setRiskZones([]);
+    }
+  };
+
+  // Récupérer toutes les zones à risque (pour la carte complète)
+  const fetchAllRiskZones = async () => {
+    try {
+      const data = await getRiskZonesMap();
+      const zonesArray = Array.isArray(data) ? data : (data.results || []);
+      setRiskZones(zonesArray);
+      console.log('✅ Toutes les zones à risque récupérées:', zonesArray.length);
+    } catch (err) {
+      console.error('Erreur lors de la récupération de toutes les zones à risque:', err);
+      setRiskZones([]);
+    }
+  };
+
   // Effet pour le suivi de position en temps réel
   useEffect(() => {
     if (!navigator.geolocation) {
       setGeoError('La géolocalisation n\'est pas supportée par votre navigateur');
       // Charger les données avec position par défaut
       fetchEnvironmentData(userPosition.lat, userPosition.lng);
+      fetchAllRiskZones(); // Charger toutes les zones à risque
       return;
     }
 
@@ -165,6 +196,7 @@ const Map = () => {
         if (userPosition.lat === 5.3600 && userPosition.lng === -4.0083) {
           console.log('📍 Utilisation de la position par défaut (Abidjan)');
           fetchEnvironmentData(userPosition.lat, userPosition.lng);
+          fetchAllRiskZones(); // Charger toutes les zones à risque si pas de position GPS
         }
       };
 
@@ -205,7 +237,7 @@ const Map = () => {
     }
   };
 
-  // Filtrer les données selon les filtres actifs
+  // Filtrer les données environnementales selon les filtres actifs
   const filteredData = environmentData.filter((data) => {
     if (!showPollution) return false;
     const level = getRiskLevel(data);
@@ -269,6 +301,7 @@ const Map = () => {
                       setUserPosition(newPosition);
                       setGeoError('');
                       fetchEnvironmentData(newPosition.lat, newPosition.lng);
+                      fetchRiskZones(newPosition.lat, newPosition.lng);
                     },
                     (err) => {
                       console.error('❌ Erreur lors de la récupération forcée:', err);
@@ -367,6 +400,7 @@ const Map = () => {
                     setUserPosition({ lat, lng });
                     setGeoError('');
                     fetchEnvironmentData(lat, lng);
+                    fetchRiskZones(lat, lng);
                     setShowManualInput(false);
                   } else {
                     alert('Coordonnées invalides. Latitude: -90 à 90, Longitude: -180 à 180');
@@ -441,28 +475,112 @@ const Map = () => {
             </Popup>
           </CircleMarker>
 
-          {/* Zones de pollution/risque */}
-          {showRiskZones && filteredData.map((data, index) => {
+          {/* Zones à risque (depuis l'API community) */}
+          {showRiskZones && riskZones.map((zone, index) => {
+            // Filtrer selon le niveau de risque sélectionné
+            if (riskLevelFilter !== 'all') {
+              const zoneLevel = zone.risk_level?.toLowerCase();
+              if (riskLevelFilter === 'low' && zoneLevel !== 'low') return null;
+              if (riskLevelFilter === 'moderate' && zoneLevel !== 'moderate') return null;
+              if (riskLevelFilter === 'high' && zoneLevel !== 'high') return null;
+              if (riskLevelFilter === 'critical' && zoneLevel !== 'critical') return null;
+            }
+
+            // Déterminer la couleur selon le niveau de risque
+            let color = '#00A651'; // Vert par défaut
+            let radius = 200;
+            let riskLabel = 'Faible';
+            
+            switch (zone.risk_level) {
+              case 'CRITICAL':
+                color = '#FF0000'; // Rouge
+                radius = 800;
+                riskLabel = 'Critique';
+                break;
+              case 'HIGH':
+                color = '#FF6B00'; // Orange
+                radius = 600;
+                riskLabel = 'Élevé';
+                break;
+              case 'MODERATE':
+                color = '#FFCC00'; // Jaune
+                radius = 400;
+                riskLabel = 'Modéré';
+                break;
+              case 'LOW':
+              default:
+                color = '#00A651'; // Vert
+                radius = 200;
+                riskLabel = 'Faible';
+                break;
+            }
+
+            return (
+              <Circle
+                key={`risk-zone-${zone.id || index}`}
+                center={[zone.latitude, zone.longitude]}
+                radius={zone.radius_meters || radius}
+                pathOptions={{
+                  color: color,
+                  fillColor: color,
+                  fillOpacity: 0.25,
+                  weight: 3
+                }}
+              >
+                <Popup>
+                  <div className="text-sm">
+                    <div className="font-semibold text-gray-800 mb-2">
+                      {zone.zone_name || zone.name} - Risque {riskLabel}
+                    </div>
+                    {zone.pollution_level !== undefined && (
+                      <div className="text-gray-600 mb-1">
+                        Pollution: {zone.pollution_level.toFixed(1)} (IQA)
+                      </div>
+                    )}
+                    {zone.respiratory_signal_count !== undefined && (
+                      <div className="text-gray-600 mb-1">
+                        Signaux respiratoires: {zone.respiratory_signal_count}
+                      </div>
+                    )}
+                    {zone.high_risk_predictions_count !== undefined && (
+                      <div className="text-gray-600 mb-1">
+                        Prédictions à risque élevé: {zone.high_risk_predictions_count}
+                      </div>
+                    )}
+                    {zone.risk_level_display && (
+                      <div className="text-gray-600">
+                        Niveau: {zone.risk_level_display}
+                      </div>
+                    )}
+                  </div>
+                </Popup>
+              </Circle>
+            );
+          })}
+
+          {/* Zones de pollution (depuis environment) */}
+          {showPollution && filteredData.map((data, index) => {
             const level = getRiskLevel(data);
             const color = getRiskColor(level);
             const radius = level === 'high' ? 500 : level === 'moderate' ? 300 : 200;
 
             return (
               <Circle
-                key={index}
+                key={`pollution-${index}`}
                 center={[data.latitude || data.lat, data.longitude || data.lng]}
                 radius={radius}
                 pathOptions={{
                   color: color,
                   fillColor: color,
-                  fillOpacity: 0.2,
-                  weight: 2
+                  fillOpacity: 0.15,
+                  weight: 2,
+                  dashArray: '5, 5' // Ligne pointillée pour différencier de risk zones
                 }}
               >
                 <Popup>
                   <div className="text-sm">
                     <div className="font-semibold text-gray-800 mb-2">
-                      Zone {level === 'high' ? 'à Risque Élevé' : level === 'moderate' ? 'à Risque Modéré' : 'Saine'}
+                      Zone de Pollution {level === 'high' ? 'Élevée' : level === 'moderate' ? 'Modérée' : 'Faible'}
                     </div>
                     {data.pollution_level !== undefined && (
                       <div className="text-gray-600 mb-1">
@@ -491,11 +609,19 @@ const Map = () => {
         <div className="flex flex-wrap gap-4 text-sm">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded-full bg-green-500"></div>
-            <span className="text-gray-700">Zone Saine</span>
+            <span className="text-gray-700">Zone Saine / Risque Faible</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded-full bg-yellow-500"></div>
             <span className="text-gray-700">Risque Modéré</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full bg-orange-500"></div>
+            <span className="text-gray-700">Risque Élevé</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full bg-red-500"></div>
+            <span className="text-gray-700">Risque Critique</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded-full bg-red-500"></div>

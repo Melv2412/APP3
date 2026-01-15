@@ -52,9 +52,11 @@ export const getLatestMeasurement = async () => {
 };
 
 /**
- * Obtenir l'évolution du risque
+ * Obtenir les tendances des mesures
  */
-export const getRiskEvolution = async () => {
-  const response = await api.get('/sensors/risk-evolution/');
+export const getMeasurementTrends = async (days = 7) => {
+  const response = await api.get('/sensors/measurements/trends/', {
+    params: { days },
+  });
   return response.data;
 };

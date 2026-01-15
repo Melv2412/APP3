@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'asiko_connect.apps.alerts',
     'asiko_connect.apps.telemedicine',
     'asiko_connect.apps.treatments',
+    'asiko_connect.apps.community',
     'asiko_connect.apps.dashboard',
 ]
 

@@ -85,9 +85,7 @@ Ce document détaille l'utilité et le rôle de chaque phase **BACKEND** dans le
 - Gestion des alertes (lues/non lues)
 - Déclenchement automatique (tasks Celery pour transitions de phase)
 
-**Statut** : 📊 **Nécessaire pour** : Prévention proactive, actions rapides
-
-**Note** : Phase partiellement complète - Modèles, Services et Tasks Celery créés ✅, API REST manquante ❌
+**Statut** : ✅ **Nécessaire pour** : Prévention proactive, actions rapides (modèles, services, tasks Celery et API REST complets)
 
 ---
 
@@ -132,9 +130,9 @@ Ce document détaille l'utilité et le rôle de chaque phase **BACKEND** dans le
 - Tendances épidémiologiques
 - Export pour recherche
 
-**Statut** : 📊 **Nécessaire pour** : Dimension santé publique, différenciation hackathon
+**Statut** : ✅ **Nécessaire pour** : Dimension santé publique, différenciation hackathon (APIs JSON livrées : stats, zones, clusters, tendances, pollution-map)
 
-**Note** : Cette phase fournit des **APIs JSON** (pas d'interface utilisateur). Le front React.js consommera ces APIs pour afficher les visualisations.
+**Note** : Cette phase fournit des **APIs JSON** (pas d'interface utilisateur). Le front React.js consomme ces APIs pour afficher les visualisations.
 
 ---
 
@@ -151,9 +149,9 @@ Ce document détaille l'utilité et le rôle de chaque phase **BACKEND** dans le
 - Filtres temporels (historique)
 - Export PDF/JSON
 
-**Statut** : 📊 **Nécessaire pour** : Suivi longitudinal, partage avec médecin
+**Statut** : ✅ **Nécessaire pour** : Suivi longitudinal, partage avec médecin (API journal livrée : prédictions, mesures, actions prévention, alertes, environnement ; filtres date, portée patient/doctor). Export/summary JSON disponibles.
 
-**Note** : Cette phase fournit des **APIs JSON** qui agrègent toutes les données. Le front React.js affichera l'historique.
+**Note** : Cette phase fournit des **APIs JSON** qui agrègent les données. Le front React.js affichera l'historique.
 
 ---
 
@@ -205,7 +203,7 @@ Ce document détaille l'utilité et le rôle de chaque phase **BACKEND** dans le
 - **Phase 7** : Actions préventives
 
 ### 📊 Analytics et Santé Publique (Phases 8-10)
-- **Phase 8** : Dashboard santé publique (API JSON)
+- **Phase 8** : Dashboard santé publique (API JSON) ✅
 - **Phase 9** : Carnet santé (API JSON)
 - **Phase 10** : Recherche/Archivage (Export fichiers)
 
@@ -273,9 +271,9 @@ Le front React.js :
 6. Phase 5 : Alertes ⚠️ (partiellement complète : modèles/tasks/services ✅, API REST ❌)
 
 ### 📈 V1 Complète
-7. Phase 6 : Community (Zones à Risque + Cartographie)
-8. Phase 7 : Treatments (Actions Préventives)
-9. Phase 8 : Dashboard Santé Publique
+7. Phase 6 : Community (Zones à Risque + Cartographie) ✅
+8. Phase 7 : Treatments (Actions Préventives) ✅
+9. Phase 8 : Dashboard Santé Publique ❌
 
 ### 🔬 V2
 10. Phase 9 : Health Journal
@@ -293,11 +291,11 @@ Le front React.js :
 - **Phase 3** : Données Capteurs IoT + Prédictions IA ✅
 - **Phase 4** : Données Environnementales ✅
 - **Phase 5** : Alertes ✅
+- **Phase 6** : Community (Zones à Risque) ✅
+- **Phase 7** : Treatments (Actions Préventives) ✅
+- **Phase 8** : Dashboard Santé Publique ✅
+- **Phase 9** : Carnet Santé Connecté ✅ (journal agrégé)
 
 ### ❌ Phases Non Démarrées
-- **Phase 6** : Community (Zones à Risque)
-- **Phase 7** : Treatments (Actions Préventives)
-- **Phase 8** : Dashboard Santé Publique
-- **Phase 9** : Carnet Santé Connecté
 - **Phase 10** : Archivage Recherche
 - **Phase 11** : Optimisations
