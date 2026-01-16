@@ -95,3 +95,61 @@ class PatientData(models.Model):
 
     def __str__(self):
         return f"Données statiques de {self.user.username}"
+    
+    def save(self, *args, **kwargs):
+        """
+        Synchronise automatiquement les données avec HealthProfile
+        pour que les comorbidités et le tabagisme influencent l'indice de vulnérabilité.
+        """
+        super().save(*args, **kwargs)
+        
+        # Créer ou récupérer le HealthProfile
+        from asiko_connect.apps.health_profiles.models import HealthProfile, Comorbidity
+        
+        health_profile, created = HealthProfile.objects.get_or_create(
+            user=self.user,
+            defaults={'age': self.age}
+        )
+        
+        # Mettre à jour l'âge
+        health_profile.age = self.age
+        
+        # Mettre à jour le statut tabagique
+        if self.smoking:
+            health_profile.smoking_status = 'CURRENT'
+        else:
+            health_profile.smoking_status = 'NEVER'
+        
+        health_profile.save()
+        
+        # Synchroniser les comorbidités
+        # Diabète
+        if self.diabetes:
+            diabetes_comorbidity, _ = Comorbidity.objects.get_or_create(
+                name='DIABETES',
+                defaults={'severity': 'MODERATE', 'is_active': True}
+            )
+            health_profile.comorbidities.add(diabetes_comorbidity)
+        
+        # COPD/Asthme
+        if self.copd_asthma:
+            copd_comorbidity, _ = Comorbidity.objects.get_or_create(
+                name='COPD',
+                defaults={'severity': 'MODERATE', 'is_active': True}
+            )
+            asthma_comorbidity, _ = Comorbidity.objects.get_or_create(
+                name='ASTHMA',
+                defaults={'severity': 'MODERATE', 'is_active': True}
+            )
+            health_profile.comorbidities.add(copd_comorbidity, asthma_comorbidity)
+        
+        # Immunosuppression
+        if self.immunosuppression:
+            immuno_comorbidity, _ = Comorbidity.objects.get_or_create(
+                name='IMMUNOSUPPRESSION',
+                defaults={'severity': 'SEVERE', 'is_active': True}
+            )
+            health_profile.comorbidities.add(immuno_comorbidity)
+        
+        # Recalculer l'indice de vulnérabilité
+        health_profile.calculate_vulnerability_index()
