@@ -7,7 +7,7 @@ import api from './api';
  * Obtenir les alertes
  */
 export const getAlerts = async (params = {}) => {
-  const response = await api.get('/alerts/alerts/', { params });
+  const response = await api.get('/alerts/', { params });
   return response.data;
 };
 
@@ -15,7 +15,7 @@ export const getAlerts = async (params = {}) => {
  * Obtenir les alertes actives
  */
 export const getActiveAlerts = async () => {
-  const response = await api.get('/alerts/alerts/active/');
+  const response = await api.get('/alerts/active/');
   return response.data;
 };
 
@@ -23,7 +23,7 @@ export const getActiveAlerts = async () => {
  * Obtenir une alerte par ID
  */
 export const getAlertById = async (id) => {
-  const response = await api.get(`/alerts/alerts/${id}/`);
+  const response = await api.get(`/alerts/${id}/`);
   return response.data;
 };
 
@@ -31,7 +31,7 @@ export const getAlertById = async (id) => {
  * Désactiver une alerte
  */
 export const deactivateAlert = async (id) => {
-  const response = await api.patch(`/alerts/alerts/${id}/deactivate/`);
+  const response = await api.patch(`/alerts/${id}/deactivate/`);
   return response.data;
 };
 
@@ -39,6 +39,6 @@ export const deactivateAlert = async (id) => {
  * Obtenir le nombre d'alertes actives
  */
 export const getActiveAlertsCount = async () => {
-  const response = await api.get('/alerts/alerts/active-count/');
+  const response = await api.get('/alerts/active-count/');
   return response.data.count || 0;
 };

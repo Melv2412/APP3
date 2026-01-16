@@ -2,6 +2,8 @@ from datetime import timedelta
 
 from django.db.models import Q
 from django.utils import timezone
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -134,6 +136,7 @@ class TrendsView(APIView):
     def get(self, request):
         now = timezone.now()
         start_date = (now - timedelta(days=14)).date()
+        
         # Prépare un dictionnaire date -> counts
         trends = {}
         for i in range(15):
@@ -145,11 +148,11 @@ class TrendsView(APIView):
             day = pred.created_at.date()
             if day in trends:
                 trends[day]["total"] += 1
-                if isinstance(pred.result, dict) and pred.result.get("niveau_risque") in (
-                    "Élevé",
-                    "Eleve",
-                ):
-                    trends[day]["high_risk"] += 1
+                # Correction : vérifier le champ result correctement
+                if hasattr(pred, 'result') and pred.result:
+                    risk_level = pred.result.get("niveau_risque") if isinstance(pred.result, dict) else None
+                    if risk_level in ("Élevé", "Eleve", "HIGH", "CRITICAL"):
+                        trends[day]["high_risk"] += 1
 
         alerts = Alert.objects.filter(created_at__date__gte=start_date)
         for alert in alerts:
@@ -198,12 +201,27 @@ class HealthJournalView(APIView):
         return user
 
     def get_date_filters(self, queryset, field_name):
-        date_from = self.request.query_params.get("date_from")
-        date_to = self.request.query_params.get("date_to")
+        date_from = self.request.GET.get("date_from")
+        date_to = self.request.GET.get("date_to")
+        
         if date_from:
-            queryset = queryset.filter(**{f"{field_name}__gte": date_from})
+            try:
+                # Convertir en datetime si nécessaire
+                if isinstance(date_from, str):
+                    date_from = timezone.datetime.fromisoformat(date_from.replace("Z", "+00:00"))
+                queryset = queryset.filter(**{f"{field_name}__gte": date_from})
+            except ValueError:
+                pass  # Ignorer les dates invalides
+        
         if date_to:
-            queryset = queryset.filter(**{f"{field_name}__lte": date_to})
+            try:
+                # Convertir en datetime si nécessaire  
+                if isinstance(date_to, str):
+                    date_to = timezone.datetime.fromisoformat(date_to.replace("Z", "+00:00"))
+                queryset = queryset.filter(**{f"{field_name}__lte": date_to})
+            except ValueError:
+                pass  # Ignorer les dates invalides
+                
         return queryset
 
     def get(self, request):
@@ -238,7 +256,7 @@ class HealthJournalView(APIView):
 
         return Response(
             {
-                "user_id": target_user.id,
+                "user_id": target_user.pk,
                 "predictions": predictions,
                 "measurements": measurements,
                 "prevention_actions": actions,
@@ -281,7 +299,7 @@ class HealthJournalSummaryView(APIView):
 
         return Response(
             {
-                "user_id": target_user.id,
+                "user_id": target_user.pk,
                 "predictions": preds_count,
                 "measurements": meas_count,
                 "actions": actions_count,
@@ -310,3 +328,79 @@ class HealthJournalExportView(APIView):
         resp = Response(data)
         resp["Content-Disposition"] = 'attachment; filename="health_journal.json"'
         return resp
+
+
+class DashboardViewSet(viewsets.ViewSet):
+    permission_classes = [IsAuthenticated]
+
+    @action(detail=False, methods=["get"])
+    def health_journal(self, request):
+        """
+        Carnet Santé Connecté - Journal agrégé
+        GET /api/dashboard/health-journal/?date_from=2024-01-01&date_to=2024-12-31
+        """
+        try:
+            user = request.user
+
+            # Paramètres de filtrage
+            date_from_str = request.query_params.get("date_from")
+            date_to_str = request.query_params.get("date_to")
+
+            # Défaut : 30 derniers jours
+            date_from = timezone.now() - timedelta(days=30)
+            date_to = timezone.now()
+            
+            # Conversion sécurisée des dates
+            if date_from_str:
+                try:
+                    date_from = timezone.datetime.fromisoformat(date_from_str.replace("Z", "+00:00"))
+                except (ValueError, AttributeError):
+                    pass  # Garder la valeur par défaut
+            
+            if date_to_str:
+                try:
+                    date_to = timezone.datetime.fromisoformat(date_to_str.replace("Z", "+00:00"))
+                except (ValueError, AttributeError):
+                    pass  # Garder la valeur par défaut
+
+            # Récupérer les données de l'utilisateur
+            predictions = Prediction.objects.filter(
+                user=user,
+                created_at__gte=date_from,
+                created_at__lte=date_to,
+            ).order_by("-created_at")
+
+            measurements = SensorMeasurement.objects.filter(
+                user=user,
+                created_at__gte=date_from,
+                created_at__lte=date_to,
+            ).order_by("-created_at")
+
+            prevention_actions = PreventionAction.objects.filter(
+                user=user,
+                created_at__gte=date_from,
+                created_at__lte=date_to,
+            ).order_by("-created_at")
+
+            # Sérialiser les données
+            from .serializers import (
+                PredictionSerializer,
+                SensorMeasurementSerializer,
+                PreventionActionSerializer,
+            )
+
+            return Response(
+                {
+                    "predictions": PredictionSerializer(predictions, many=True).data,
+                    "measurements": SensorMeasurementSerializer(measurements, many=True).data,
+                    "prevention_actions": PreventionActionSerializer(prevention_actions, many=True).data,
+                    "date_from": date_from.isoformat(),
+                    "date_to": date_to.isoformat(),
+                }
+            )
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

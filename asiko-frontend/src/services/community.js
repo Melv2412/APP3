@@ -22,9 +22,9 @@ export const getRiskZoneById = async (id) => {
 /**
  * Obtenir les zones à risque proches d'un point GPS
  */
-export const getNearbyRiskZones = async (latitude, longitude, radius = 5000) => {
+export const getNearbyRiskZones = async (latitude, longitude, radius = 10000) => {
   const response = await api.get('/community/risk-zones/nearby/', {
-    params: { latitude, longitude, radius },
+    params: { lat: latitude, lng: longitude, radius },
   });
   return response.data;
 };

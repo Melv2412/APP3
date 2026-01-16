@@ -45,23 +45,26 @@ class RiskZoneViewSet(viewsets.ReadOnlyModelViewSet):
         """
         Retourne les zones à risque proches d'un point GPS.
         GET /api/community/risk-zones/nearby/?latitude=5.3&longitude=-4.0&radius=5000
+        GET /api/community/risk-zones/nearby/?lat=5.3&lng=-4.0&radius=10000
         """
-        latitude = request.query_params.get('latitude')
-        longitude = request.query_params.get('longitude')
-        radius = float(request.query_params.get('radius', 5000))
+        # Accepter lat/latitude et lng/longitude
+        latitude = request.query_params.get('latitude') or request.query_params.get('lat')
+        longitude = request.query_params.get('longitude') or request.query_params.get('lng')
+        radius = request.query_params.get('radius', 10000)
         
         if not latitude or not longitude:
             return Response(
-                {'error': 'Les paramètres latitude et longitude sont requis.'},
+                {'error': 'Les paramètres latitude (ou lat) et longitude (ou lng) sont requis.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
         try:
             latitude = float(latitude)
             longitude = float(longitude)
+            radius = float(radius)
         except ValueError:
             return Response(
-                {'error': 'Les paramètres latitude et longitude doivent être des nombres.'},
+                {'error': 'Les paramètres latitude, longitude et radius doivent être des nombres.'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         
@@ -69,7 +72,7 @@ class RiskZoneViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = self.get_serializer(nearby_zones, many=True)
         
         return Response({
-            'count': nearby_zones.count(),
+            'count': len(nearby_zones),
             'radius_meters': radius,
             'center': {'latitude': latitude, 'longitude': longitude},
             'results': serializer.data

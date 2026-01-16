@@ -177,7 +177,7 @@ SIMPLE_JWT = {
 # CORS Settings
 CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
-    default='http://localhost:3000,http://localhost:8000',
+    default='http://localhost:3000,http://localhost:8000,http://localhost:5173',
     cast=Csv()
 )
 

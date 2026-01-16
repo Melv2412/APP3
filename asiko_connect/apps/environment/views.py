@@ -36,34 +36,69 @@ class EnvironmentDataViewSet(viewsets.ModelViewSet):
         Récupère les données environnementales proches d'un point géographique.
         
         Paramètres de requête:
-        - latitude: Latitude du point (requis)
-        - longitude: Longitude du point (requis)
-        - radius_km: Rayon de recherche en km (défaut: 5 km)
+        - latitude ou lat: Latitude du point (requis)
+        - longitude ou lng: Longitude du point (requis)
+        - radius: Rayon de recherche en mètres (défaut: 10000m = 10km)
+        - radius_km: Rayon de recherche en km (alternative à radius)
         - limit: Nombre maximum de résultats (défaut: 10)
         """
-        serializer = EnvironmentDataNearbySerializer(data=request.query_params)
-        serializer.is_valid(raise_exception=True)
-        
-        lat = float(serializer.validated_data['latitude'])
-        lng = float(serializer.validated_data['longitude'])
-        radius_km = serializer.validated_data.get('radius_km', 5.0)
-        limit = serializer.validated_data.get('limit', 10)
-        
-        # Calcul approximatif de la distance (formule de Haversine simplifiée)
-        # Pour une zone de 5 km, on utilise ~0.045 degrés de latitude/longitude
-        lat_delta = radius_km / 111.0  # 1 degré ≈ 111 km
-        lng_delta = radius_km / (111.0 * math.cos(math.radians(lat)))
-        
-        # Filtrer les données dans la zone
-        nearby_data = EnvironmentData.objects.filter(
-            latitude__gte=lat - lat_delta,
-            latitude__lte=lat + lat_delta,
-            longitude__gte=lng - lng_delta,
-            longitude__lte=lng + lng_delta,
-        ).order_by('-timestamp')[:limit]
-        
-        serializer_response = EnvironmentDataSerializer(nearby_data, many=True)
-        return Response(serializer_response.data)
+        try:
+            # Accepter lat/latitude et lng/longitude
+            lat = request.query_params.get('lat') or request.query_params.get('latitude')
+            lng = request.query_params.get('lng') or request.query_params.get('longitude')
+            
+            if not lat or not lng:
+                return Response(
+                    {'error': 'Les paramètres latitude (ou lat) et longitude (ou lng) sont requis.'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            lat = float(lat)
+            lng = float(lng)
+            
+            # Accepter radius en mètres ou radius_km en km
+            radius = request.query_params.get('radius')
+            radius_km = request.query_params.get('radius_km')
+            
+            if radius:
+                radius_km = float(radius) / 1000.0  # Convertir mètres en km
+            elif radius_km:
+                radius_km = float(radius_km)
+            else:
+                radius_km = 10.0  # Défaut: 10 km
+            
+            limit = int(request.query_params.get('limit', 10))
+            
+            # Calcul approximatif de la distance (formule de Haversine simplifiée)
+            # Pour une zone de 5 km, on utilise ~0.045 degrés de latitude/longitude
+            lat_delta = radius_km / 111.0  # 1 degré ≈ 111 km
+            lng_delta = radius_km / (111.0 * math.cos(math.radians(lat)))
+            
+            # Filtrer les données dans la zone
+            nearby_data = EnvironmentData.objects.filter(
+                latitude__gte=lat - lat_delta,
+                latitude__lte=lat + lat_delta,
+                longitude__gte=lng - lng_delta,
+                longitude__lte=lng + lng_delta,
+            ).order_by('-timestamp')[:limit]
+            
+            serializer_response = EnvironmentDataSerializer(nearby_data, many=True)
+            return Response({
+                'count': len(nearby_data),
+                'results': serializer_response.data,
+                'radius_km': radius_km,
+                'center': {'latitude': lat, 'longitude': lng}
+            })
+        except (ValueError, TypeError) as e:
+            return Response(
+                {'error': f'Paramètres invalides: {str(e)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
     
     @action(detail=False, methods=['get'], url_path='current/(?P<lat>[^/.]+)/(?P<lng>[^/.]+)')
     def current(self, request, lat=None, lng=None):

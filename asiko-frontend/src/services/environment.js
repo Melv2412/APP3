@@ -22,9 +22,9 @@ export const getCurrentEnvironmentData = async (latitude, longitude) => {
 /**
  * Obtenir les données environnementales proches
  */
-export const getNearbyEnvironmentData = async (latitude, longitude, radius = 5000) => {
+export const getNearbyEnvironmentData = async (latitude, longitude, radius = 10000) => {
   const response = await api.get('/environment/nearby/', {
-    params: { latitude, longitude, radius },
+    params: { lat: latitude, lng: longitude, radius },
   });
   return response.data;
 };
