@@ -207,8 +207,12 @@ class PredictionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Prediction
         fields = [
-            'id', 'created_at', 'probabilite_pneumonie_72h', 'niveau_risque',
-            'facteurs_risques', 'recommandations'
+            "id",
+            "created_at",
+            "probabilite_pneumonie_72h",
+            "niveau_risque",
+            "facteurs_risques",
+            "recommandations",
         ]
 
 
@@ -216,8 +220,16 @@ class SensorMeasurementSerializer(serializers.ModelSerializer):
     class Meta:
         model = SensorMeasurement
         fields = [
-            'id', 'created_at', 'spo2', 'temperature', 'heart_rate',
-            'respiratory_rate', 'systolic_bp', 'diastolic_bp', 'wbc', 'curb65'
+            "id",
+            "created_at",
+            "spo2",
+            "temperature",
+            "heart_rate",
+            "respiratory_rate",
+            "systolic_bp",
+            "diastolic_bp",
+            "wbc",
+            "curb65",
         ]
 
 
@@ -225,6 +237,11 @@ class PreventionActionSerializer(serializers.ModelSerializer):
     class Meta:
         model = PreventionAction
         fields = [
-            'id', 'created_at', 'recommendation_text', 'action_type',
-            'priority', 'completed', 'completed_at'
+            "id",
+            "created_at",
+            "recommendation_text",
+            "action_type",
+            "priority",
+            "completed",
+            "completed_at",
         ]

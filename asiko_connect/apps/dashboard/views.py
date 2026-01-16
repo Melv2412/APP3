@@ -2,7 +2,7 @@ from datetime import timedelta
 
 from django.db.models import Q
 from django.utils import timezone
-from rest_framework import viewsets, status
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -136,7 +136,6 @@ class TrendsView(APIView):
     def get(self, request):
         now = timezone.now()
         start_date = (now - timedelta(days=14)).date()
-        
         # Prépare un dictionnaire date -> counts
         trends = {}
         for i in range(15):
@@ -148,11 +147,11 @@ class TrendsView(APIView):
             day = pred.created_at.date()
             if day in trends:
                 trends[day]["total"] += 1
-                # Correction : vérifier le champ result correctement
-                if hasattr(pred, 'result') and pred.result:
-                    risk_level = pred.result.get("niveau_risque") if isinstance(pred.result, dict) else None
-                    if risk_level in ("Élevé", "Eleve", "HIGH", "CRITICAL"):
-                        trends[day]["high_risk"] += 1
+                if isinstance(pred.result, dict) and pred.result.get("niveau_risque") in (
+                    "Élevé",
+                    "Eleve",
+                ):
+                    trends[day]["high_risk"] += 1
 
         alerts = Alert.objects.filter(created_at__date__gte=start_date)
         for alert in alerts:
@@ -200,9 +199,9 @@ class HealthJournalView(APIView):
                 return None
         return user
 
-    def get_date_filters(self, queryset, field_name):
-        date_from = self.request.GET.get("date_from")
-        date_to = self.request.GET.get("date_to")
+    def get_date_filters(self, request, queryset, field_name):
+        date_from = request.query_params.get("date_from")
+        date_to = request.query_params.get("date_to")
         
         if date_from:
             try:
@@ -210,7 +209,7 @@ class HealthJournalView(APIView):
                 if isinstance(date_from, str):
                     date_from = timezone.datetime.fromisoformat(date_from.replace("Z", "+00:00"))
                 queryset = queryset.filter(**{f"{field_name}__gte": date_from})
-            except ValueError:
+            except (ValueError, AttributeError):
                 pass  # Ignorer les dates invalides
         
         if date_to:
@@ -219,7 +218,7 @@ class HealthJournalView(APIView):
                 if isinstance(date_to, str):
                     date_to = timezone.datetime.fromisoformat(date_to.replace("Z", "+00:00"))
                 queryset = queryset.filter(**{f"{field_name}__lte": date_to})
-            except ValueError:
+            except (ValueError, AttributeError):
                 pass  # Ignorer les dates invalides
                 
         return queryset
@@ -229,29 +228,34 @@ class HealthJournalView(APIView):
         if target_user is None:
             return Response({"detail": "Utilisateur cible introuvable."}, status=404)
 
-        # Prédictions
-        predictions_qs = Prediction.objects.filter(user=target_user).order_by("-created_at")[:100]
-        predictions_qs = self.get_date_filters(predictions_qs, "created_at")
+        # Prédictions - FILTRER D'ABORD, PUIS LIMITER
+        predictions_qs = Prediction.objects.filter(user=target_user).order_by("-created_at")
+        predictions_qs = self.get_date_filters(request, predictions_qs, "created_at")
+        predictions_qs = predictions_qs[:100]  # Slice À LA FIN
         predictions = PredictionEntrySerializer(predictions_qs, many=True).data
 
         # Mesures capteurs
-        measurements_qs = SensorMeasurement.objects.filter(user=target_user).order_by("-created_at")[:100]
-        measurements_qs = self.get_date_filters(measurements_qs, "created_at")
+        measurements_qs = SensorMeasurement.objects.filter(user=target_user).order_by("-created_at")
+        measurements_qs = self.get_date_filters(request, measurements_qs, "created_at")
+        measurements_qs = measurements_qs[:100]  # Slice À LA FIN
         measurements = MeasurementEntrySerializer(measurements_qs, many=True).data
 
         # Actions préventives
-        actions_qs = PreventionAction.objects.filter(user=target_user).order_by("-created_at")[:100]
-        actions_qs = self.get_date_filters(actions_qs, "created_at")
+        actions_qs = PreventionAction.objects.filter(user=target_user).order_by("-created_at")
+        actions_qs = self.get_date_filters(request, actions_qs, "created_at")
+        actions_qs = actions_qs[:100]  # Slice À LA FIN
         actions = PreventionActionEntrySerializer(actions_qs, many=True).data
 
-        # Alertes (pas de lien direct user -> sensor dans le modèle, on retourne les plus récentes)
-        alerts_qs = Alert.objects.all().order_by("-created_at")[:100]
-        alerts_qs = self.get_date_filters(alerts_qs, "created_at")
+        # Alertes - FILTRER D'ABORD, PUIS LIMITER
+        alerts_qs = Alert.objects.all().order_by("-created_at")
+        alerts_qs = self.get_date_filters(request, alerts_qs, "created_at")
+        alerts_qs = alerts_qs[:100]  # Slice À LA FIN
         alerts = AlertEntrySerializer(alerts_qs, many=True).data
 
-        # Données environnementales (globales, limitées)
-        env_qs = EnvironmentData.objects.all().order_by("-timestamp")[:100]
-        env_qs = self.get_date_filters(env_qs, "timestamp")
+        # Données environnementales - FILTRER D'ABORD, PUIS LIMITER
+        env_qs = EnvironmentData.objects.all().order_by("-timestamp")
+        env_qs = self.get_date_filters(request, env_qs, "timestamp")
+        env_qs = env_qs[:100]  # Slice À LA FIN
         environment = EnvironmentEntrySerializer(env_qs, many=True).data
 
         return Response(
@@ -264,7 +268,6 @@ class HealthJournalView(APIView):
                 "environment": environment,
             }
         )
-
 
 class HealthJournalSummaryView(APIView):
     """
@@ -349,37 +352,35 @@ class DashboardViewSet(viewsets.ViewSet):
             # Défaut : 30 derniers jours
             date_from = timezone.now() - timedelta(days=30)
             date_to = timezone.now()
-            
+
             # Conversion sécurisée des dates
             if date_from_str:
                 try:
-                    date_from = timezone.datetime.fromisoformat(date_from_str.replace("Z", "+00:00"))
+                    date_from = timezone.datetime.fromisoformat(
+                        date_from_str.replace("Z", "+00:00")
+                    )
                 except (ValueError, AttributeError):
-                    pass  # Garder la valeur par défaut
-            
+                    pass
+
             if date_to_str:
                 try:
-                    date_to = timezone.datetime.fromisoformat(date_to_str.replace("Z", "+00:00"))
+                    date_to = timezone.datetime.fromisoformat(
+                        date_to_str.replace("Z", "+00:00")
+                    )
                 except (ValueError, AttributeError):
-                    pass  # Garder la valeur par défaut
+                    pass
 
             # Récupérer les données de l'utilisateur
             predictions = Prediction.objects.filter(
-                user=user,
-                created_at__gte=date_from,
-                created_at__lte=date_to,
+                user=user, created_at__gte=date_from, created_at__lte=date_to
             ).order_by("-created_at")
 
             measurements = SensorMeasurement.objects.filter(
-                user=user,
-                created_at__gte=date_from,
-                created_at__lte=date_to,
+                user=user, created_at__gte=date_from, created_at__lte=date_to
             ).order_by("-created_at")
 
             prevention_actions = PreventionAction.objects.filter(
-                user=user,
-                created_at__gte=date_from,
-                created_at__lte=date_to,
+                user=user, created_at__gte=date_from, created_at__lte=date_to
             ).order_by("-created_at")
 
             # Sérialiser les données
@@ -401,6 +402,5 @@ class DashboardViewSet(viewsets.ViewSet):
 
         except Exception as e:
             return Response(
-                {"error": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

@@ -233,8 +233,38 @@ const HealthJournal = () => {
 
       <div className="p-4 rounded-xl border border-gray-100 bg-white shadow-sm">
         <h3 className="font-semibold text-gray-800 mb-2">Export</h3>
-        <p className="text-sm text-gray-600">
-          Les exports PDF/JSON seront ajoutés lorsque les endpoints backend seront disponibles.
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              const params = new URLSearchParams();
+              if (filter === 'custom') {
+                if (customFrom) params.set('date_from', new Date(customFrom).toISOString());
+                if (customTo) params.set('date_to', new Date(customTo).toISOString());
+              } else if (filter === '7d') {
+                params.set('date_from', new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString());
+              } else if (filter === '30d') {
+                params.set('date_from', new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString());
+              } else if (filter === '90d') {
+                params.set('date_from', new Date(Date.now() - 90 * 24 * 3600 * 1000).toISOString());
+              }
+              
+              const url = `${process.env.REACT_APP_API_URL}/dashboard/health-journal/export/?${params.toString()}`;
+              window.open(url, '_blank');
+            }}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          >
+            📄 Exporter JSON
+          </button>
+          <button
+            disabled
+            className="px-4 py-2 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed"
+            title="PDF export sera disponible prochainement"
+          >
+            📕 Exporter PDF (Bientôt)
+          </button>
+        </div>
+        <p className="text-xs text-gray-600 mt-2">
+          L'export inclut toutes les données du carnet pour la période sélectionnée.
         </p>
       </div>
     </div>

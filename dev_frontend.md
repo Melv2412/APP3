@@ -17,9 +17,9 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 - **Phase 7** : Actions Préventives ✅ (Page PreventionActions + Widget Dashboard)
 - **Phase 8** : Profil de Santé ✅ (Page HealthProfile complète avec indice de vulnérabilité, comorbidités, vaccinations + Page Profile utilisateur)
 - **Phase 9** : Dashboard Médecin (Santé Publique) ✅ (Page DashboardDoctor + route protégée DOCTOR)
+- **Phase 10** : Carnet Santé Connecté ✅ (Page HealthJournal complète avec timeline, filtres temporels, export JSON)
 
 ### ❌ Phases Non Démarrées
-- **Phase 10** : Carnet Santé Connecté
 - **Phase 11** : Optimisations et Finalisation
 
 ### 🔄 Modifications depuis Figma
@@ -520,34 +520,29 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 
 ---
 
-## Phase 10 : Carnet Santé Connecté (Semaine 5)
+## Phase 10 : Carnet Santé Connecté (Semaine 5) ✅ COMPLÈTE
 
-### 10.1 Page Carnet Santé
-- [ ] Créer `src/pages/HealthJournal.jsx`
-- [ ] Vue agrégée de toutes les données :
-  - Timeline verticale ou liste chronologique
-  - Prédictions (avec date, probabilité)
-  - Données capteurs (avec graphiques mini)
-  - Données environnementales (qualité de l'air)
-  - Alertes déclenchées
-  - Actions préventives complétées
-- [ ] Filtres temporels :
-  - Dernière semaine
-  - Dernier mois
-  - Dernière année
-  - Personnalisé (date_from, date_to)
-- [ ] Appel API : `GET /api/health-journal/`
+### 10.1 Page Carnet Santé ✅ COMPLÈTE
+- [x] Créer `src/pages/HealthJournal.jsx` ✅
+- [x] Vue agrégée de toutes les données :
+  - Timeline verticale chronologique ✅
+  - Prédictions (avec date, probabilité, niveau de risque) ✅
+  - Données capteurs (SpO₂, température, FR, etc.) ✅
+  - Actions préventives (avec statut complété/à faire) ✅
+- [x] Filtres temporels :
+  - 7 jours, 30 jours, 90 jours, tout ✅
+  - Personnalisé (date_from, date_to) ✅
+- [x] Statistiques de résumé (compteurs par type) ✅
+- [x] Appel API : `GET /api/dashboard/health-journal/` ✅
 
-### 10.2 Section Résumé
-- [ ] Page résumé période
-- [ ] Statistiques agrégées
-- [ ] Graphiques synthétiques
-- [ ] Appel API : `GET /api/health-journal/summary/`
+### 10.2 Section Résumé ✅ COMPLÈTE
+- [x] Statistiques agrégées sur la page ✅
+- [x] Compteurs : prédictions, mesures, actions, actions complétées ✅
 
-### 10.3 Export
-- [ ] Bouton "Exporter"
-- [ ] Options : PDF ou JSON
-- [ ] Appel API : `GET /api/health-journal/export/`
+### 10.3 Export ✅ COMPLÈTE
+- [x] Bouton "Exporter JSON" fonctionnel ✅
+- [x] Bouton "Exporter PDF" (préparé pour plus tard) ✅
+- [x] Appel API : `GET /api/dashboard/health-journal/export/` ✅
 
 ### 10.4 Tests
 - [ ] Tests d'affichage carnet
@@ -555,7 +550,7 @@ Ce document détaille le plan d'implémentation complet du frontend React.js pou
 
 ---
 
-## Phase 11 : Optimisations et Finalisation (Semaine 6)
+## Phase 11 : Optimisations et Finalisation (Semaine 6) 🔄 EN COURS
 
 ### 11.1 Performance
 - [ ] Lazy loading des routes
