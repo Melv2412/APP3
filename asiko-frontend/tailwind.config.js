@@ -53,7 +53,58 @@ export default {
         'asiko': '8px',    // Boutons principaux
         'asiko-lg': '12px', // Cards
       },
+      animation: {
+        'fade-in': 'fadeIn 0.6s ease-out forwards',
+        'slide-up': 'slideUp 0.6s ease-out forwards',
+        'shake': 'shake 0.5s ease-in-out',
+      },
+      animationDelay: {
+        '100': '100ms',
+        '200': '200ms',
+        '300': '300ms',
+        '400': '400ms',
+        '500': '500ms',
+        '600': '600ms',
+        '700': '700ms',
+        '800': '800ms',
+        '900': '900ms',
+        '1000': '1000ms',
+        '1100': '1100ms',
+        '1200': '1200ms',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideUp: {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        shake: {
+          '0%, 100%': { transform: 'translateX(0)' },
+          '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-5px)' },
+          '20%, 40%, 60%, 80%': { transform: 'translateX(5px)' },
+        },
+      },
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addUtilities }) {
+      addUtilities({
+        '.animation-delay-100': { 'animation-delay': '100ms' },
+        '.animation-delay-200': { 'animation-delay': '200ms' },
+        '.animation-delay-300': { 'animation-delay': '300ms' },
+        '.animation-delay-400': { 'animation-delay': '400ms' },
+        '.animation-delay-500': { 'animation-delay': '500ms' },
+        '.animation-delay-600': { 'animation-delay': '600ms' },
+        '.animation-delay-700': { 'animation-delay': '700ms' },
+        '.animation-delay-800': { 'animation-delay': '800ms' },
+        '.animation-delay-900': { 'animation-delay': '900ms' },
+        '.animation-delay-1000': { 'animation-delay': '1000ms' },
+        '.animation-delay-1100': { 'animation-delay': '1100ms' },
+        '.animation-delay-1200': { 'animation-delay': '1200ms' },
+      });
+    },
+  ],
 }

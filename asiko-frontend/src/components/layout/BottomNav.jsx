@@ -1,6 +1,6 @@
 /**
  * Composant BottomNav
- * Navigation mobile en bas d'écran
+ * Navigation mobile en bas d'écran - Design moderne
  */
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -9,20 +9,20 @@ const BottomNav = () => {
   const location = useLocation();
 
   const navItems = [
-    { path: '/dashboard', icon: 'home', label: 'Accueil' },
-    { path: '/predictions', icon: 'stats', label: 'Prédictions' },
-    { path: '/sensors', icon: 'sensor', label: 'Capteurs' },
-    { path: '/alerts', icon: 'bell', label: 'Alertes' },
-    { path: '/profile', icon: 'profile', label: 'Profil' },
+    { path: '/dashboard', icon: 'home', label: 'Accueil', color: 'from-primary-green to-dark-green' },
+    { path: '/predictions', icon: 'stats', label: 'Prédictions', color: 'from-blue-500 to-blue-600' },
+    { path: '/sensors', icon: 'sensor', label: 'Capteurs', color: 'from-purple-500 to-purple-600' },
+    { path: '/alerts', icon: 'bell', label: 'Alertes', color: 'from-red-500 to-red-600' },
+    { path: '/profile', icon: 'profile', label: 'Profil', color: 'from-green-500 to-green-600' },
   ];
 
   const isActive = (path) => {
     return location.pathname === path || location.pathname.startsWith(path + '/');
   };
 
-  const getIcon = (iconName) => {
-    const iconClasses = 'w-6 h-6';
-    
+  const getIcon = (iconName, isActive) => {
+    const iconClasses = `w-6 h-6 ${isActive ? 'text-white' : 'text-gray-500'}`;
+
     switch (iconName) {
       case 'home':
         return (
@@ -60,29 +60,54 @@ const BottomNav = () => {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50">
-      <div className="container mx-auto">
-        <div className="flex justify-around items-center py-2">
-          {navItems.map((item) => (
-            <button
-              key={item.path}
-              onClick={() => navigate(item.path)}
-              className={`flex flex-col items-center justify-center px-4 py-2 rounded-lg transition-colors ${
-                isActive(item.path)
-                  ? 'text-primary-green'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-              aria-label={item.label}
-            >
-              {getIcon(item.icon)}
-              <span className="text-xs mt-1">{item.label}</span>
-              {isActive(item.path) && (
-                <span className="absolute bottom-0 w-12 h-0.5 bg-primary-green rounded-t"></span>
-              )}
-            </button>
-          ))}
+    <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-gray-200/50 shadow-2xl z-50">
+      <div className="container mx-auto px-2">
+        <div className="flex justify-around items-center py-3">
+          {navItems.map((item, index) => {
+            const active = isActive(item.path);
+            return (
+              <button
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                className={`relative flex flex-col items-center justify-center px-4 py-3 rounded-2xl transition-all duration-300 transform hover:scale-110 active:scale-95 group ${
+                  active
+                    ? `bg-gradient-to-br ${item.color} text-white shadow-lg scale-110`
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100/50'
+                }`}
+                style={{ animationDelay: `${index * 100}ms` }}
+                aria-label={item.label}
+              >
+                {/* Indicateur actif avec animation */}
+                {active && (
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full border-2 border-gray-200 animate-pulse">
+                    <div className="w-full h-full bg-green-400 rounded-full animate-ping"></div>
+                  </div>
+                )}
+
+                {/* Icône avec animation */}
+                <div className={`transition-transform duration-300 ${active ? 'scale-110' : 'group-hover:scale-110'}`}>
+                  {getIcon(item.icon, active)}
+                </div>
+
+                {/* Label avec animation */}
+                <span className={`text-xs mt-1 font-medium transition-all duration-300 ${
+                  active ? 'text-white' : 'group-hover:text-gray-900'
+                }`}>
+                  {item.label}
+                </span>
+
+                {/* Effet de brillance pour l'élément actif */}
+                {active && (
+                  <div className="absolute inset-0 bg-gradient-to-t from-white/20 to-transparent rounded-2xl opacity-50"></div>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
+
+      {/* Ligne décorative subtile */}
+      <div className="h-px bg-gradient-to-r from-transparent via-primary-green/20 to-transparent"></div>
     </nav>
   );
 };

@@ -100,81 +100,127 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   return (
     <>
-      {/* Overlay */}
+      {/* Overlay modernisé avec animation */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 animate-fade-in"
           onClick={onClose}
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar modernisé */}
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed top-0 left-0 h-full w-80 bg-white/95 backdrop-blur-xl shadow-2xl border-r border-gray-100/50 z-50 transform transition-all duration-500 ease-out ${
+          isOpen ? 'translate-x-0 scale-100' : '-translate-x-full scale-95'
         }`}
       >
         <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="bg-primary-green text-white px-4 py-4 flex items-center justify-between">
-            <h2 className="text-xl font-bold">Menu</h2>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
-              aria-label="Fermer"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+          {/* Header modernisé */}
+          <div className="bg-gradient-to-r from-primary-green via-dark-green to-primary-green text-white px-6 py-6 relative overflow-hidden">
+            {/* Fond décoratif */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-8 translate-x-8"></div>
+
+            <div className="relative z-10 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </div>
+                <h2 className="text-xl font-bold">Menu</h2>
+              </div>
+              <button
+                onClick={onClose}
+                className="p-2 hover:bg-white/20 rounded-xl transition-all duration-300 transform hover:scale-110 active:scale-95 backdrop-blur-sm"
+                aria-label="Fermer"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
 
-          {/* User info */}
-          <div className="px-4 py-4 border-b border-gray-200">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-primary-green bg-opacity-20 flex items-center justify-center text-xl font-bold text-primary-green">
-                {user?.first_name?.charAt(0) || user?.username?.charAt(0) || 'U'}
+          {/* User info modernisé */}
+          <div className="px-6 py-6 border-b border-gray-100/50 bg-gradient-to-r from-gray-50/50 to-blue-50/30">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="w-14 h-14 bg-gradient-to-br from-primary-green to-dark-green rounded-2xl flex items-center justify-center text-xl font-bold text-white shadow-lg">
+                  {user?.first_name?.charAt(0) || user?.username?.charAt(0) || 'U'}
+                </div>
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-white"></div>
               </div>
-              <div>
-                <p className="font-semibold text-gray-800">
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-gray-800 text-lg truncate">
                   {user?.first_name || user?.username || 'Utilisateur'}
                 </p>
-                <p className="text-sm text-gray-600">{user?.email || ''}</p>
+                <p className="text-sm text-gray-600 truncate">{user?.email || ''}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-gray-500 font-medium">Connecté</span>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Menu items */}
-          <nav className="flex-1 overflow-y-auto py-2">
-            {menuItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              return (
-                <button
-                  key={item.path}
-                  onClick={() => handleNavigate(item.path)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
-                    isActive
-                      ? 'bg-primary-green bg-opacity-10 text-primary-green font-semibold border-r-4 border-primary-green'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  {getIcon(item.icon)}
-                  <span>{item.label}</span>
-                </button>
-              );
-            })}
+          {/* Menu items modernisés */}
+          <nav className="flex-1 overflow-y-auto py-4 px-3">
+            <div className="space-y-2">
+              {menuItems.map((item, index) => {
+                const isActive = location.pathname === item.path;
+                return (
+                  <button
+                    key={item.path}
+                    onClick={() => handleNavigate(item.path)}
+                    className={`w-full group flex items-center gap-4 px-4 py-4 text-left rounded-2xl transition-all duration-300 transform hover:scale-105 active:scale-95 ${
+                      isActive
+                        ? 'bg-gradient-to-r from-primary-green/10 to-dark-green/10 text-primary-green font-semibold shadow-lg border border-primary-green/20'
+                        : 'text-gray-700 hover:bg-gray-100/70 hover:text-gray-900'
+                    }`}
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    {/* Indicateur actif */}
+                    {isActive && (
+                      <div className="w-1 h-8 bg-gradient-to-b from-primary-green to-dark-green rounded-full"></div>
+                    )}
+
+                    {/* Icône avec animation */}
+                    <div className={`transition-all duration-300 ${
+                      isActive ? 'scale-110' : 'group-hover:scale-110'
+                    }`}>
+                      {getIcon(item.icon)}
+                    </div>
+
+                    {/* Label */}
+                    <span className="flex-1 font-medium">{item.label}</span>
+
+                    {/* Flèche pour l'élément actif */}
+                    {isActive && (
+                      <svg className="w-4 h-4 text-primary-green" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </nav>
 
-          {/* Logout button */}
-          <div className="border-t border-gray-200 p-4">
+          {/* Logout button modernisé */}
+          <div className="border-t border-gray-100/50 p-6 bg-gradient-to-r from-red-50/30 to-orange-50/30">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 text-left text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className="w-full group flex items-center gap-4 px-4 py-4 text-left text-red-600 hover:bg-red-50/70 rounded-2xl transition-all duration-300 transform hover:scale-105 active:scale-95"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-              <span className="font-semibold">Déconnexion</span>
+              <div className="w-10 h-10 bg-red-100/70 rounded-xl flex items-center justify-center group-hover:bg-red-200/70 transition-colors duration-300">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </div>
+              <div>
+                <span className="font-semibold block">Déconnexion</span>
+                <span className="text-xs text-red-500">Fermer la session</span>
+              </div>
             </button>
           </div>
         </div>
