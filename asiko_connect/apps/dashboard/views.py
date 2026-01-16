@@ -194,7 +194,18 @@ class HealthJournalView(APIView):
         target_user_id = request.query_params.get("user_id")
         if user.is_doctor and target_user_id:
             try:
-                return User.objects.get(id=target_user_id)
+                target_user = User.objects.get(id=target_user_id)
+                # Vérifier si un thread existe et si le partage est activé
+                from asiko_connect.apps.telemedicine.models import Thread
+                is_shared = Thread.objects.filter(
+                    doctor=user, 
+                    patient=target_user, 
+                    is_journal_shared=True
+                ).exists()
+                
+                if is_shared:
+                    return target_user
+                return None # Accès refusé si pas de consentement
             except User.DoesNotExist:
                 return None
         return user
@@ -261,6 +272,13 @@ class HealthJournalView(APIView):
         return Response(
             {
                 "user_id": target_user.pk,
+                "patient_info": {
+                    "id": target_user.pk,
+                    "email": target_user.email,
+                    "first_name": target_user.first_name or "",
+                    "last_name": target_user.last_name or "",
+                    "username": target_user.username,
+                },
                 "predictions": predictions,
                 "measurements": measurements,
                 "prevention_actions": actions,
@@ -281,7 +299,17 @@ class HealthJournalSummaryView(APIView):
         target_user_id = request.query_params.get("user_id")
         if user.is_doctor and target_user_id:
             try:
-                return User.objects.get(id=target_user_id)
+                target_user = User.objects.get(id=target_user_id)
+                from asiko_connect.apps.telemedicine.models import Thread
+                is_shared = Thread.objects.filter(
+                    doctor=user, 
+                    patient=target_user, 
+                    is_journal_shared=True
+                ).exists()
+                
+                if is_shared:
+                    return target_user
+                return None
             except User.DoesNotExist:
                 return None
         return user

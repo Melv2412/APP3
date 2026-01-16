@@ -52,3 +52,18 @@ export const getHealthJournal = async (params = {}) => {
   const response = await api.get('/dashboard/health-journal/', { params });
   return response.data;
 };
+
+/**
+ * Obtenir les établissements de santé à proximité
+ * @param {number} latitude - Latitude de l'utilisateur
+ * @param {number} longitude - Longitude de l'utilisateur
+ * @param {number} radius - Rayon de recherche en km (défaut: 10)
+ * @param {string} type - Type d'établissement (HOSPITAL, PNEUMOLOGY_CENTER, etc.)
+ */
+export const getNearbyFacilities = async (latitude, longitude, radius = 10, type = null) => {
+  const params = { lat: latitude, lng: longitude, radius };
+  if (type) params.type = type;
+  
+  const response = await api.get('/community/facilities/nearby/', { params });
+  return response.data;
+};

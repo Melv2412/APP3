@@ -100,3 +100,101 @@ class RiskZone(models.Model):
     def name(self):
         """Retourne le nom de la zone associée."""
         return self.zone.name
+
+
+class HealthFacility(models.Model):
+    """
+    Établissement de santé (hôpital, centre de pneumologie, etc.)
+    avec coordonnées GPS pour calcul de proximité.
+    """
+    
+    class FacilityType(models.TextChoices):
+        HOSPITAL = 'HOSPITAL', _('Hôpital Général')
+        PNEUMOLOGY_CENTER = 'PNEUMOLOGY_CENTER', _('Centre de Pneumologie')
+        CLINIC = 'CLINIC', _('Clinique')
+        HEALTH_CENTER = 'HEALTH_CENTER', _('Centre de Santé')
+    
+    name = models.CharField(
+        max_length=255,
+        verbose_name=_('Nom de l\'établissement')
+    )
+    
+    facility_type = models.CharField(
+        max_length=30,
+        choices=FacilityType.choices,
+        verbose_name=_('Type d\'établissement')
+    )
+    
+    address = models.TextField(
+        verbose_name=_('Adresse complète')
+    )
+    
+    # Coordonnées GPS
+    latitude = models.FloatField(
+        verbose_name=_('Latitude')
+    )
+    
+    longitude = models.FloatField(
+        verbose_name=_('Longitude')
+    )
+    
+    # Informations de contact
+    phone = models.CharField(
+        max_length=50,
+        blank=True,
+        null=True,
+        verbose_name=_('Téléphone')
+    )
+    
+    email = models.EmailField(
+        blank=True,
+        null=True,
+        verbose_name=_('Email')
+    )
+    
+    # Horaires
+    opening_hours = models.TextField(
+        blank=True,
+        null=True,
+        help_text=_('Ex: Lun-Ven: 8h-18h, Sam: 8h-12h'),
+        verbose_name=_('Horaires d\'ouverture')
+    )
+    
+    # Services disponibles
+    has_emergency = models.BooleanField(
+        default=False,
+        verbose_name=_('Service d\'urgence')
+    )
+    
+    has_pneumology = models.BooleanField(
+        default=False,
+        verbose_name=_('Service de pneumologie')
+    )
+    
+    # Métadonnées
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name=_('Établissement actif')
+    )
+    
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_('Date de création')
+    )
+    
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_('Dernière mise à jour')
+    )
+    
+    class Meta:
+        verbose_name = _('Établissement de santé')
+        verbose_name_plural = _('Établissements de santé')
+        ordering = ['name']
+        indexes = [
+            models.Index(fields=['facility_type', 'is_active']),
+            models.Index(fields=['latitude', 'longitude']),
+        ]
+    
+    def __str__(self):
+        return f"{self.name} ({self.get_facility_type_display()})"

@@ -22,6 +22,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     { path: '/map', label: 'Carte', icon: 'map' },
     { path: '/health-profile', label: 'Profil de Santé', icon: 'health' },
     { path: '/journal', label: 'Carnet Santé', icon: 'journal' },
+    { path: '/telemedicine', label: 'Conseil Médical', icon: 'chat' },
     { path: '/profile', label: 'Profil', icon: 'profile' },
   ];
 
@@ -91,6 +92,12 @@ const Sidebar = ({ isOpen, onClose }) => {
         return (
           <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5v14a2 2 0 002 2h10M5 5a2 2 0 012-2h8a2 2 0 012 2v12M5 5h14M9 9h6M9 13h4" />
+          </svg>
+        );
+      case 'chat':
+        return (
+          <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
         );
       default:

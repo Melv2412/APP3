@@ -20,6 +20,7 @@ import Profile from './pages/Profile';
 import HealthProfile from './pages/HealthProfile';
 import PreventionActions from './pages/PreventionActions';
 import HealthJournal from './pages/HealthJournal';
+import Telemedicine from './pages/Telemedicine';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -114,6 +115,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <HealthJournal />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/telemedicine" 
+              element={
+                <ProtectedRoute>
+                  <Telemedicine />
                 </ProtectedRoute>
               } 
             />
