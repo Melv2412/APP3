@@ -31,6 +31,7 @@ function App() {
     <AuthProvider>
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
       <BrowserRouter>
         <Routes>
           {/* Route par défaut : redirige vers login */}
@@ -137,6 +138,8 @@ function App() {
 =======
 =======
 >>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
       <AlertsProvider>
         <BrowserRouter>
           <Routes>
@@ -235,6 +238,9 @@ function App() {
         </BrowserRouter>
       </AlertsProvider>
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes

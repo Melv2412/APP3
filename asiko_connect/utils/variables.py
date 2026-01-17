@@ -9,8 +9,13 @@ de phase
 
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 DUREE_CALCUL_IQA_PHASE_1=5
 DUREE_CALCUL_IQA_PHASE_2=5
+=======
+DUREE_CALCUL_IQA_PHASE_1=10
+DUREE_CALCUL_IQA_PHASE_2=10
+>>>>>>> Stashed changes
 =======
 DUREE_CALCUL_IQA_PHASE_1=10
 DUREE_CALCUL_IQA_PHASE_2=10
@@ -25,8 +30,13 @@ DUREE_CALCUL_IQA_PHASE_3=10
 '''Temps avant changement de phase en secondes'''
 <<<<<<< Updated upstream
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 PASSAGE_PHASE_1=5 # en secondes TASK ALERTS
 PASSAGE_PHASE_1_TO_2=5  # en secondes TASK ALERTS
+=======
+PASSAGE_PHASE_1=10 # en secondes TASK ALERTS
+PASSAGE_PHASE_1_TO_2=10  # en secondes TASK ALERTS
+>>>>>>> Stashed changes
 =======
 PASSAGE_PHASE_1=10 # en secondes TASK ALERTS
 PASSAGE_PHASE_1_TO_2=10  # en secondes TASK ALERTS
