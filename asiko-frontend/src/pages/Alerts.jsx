@@ -2,9 +2,14 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getActiveAlerts, getAlerts, deactivateAlert, getActiveAlertsCount } from '../services/alerts';
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 import Card from '../components/common/Card';
 import Badge from '../components/common/Badge';
 import Button from '../components/common/Button';
+=======
+import { useAlerts } from "../context/AlertsContext";
+
+>>>>>>> Stashed changes
 =======
 import { useAlerts } from "../context/AlertsContext";
 
@@ -21,6 +26,10 @@ const Alerts = () => {
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('active'); // active, all
   const { alerts: liveAlerts } = useAlerts();
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 
 >>>>>>> Stashed changes
 
@@ -45,6 +54,39 @@ const Alerts = () => {
 
 <<<<<<< Updated upstream
 =======
+
+
+  useEffect(() => {
+    if (liveAlerts.length === 0) return;
+
+    const latest = liveAlerts[0];
+
+    // Optionnel : toast
+    console.log("Nouvelle alerte SSE :", latest.message);
+
+    // Rafraîchir la liste REST
+    const refresh = async () => {
+      try {
+        const count = await getActiveAlertsCount();
+        setActiveAlertsCount(count);
+
+        if (filter === "active") {
+          const activeAlerts = await getActiveAlerts();
+          setAlerts(Array.isArray(activeAlerts) ? activeAlerts : []);
+        } else {
+          const allAlerts = await getAlerts({ ordering: "-created_at" });
+          const data = allAlerts.results || allAlerts || [];
+          setAlerts(Array.isArray(data) ? data : []);
+        }
+      } catch (e) {
+        console.warn("Refresh après SSE échoué");
+      }
+    };
+
+    refresh();
+  }, [liveAlerts]);
+
+
 
 
   useEffect(() => {
@@ -177,6 +219,9 @@ const Alerts = () => {
             <div
               key={alert.id}
               className={`bg-white rounded-lg shadow-sm p-6 border-2 ${alert.is_active ? 'border-red-200' : 'border-gray-200'
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
                 }`}
             >

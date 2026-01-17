@@ -32,5 +32,8 @@ urlpatterns = [
     path('alerts/active/', AlertViewSet.as_view({'get': 'active'}), name='alert-active'),
     path('alerts/active-count/', AlertViewSet.as_view({'get': 'active_count'}), name='alert-active-count'),
     path("stream/", alerts_stream),
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 ]
