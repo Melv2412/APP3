@@ -32,6 +32,7 @@ prediction_detail = PredictionViewSet.as_view({
 urlpatterns = [
     # SensorMeasurement - ViewSet complet
     path('measurements/', sensor_measurement_list, name='sensor-measurement-list'),
+    path('measurements/create/', SensorMeasurementCreateView.as_view(), name='sensor-measurement-create'),
     path('measurements/<int:pk>/', sensor_measurement_detail, name='sensor-measurement-detail'),
     path('measurements/latest/', SensorMeasurementViewSet.as_view({'get': 'latest'}), name='sensor-measurement-latest'),
     path('measurements/trends/', SensorMeasurementViewSet.as_view({'get': 'trends'}), name='sensor-measurement-trends'),

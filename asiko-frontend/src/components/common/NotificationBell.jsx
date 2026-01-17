@@ -1,8 +1,4 @@
-/**
- * Composant NotificationBell
- * Badge de notification avec dropdown pour les alertes
- */
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getActiveAlertsCount, getActiveAlerts } from '../../services/alerts';
 
@@ -14,227 +10,141 @@ const NotificationBell = () => {
   const [loading, setLoading] = useState(false);
   const dropdownRef = useRef(null);
 
-  useEffect(() => {
-    const fetchAlertsCount = async () => {
-      try {
-        const count = await getActiveAlertsCount();
-        setActiveCount(count);
-      } catch (err) {
-        console.error('Erreur lors de la récupération du nombre d\'alertes');
+  // 1. Logique de synchronisation optimisée
+  const refreshData = useCallback(async () => {
+    try {
+      const count = await getActiveAlertsCount();
+      setActiveCount(count);
+      if (isOpen) {
+        setLoading(true);
+        const alerts = await getActiveAlerts();
+        setRecentAlerts(Array.isArray(alerts) ? alerts.slice(0, 5) : []);
+        setLoading(false);
       }
-    };
+    } catch (err) {
+      console.error("Sync failed");
+    }
+  }, [isOpen]);
 
-    fetchAlertsCount();
-    
-    // Rafraîchir toutes les 30 secondes
-    const interval = setInterval(fetchAlertsCount, 30000);
+  useEffect(() => {
+    refreshData();
+    const interval = setInterval(refreshData, 15000); // Rafraîchissement dynamique
     return () => clearInterval(interval);
-  }, []);
+  }, [refreshData]);
 
-  useEffect(() => {
-    if (isOpen) {
-      const fetchRecentAlerts = async () => {
-        try {
-          setLoading(true);
-          const alerts = await getActiveAlerts();
-          const data = Array.isArray(alerts) ? alerts : [];
-          setRecentAlerts(data.slice(0, 5)); // Limiter à 5 alertes récentes
-        } catch (err) {
-          console.error('Erreur lors de la récupération des alertes récentes');
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchRecentAlerts();
-    }
-  }, [isOpen]);
-
-  // Fermer le dropdown si on clique en dehors
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
+  // 2. Styles sémantiques iOS
+  const getStatusConfig = (phase) => {
+    const configs = {
+      'PHASE_3': { color: 'bg-red-500', label: 'Critique', pulse: 'bg-red-400' },
+      'PHASE_2': { color: 'bg-orange-500', label: 'Urgent', pulse: 'bg-orange-400' },
+      'PHASE_1': { color: 'bg-amber-500', label: 'Attention', pulse: 'bg-amber-400' }
     };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen]);
-
-  const getPhaseText = (phase) => {
-    const phases = {
-      'PHASE_1': 'Phase 1',
-      'PHASE_2': 'Phase 2',
-      'PHASE_3': 'Phase 3'
-    };
-    return phases[phase] || phase;
-  };
-
-  const getPhaseColor = (phase) => {
-    const colors = {
-      'PHASE_1': 'bg-yellow-100 text-yellow-800',
-      'PHASE_2': 'bg-orange-100 text-orange-800',
-      'PHASE_3': 'bg-red-100 text-red-800'
-    };
-    return colors[phase] || 'bg-gray-100 text-gray-800';
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return configs[phase] || { color: 'bg-slate-400', label: 'Info', pulse: 'bg-slate-300' };
   };
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative inline-block" ref={dropdownRef}>
+      {/* TRIGGER : Bouton à retour haptique visuel */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative group p-3 hover:bg-primary-green/10 rounded-2xl transition-all duration-300 transform hover:scale-110 active:scale-95"
-        aria-label="Notifications"
+        className={`relative p-2.5 rounded-full transition-all duration-500 active:scale-90 ${isOpen ? 'bg-slate-100 shadow-inner' : 'hover:bg-slate-50'
+          }`}
       >
-        <div className="relative">
-          <svg
-            className={`w-6 h-6 transition-colors duration-300 ${
-              activeCount > 0 ? 'text-red-500' : 'text-gray-700 group-hover:text-primary-green'
-            }`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-            />
-          </svg>
+        <svg
+          className={`w-6 h-6 transition-all duration-500 ${activeCount > 0 ? 'text-slate-900 scale-110' : 'text-slate-400'}`}
+          fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+        </svg>
 
-          {/* Badge de notification modernisé */}
-          {activeCount > 0 && (
-            <div className="absolute -top-1 -right-1 flex items-center">
-              <span className="relative w-6 h-6 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg animate-pulse">
-                {activeCount > 9 ? '9+' : activeCount}
-                {/* Indicateur de pulse */}
-                <span className="absolute inset-0 bg-red-400 rounded-full animate-ping opacity-75"></span>
-              </span>
-            </div>
-          )}
-        </div>
+        {activeCount > 0 && (
+          <span className="absolute top-2 right-2.5 flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 border border-white"></span>
+          </span>
+        )}
       </button>
 
-      {/* Dropdown modernisé */}
+      {/* DROPDOWN : Design "Glassmorphism" Dynamique */}
       {isOpen && (
-        <div className="absolute right-0 mt-3 w-96 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-gray-100/50 z-50 max-h-96 overflow-hidden animate-slide-up">
-          {/* Header modernisé */}
-          <div className="px-6 py-4 border-b border-gray-100/50 bg-gradient-to-r from-gray-50/50 to-blue-50/30">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center">
-                  <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                  </svg>
-                </div>
-                <h3 className="font-bold text-gray-800">Alertes Actives</h3>
-              </div>
-              {activeCount > 0 && (
-                <span className="px-3 py-1 bg-red-100 text-red-700 text-sm font-semibold rounded-full border border-red-200">
-                  {activeCount} active{activeCount > 1 ? 's' : ''}
-                </span>
-              )}
-            </div>
+        <div className="absolute right-0 mt-4 w-[340px] sm:w-[380px] bg-white/80 backdrop-blur-2xl rounded-[28px] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] border border-white/50 z-[100] overflow-hidden animate-in fade-in slide-in-from-top-5 duration-300">
+
+          {/* Header minimaliste */}
+          <div className="px-6 pt-6 pb-4 flex items-center justify-between border-b border-slate-100/50">
+            <h3 className="text-lg font-bold text-slate-900 tracking-tight">Activités</h3>
+            <span className="text-[12px] font-bold px-2.5 py-1 bg-slate-900 text-white rounded-full">
+              {activeCount}
+            </span>
           </div>
 
-          {/* Liste des alertes modernisée */}
-          <div className="overflow-y-auto flex-1">
+          <div className="max-h-[420px] overflow-y-auto overflow-x-hidden py-2 px-3">
             {loading ? (
-              <div className="px-6 py-8 text-center">
-                <div className="inline-flex items-center gap-3 px-4 py-3 bg-gray-100/50 rounded-xl">
-                  <div className="w-5 h-5 border-2 border-primary-green/30 border-t-primary-green rounded-full animate-spin"></div>
-                  <span className="text-gray-600 font-medium">Chargement...</span>
-                </div>
+              <div className="flex flex-col items-center py-12 space-y-4">
+                <div className="w-6 h-6 border-[3px] border-slate-100 border-t-emerald-500 rounded-full animate-spin" />
+                <span className="text-xs font-medium text-slate-400 uppercase tracking-widest">Analyse en cours</span>
               </div>
             ) : recentAlerts.length > 0 ? (
-              <div className="py-2">
-                {recentAlerts.map((alert, index) => (
+              recentAlerts.map((alert, idx) => {
+                const config = getStatusConfig(alert.phase);
+                return (
                   <div
                     key={alert.id}
-                    className="px-6 py-4 hover:bg-gradient-to-r hover:from-gray-50/50 hover:to-blue-50/30 cursor-pointer border-b border-gray-100/50 last:border-b-0 transition-all duration-300 group"
-                    onClick={() => {
-                      setIsOpen(false);
-                      navigate('/alerts');
-                    }}
-                    style={{ animationDelay: `${index * 100}ms` }}
+                    onClick={() => { navigate('/alerts'); setIsOpen(false); }}
+                    className="group relative flex items-center gap-4 p-4 rounded-[20px] transition-all duration-300 hover:bg-white active:scale-[0.97] cursor-pointer"
+                    style={{ animationDelay: `${idx * 50}ms` }}
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${getPhaseColor(alert.phase)} shadow-sm`}>
-                        {getPhaseText(alert.phase)}
-                      </span>
-                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-lg">
-                        {formatDate(alert.created_at)}
-                      </span>
+                    {/* Indicateur visuel gauche */}
+                    <div className="relative flex-shrink-0">
+                      <div className={`w-12 h-12 ${config.color} bg-opacity-10 rounded-2xl flex items-center justify-center transition-transform group-hover:rotate-12`}>
+                        <div className={`w-2.5 h-2.5 rounded-full ${config.color} shadow-[0_0_10px_rgba(0,0,0,0.1)]`} />
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-                        </svg>
+
+                    {/* Contenu textuel */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start">
+                        <span className={`text-[11px] font-bold uppercase tracking-wider ${config.color.replace('bg-', 'text-')}`}>
+                          {config.label}
+                        </span>
+                        <span className="text-[11px] font-medium text-slate-400 bg-slate-50 px-2 py-0.5 rounded-md">
+                          {new Date(alert.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
                       </div>
-                      <div className="flex-1">
-                        <div className="text-sm font-semibold text-gray-800 group-hover:text-primary-green transition-colors">
-                          Capteur : {alert.sensor_device_id || alert.sensor}
-                        </div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          Cliquez pour voir les détails
-                        </div>
-                      </div>
-                      <svg className="w-4 h-4 text-gray-400 group-hover:text-primary-green group-hover:translate-x-1 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
+                      <h4 className="text-[15px] font-bold text-slate-800 mt-0.5 truncate uppercase">
+                        {alert.sensor_device_id || 'Système'}
+                      </h4>
+                      <p className="text-[13px] text-slate-500 leading-snug mt-0.5 line-clamp-1">
+                        Anomalie détectée • Nécessite votre attention
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
+                );
+              })
             ) : (
-              <div className="px-6 py-12 text-center">
-                <div className="inline-flex flex-col items-center gap-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-2xl flex items-center justify-center">
-                    <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-gray-600 font-medium">Aucune alerte active</p>
-                    <p className="text-sm text-gray-500 mt-1">Tout est sous contrôle !</p>
-                  </div>
+              <div className="py-16 text-center animate-in fade-in zoom-in-95">
+                <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-10 h-10 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
                 </div>
+                <p className="text-base font-bold text-slate-900">Zone Optimale</p>
+                <p className="text-sm text-slate-400">Aucune alerte pour le moment.</p>
               </div>
             )}
           </div>
 
-          {/* Footer avec lien modernisé */}
-          <div className="px-6 py-4 border-t border-gray-100/50 bg-gradient-to-r from-gray-50/50 to-blue-50/30">
+          {/* Footer - Bouton Action Massive */}
+          <div className="p-4 bg-slate-50/50 backdrop-blur-sm border-t border-slate-100">
             <button
-              onClick={() => {
-                setIsOpen(false);
-                navigate('/alerts');
-              }}
-              className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-gradient-to-r from-primary-green to-dark-green text-white font-semibold rounded-xl hover:from-dark-green hover:to-primary-green transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-lg"
+              onClick={() => { navigate('/alerts'); setIsOpen(false); }}
+              className="w-full group flex items-center justify-between px-5 py-4 bg-white border border-slate-200 rounded-[20px] shadow-sm hover:shadow-md transition-all active:scale-95"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-              <span>Voir toutes les alertes</span>
+              <span className="text-[15px] font-bold text-slate-900">Historique complet</span>
+              <div className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center text-white transition-transform group-hover:translate-x-1">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                </svg>
+              </div>
             </button>
           </div>
         </div>

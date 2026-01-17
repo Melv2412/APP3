@@ -1,31 +1,67 @@
-/**
- * Composant Layout
- * Layout principal avec Header et BottomNav - Design moderne
- */
-import { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import Header from './Header';
 import BottomNav from './BottomNav';
 import Sidebar from './Sidebar';
 
+/**
+ * Layout - Architecture "Medical App Shell"
+ * Structure responsive qui imite le comportement natif iOS
+ * Gère le scroll, les zones de sécurité (safe-areas) et le centrage sur Desktop
+ */
 const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+
+  // Scroll to top automatique lors du changement de page (comportement natif)
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [location.pathname]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-green-50/20 relative overflow-hidden">
-      {/* Fond décoratif avec formes géométriques */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary-green/5 to-blue-200/5 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 -left-20 w-64 h-64 bg-gradient-to-tr from-green-200/5 to-primary-green/5 rounded-full blur-2xl"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-tl from-blue-100/5 to-transparent rounded-full blur-3xl"></div>
+    <div className="relative min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-emerald-100 selection:text-emerald-900">
+
+      {/* --- FOND D'AMBIANCE (Fixed) --- 
+          Création d'une atmosphère "Clean & Sterile" mais chaleureuse
+          Utilisation de gradients fixes pour éviter le repeint lors du scroll
+      */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        {/* Lumière principale en haut à gauche */}
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-gradient-to-br from-emerald-50/60 to-transparent rounded-full blur-[120px]" />
+        {/* Contre-lumière douce en bas à droite */}
+        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-gradient-to-tl from-blue-50/50 to-transparent rounded-full blur-[100px]" />
+        {/* Texture subtile de bruit (optionnel, ajoute du réalisme premium) */}
+        <div className="absolute inset-0 opacity-[0.015] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
       </div>
 
-      <Header onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <main className="flex-1 pb-24 relative z-10">
-        <Outlet />
-      </main>
-      <BottomNav />
+      {/* --- STRUCTURE PRINCIPALE --- */}
+      <div className="relative z-10 flex flex-col min-h-screen">
+
+        {/* Header (Sticky top) */}
+        <Header
+          onMenuClick={() => setSidebarOpen(true)}
+          showNotifications={true}
+        />
+
+        {/* Sidebar (Overlay) */}
+        <Sidebar
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+        />
+
+        {/* --- CONTENU DE LA PAGE --- 
+            max-w-3xl : Sur grand écran, on centre le contenu pour garder l'aspect app
+            px-4 : Marges latérales de sécurité
+            pb-32 : Espace vital pour ne pas que la BottomNav cache le contenu
+        */}
+        <main className="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-[calc(8rem+env(safe-area-inset-bottom))] animate-in fade-in duration-500">
+          <Outlet />
+        </main>
+
+        {/* Bottom Navigation (Mobile Only - géré par le composant lui-même) */}
+        <BottomNav />
+
+      </div>
     </div>
   );
 };

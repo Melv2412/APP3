@@ -1,7 +1,3 @@
-/**
- * Page Dashboard Patient
- * Page d'accueil du patient avec résumé des informations clés
- */
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getLatestPrediction } from '../services/sensors';
@@ -19,14 +15,13 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [userPosition, setUserPosition] = useState({ lat: 5.3600, lng: -4.0083 }); // Abidjan par défaut
-  
-  // États pour les établissements de santé
+
   const [showFacilitiesModal, setShowFacilitiesModal] = useState(false);
   const [facilities, setFacilities] = useState([]);
   const [facilitiesType, setFacilitiesType] = useState('');
   const [loadingFacilities, setLoadingFacilities] = useState(false);
 
-  // Récupérer la position GPS de l'utilisateur
+  // LOGIQUE GÉOLOCALISATION (STRICTEMENT IDENTIQUE)
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -36,58 +31,35 @@ const Dashboard = () => {
             lng: position.coords.longitude
           });
         },
-        (err) => {
-          console.log('Erreur géolocalisation dans Dashboard:', err);
-          // Utiliser position par défaut (Abidjan)
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 5000,
-          maximumAge: 60000 // Accepter une position mise en cache de moins de 1 minute
-        }
+        (err) => console.log('Erreur géolocalisation:', err),
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 60000 }
       );
     }
   }, []);
 
+  // LOGIQUE RÉCUPÉRATION DONNÉES (STRICTEMENT IDENTIQUE)
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
-        // Récupérer la dernière prédiction
         try {
           const predData = await getLatestPrediction();
           setPrediction(predData);
-        } catch (err) {
-          // Si pas de prédiction, c'est OK (utilisateur sans données)
-          console.log('Aucune prédiction disponible');
-        }
+        } catch (err) { console.log('Aucune prédiction disponible'); }
 
-        // Récupérer les données environnementales avec la position GPS réelle
         try {
           const envData = await getCurrentEnvironmentData(userPosition.lat, userPosition.lng);
           setEnvironmentData(envData);
-        } catch (err) {
-          console.log('Données environnementales non disponibles');
-        }
+        } catch (err) { console.log('Données environnementales non disponibles'); }
 
-        // Récupérer les actions préventives prioritaires (3 premières)
         try {
           const actionsData = await getPreventionActions();
-          const actions = Array.isArray(actionsData) 
-            ? actionsData 
-            : (actionsData.results || actionsData.data || []);
-          
-          // Filtrer les actions non complétées et prioritaires, prendre les 3 premières
+          const actions = Array.isArray(actionsData) ? actionsData : (actionsData.results || actionsData.data || []);
           const priorityActions = actions
             .filter(a => !a.completed && (a.priority === 'HIGH' || a.priority === 'HAUTE'))
             .slice(0, 3);
-          
           setPreventionActions(priorityActions);
-        } catch (err) {
-          // Si le backend n'est pas encore implémenté, on ignore silencieusement
-          console.log('Actions préventives non disponibles');
-        }
+        } catch (err) { console.log('Actions préventives non disponibles'); }
       } catch (err) {
         setError('Erreur lors du chargement des données');
         console.error(err);
@@ -95,56 +67,41 @@ const Dashboard = () => {
         setLoading(false);
       }
     };
-
     fetchData();
   }, [userPosition.lat, userPosition.lng]);
 
-  // Fonction pour obtenir le texte du niveau de risque
+  // FONCTIONS UTILITAIRES DE STYLE (CONSERVÉES)
   const getRiskLevelText = (level) => {
-    const levels = {
-      'FAIBLE': 'Faible',
-      'MODERE': 'Modéré',
-      'ELEVE': 'Élevé',
-      'CRITIQUE': 'Critique'
-    };
+    const levels = { 'FAIBLE': 'Faible', 'MODERE': 'Modéré', 'ELEVE': 'Élevé', 'CRITIQUE': 'Critique' };
     return levels[level] || level;
   };
 
-  // Fonction pour obtenir la couleur du niveau de risque
   const getRiskLevelColor = (level) => {
     const colors = {
-      'FAIBLE': 'text-green-600 bg-green-50',
-      'MODERE': 'text-yellow-600 bg-yellow-50',
-      'ELEVE': 'text-orange-600 bg-orange-50',
-      'CRITIQUE': 'text-red-600 bg-red-50'
+      'FAIBLE': 'text-emerald-600 bg-emerald-50 border-emerald-100',
+      'MODERE': 'text-amber-600 bg-amber-50 border-amber-100',
+      'ELEVE': 'text-orange-600 bg-orange-50 border-orange-100',
+      'CRITIQUE': 'text-rose-600 bg-rose-50 border-rose-100'
     };
-    return colors[level] || 'text-gray-600 bg-gray-50';
+    return colors[level] || 'text-gray-600 bg-gray-50 border-gray-100';
   };
 
-  // Fonction pour obtenir le texte de qualité de l'air
-  const getAirQualityText = () => {
-    if (!environmentData) return 'Non disponible';
-    return environmentData.pollution_level_text || 'Bonne';
-  };
+  const getAirQualityText = () => environmentData?.pollution_level_text || 'Analyse...';
 
   const getStatus = () => {
     if (!environmentData) return 'Sain';
-    const pollutionLevel = environmentData.pollution_level || 0;
-    if (pollutionLevel > 50) return 'Risque';
-    return 'Sain';
+    return (environmentData.pollution_level || 0) > 50 ? 'Risque' : 'Sain';
   };
 
-  // Fonction pour charger et afficher les établissements proches
   const handleShowFacilities = async (type) => {
     setLoadingFacilities(true);
     setFacilitiesType(type);
     setShowFacilitiesModal(true);
-    
     try {
       const data = await getNearbyFacilities(userPosition.lat, userPosition.lng, 10, type);
       setFacilities(data.results || []);
     } catch (err) {
-      console.error('Erreur lors du chargement des établissements:', err);
+      console.error(err);
       setFacilities([]);
     } finally {
       setLoadingFacilities(false);
@@ -156,379 +113,228 @@ const Dashboard = () => {
   const userName = user?.first_name || user?.username || 'Utilisateur';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-green-50/20 pb-24 relative overflow-hidden">
-      {/* Fond décoratif avec formes géométriques */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary-green/10 to-blue-200/10 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 -left-20 w-64 h-64 bg-gradient-to-tr from-green-200/10 to-primary-green/10 rounded-full blur-2xl"></div>
-      </div>
+    <div className="min-h-screen bg-[#F2F4F7] pb-32 font-sans antialiased text-slate-900">
 
-      {/* Section Welcome Banner Modernisée */}
-      <div className="relative bg-gradient-to-r from-primary-green via-dark-green to-primary-green text-white px-6 py-8 shadow-lg animate-fade-in">
-        <div className="flex items-center gap-4 relative z-10">
-          {/* Photo de profil avec effet moderne */}
-          <div className="relative">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-3xl font-bold shadow-lg transform hover:scale-105 transition-all duration-300">
-              {userName.charAt(0).toUpperCase()}
+      {/* 1. TOP BANNER : STYLE IMMERSIF NÉO-MODERNE */}
+      <header className="relative bg-[#0F172A] pt-14 pb-28 px-6 overflow-hidden">
+        {/* Cercles de lumière décoratifs */}
+        <div className="absolute top-[-10%] right-[-10%] w-[300px] h-[300px] bg-emerald-500/10 rounded-full blur-[80px]" />
+        <div className="absolute bottom-[-20%] left-[-5%] w-[250px] h-[250px] bg-blue-500/10 rounded-full blur-[80px]" />
+
+        <div className="max-w-5xl mx-auto relative z-10">
+          <div className="flex items-center gap-6 mb-10">
+            <div className="relative group">
+              <div className="w-20 h-20 rounded-[24px] bg-gradient-to-br from-emerald-400 to-teal-500 p-[3px] shadow-2xl transition-transform group-hover:scale-105">
+                <div className="w-full h-full rounded-[21px] bg-[#0F172A] flex items-center justify-center text-3xl font-black text-white">
+                  {userName.charAt(0).toUpperCase()}
+                </div>
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-emerald-500 rounded-full border-[4px] border-[#0F172A] flex items-center justify-center">
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+              </div>
             </div>
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-300 rounded-full border-2 border-white flex items-center justify-center">
-              <svg className="w-3 h-3 text-green-700" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
+            <div>
+              <h2 className="text-3xl font-black text-white tracking-tight">Bonjour, {userName}</h2>
+              <div className="flex items-center gap-3 mt-1">
+                <span className="text-slate-400 font-medium">Connecté au réseau de santé</span>
+                <span className="h-1 w-1 bg-slate-600 rounded-full" />
+                <span className="text-emerald-400 text-sm font-bold uppercase tracking-widest">En direct</span>
+              </div>
             </div>
           </div>
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold mb-1 animate-slide-up animation-delay-200">Bon retour, {userName} !</h2>
-            <p className="text-green-100 text-base opacity-90 animate-fade-in animation-delay-400">Prêt à prendre soin de votre santé ?</p>
-            <div className="flex items-center gap-2 mt-2 animate-fade-in animation-delay-600">
-              <div className="w-2 h-2 bg-green-300 rounded-full animate-pulse"></div>
-              <span className="text-sm text-green-200">Connecté et protégé</span>
+
+          {/* STATUS CARDS OVERLAY */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-5 hover:bg-white/10 transition-all">
+              <p className="text-slate-400 text-[11px] font-black uppercase tracking-[0.2em] mb-2">Statut Santé</p>
+              <div className="flex items-center gap-3">
+                <div className={`w-3 h-3 rounded-full ${isHealthy ? 'bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.5)]' : 'bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.5)]'}`} />
+                <span className="text-white text-xl font-bold">{status}</span>
+              </div>
+            </div>
+            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-5 hover:bg-white/10 transition-all text-right">
+              <p className="text-slate-400 text-[11px] font-black uppercase tracking-[0.2em] mb-2">Qualité de l'air</p>
+              <p className="text-white text-xl font-bold">{getAirQualityText()}</p>
             </div>
           </div>
         </div>
+      </header>
 
-        {/* Indicateur de statut santé rapide */}
-        <div className="mt-6 flex items-center justify-between bg-white/10 backdrop-blur-sm rounded-xl p-4 animate-slide-up animation-delay-800">
-          <div className="flex items-center gap-3">
-            <div className={`w-3 h-3 rounded-full ${isHealthy ? 'bg-green-300 animate-pulse' : 'bg-red-400'}`}></div>
-            <span className="text-white font-medium">Statut santé: {status}</span>
-          </div>
-          <div className="text-right">
-            <div className="text-green-200 text-sm">Qualité de l'air</div>
-            <div className="text-white font-semibold">{getAirQualityText()}</div>
-          </div>
-        </div>
-      </div>
+      {/* 2. MAIN CONTENT AREA */}
+      <main className="max-w-5xl mx-auto px-6 -mt-10 relative z-20 space-y-8">
 
-      <div className="px-6 py-6 space-y-6 relative z-10">
-        {/* Section Prédiction Actuelle Modernisée */}
+        {/* SECTION PRÉDICTION : GRANDE CARTE DE RELIEF */}
         {prediction && (
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100/50 p-6 hover:shadow-2xl transition-all duration-300 animate-slide-up animation-delay-200 relative overflow-hidden group">
-            {/* Fond décoratif subtil */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary-green/5 to-transparent rounded-full -translate-y-8 translate-x-8"></div>
-
-            <div className="relative z-10">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-primary-green to-dark-green rounded-xl flex items-center justify-center shadow-lg">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold text-gray-800">Prédiction Actuelle</h3>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-green-50 rounded-xl border border-blue-100/50">
-                  <div className="flex items-center gap-3">
-                    <svg className="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className="text-gray-700 font-medium">Probabilité de pneumonie (72h)</span>
-                  </div>
-                  <span className="text-3xl font-bold bg-gradient-to-r from-primary-green to-dark-green bg-clip-text text-transparent">
-                    {(prediction.probabilite_pneumonie_72h * 100).toFixed(1)}%
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200/50">
-                  <div className="flex items-center gap-3">
-                    <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                    <span className="text-gray-700 font-medium">Niveau de risque</span>
-                  </div>
-                  <span className={`px-4 py-2 rounded-full text-sm font-bold ${getRiskLevelColor(prediction.niveau_risque)} shadow-sm`}>
-                    {getRiskLevelText(prediction.niveau_risque)}
-                  </span>
-                </div>
-              </div>
+          <div className="bg-white rounded-[40px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] border border-white p-8 group overflow-hidden relative">
+            <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity">
+              <svg className="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M13 3v10h10V3H13zM3 13h10v10H3V13zm0-10h10v10H3V3zm10 10h10v10H13V13z" /></svg>
             </div>
-          </div>
-        )}
 
-        {/* Section Ma localisation Modernisée */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100/50 p-6 hover:shadow-2xl transition-all duration-300 animate-slide-up animation-delay-400 relative overflow-hidden group">
-          {/* Fond décoratif subtil */}
-          <div className="absolute top-0 left-0 w-24 h-24 bg-gradient-to-br from-blue-100/30 to-transparent rounded-full -translate-y-6 -translate-x-6"></div>
-
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            <div className="flex flex-col md:flex-row items-center gap-10">
+              <div className="relative">
+                <svg className="w-40 h-40 transform -rotate-90">
+                  <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-slate-50" />
+                  <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="12" fill="transparent"
+                    strokeDasharray={440} strokeDashoffset={440 - (440 * prediction.probabilite_pneumonie_72h)}
+                    className="text-emerald-500 transition-all duration-1000 ease-in-out" strokeLinecap="round" />
                 </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-3xl font-black text-slate-900">{(prediction.probabilite_pneumonie_72h * 100).toFixed(1)}%</span>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Probabilité</span>
+                </div>
               </div>
-              <h3 className="text-xl font-bold text-gray-800">Ma localisation</h3>
-            </div>
-            <div className="rounded-xl overflow-hidden shadow-lg border border-gray-200/50">
-              <MapWidget
-                latitude={userPosition.lat}
-                longitude={userPosition.lng}
-                height="h-48"
-              />
-            </div>
-          </div>
-        </div>
 
-        {/* Section Actions Préventives Prioritaires Modernisée */}
-        {preventionActions.length > 0 && (
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100/50 p-6 hover:shadow-2xl transition-all duration-300 animate-slide-up animation-delay-600 relative overflow-hidden group">
-            {/* Fond décoratif subtil */}
-            <div className="absolute bottom-0 right-0 w-32 h-32 bg-gradient-to-tl from-red-100/20 to-transparent rounded-full translate-y-8 translate-x-8"></div>
-
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex-1 space-y-5">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
-                    <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                    </svg>
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-800">Actions Préventives</h3>
+                  <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600 font-black text-xs uppercase italic">Prédiction 72h</div>
+                  <h3 className="text-2xl font-black text-slate-900 tracking-tight">Analyse Pulmonaire</h3>
                 </div>
-                <Link
-                  to="/actions"
-                  className="text-primary-green hover:text-dark-green font-semibold transition-colors flex items-center gap-1 group"
-                >
-                  <span>Voir tout</span>
-                  <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
-              </div>
-
-              <div className="space-y-3">
-                {preventionActions.map((action, index) => (
-                  <div
-                    key={action.id}
-                    className="border border-red-200/50 rounded-xl p-4 bg-gradient-to-r from-red-50/50 to-orange-50/50 hover:from-red-50/70 hover:to-orange-50/70 transition-all duration-300 animate-fade-in"
-                    style={{ animationDelay: `${800 + index * 100}ms` }}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                        <span className="text-lg">
-                          {action.action_type === 'AVOID_ZONE' ? '🚫' :
-                           action.action_type === 'WEAR_MASK' ? '😷' :
-                           action.action_type === 'CHECK_SPO2' ? '📊' :
-                           action.action_type === 'CONSULT_DOCTOR' ? '👨‍⚕️' :
-                           action.action_type === 'STAY_HOME' ? '🏠' : '📋'}
-                        </span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-800 leading-relaxed">
-                          {action.recommendation_text || action.text || 'Action préventive'}
-                        </p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700 border border-red-200">
-                            🔥 Priorité Haute
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+                <div className="flex flex-wrap gap-4">
+                  <div className={`px-5 py-3 rounded-2xl border-2 flex items-center gap-3 ${getRiskLevelColor(prediction.niveau_risque)}`}>
+                    <span className="text-sm font-black uppercase tracking-wider">Risque {getRiskLevelText(prediction.niveau_risque)}</span>
                   </div>
-                ))}
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Section facteurs autour & services Modernisée */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100/50 p-6 hover:shadow-2xl transition-all duration-300 animate-slide-up animation-delay-800 relative overflow-hidden group">
-          {/* Fond décoratif subtil */}
-          <div className="absolute top-0 left-1/2 w-40 h-40 bg-gradient-to-br from-green-100/20 to-blue-100/20 rounded-full -translate-y-10 -translate-x-1/2 blur-xl"></div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
 
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
-                <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
+          {/* CARTE LOCALISATION / MAP */}
+          <div className="bg-white rounded-[32px] p-3 shadow-sm border border-slate-200/60 flex flex-col">
+            <div className="p-5 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-800">Services & Facteurs</h3>
+              <h3 className="font-black text-slate-900 uppercase text-sm tracking-widest">Zone de Surveillance</h3>
+            </div>
+            <div className="flex-1 rounded-[24px] overflow-hidden border border-slate-100">
+              <MapWidget latitude={userPosition.lat} longitude={userPosition.lng} height="h-[300px]" />
+            </div>
+          </div>
+
+          {/* ACTIONS PRÉVENTIVES : LISTE ÉPURÉE */}
+          <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-200/60">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="font-black text-slate-900 uppercase text-sm tracking-widest">Actions Prioritaires</h3>
+              <Link to="/actions" className="text-emerald-500 font-bold text-sm hover:underline">Voir tout</Link>
             </div>
 
-            {/* Trois boutons carrés verts modernisés */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              {/* Facteurs */}
-              <button 
-                onClick={() => handleShowFacilities(null)}
-                className="group aspect-square bg-gradient-to-br from-primary-green to-dark-green text-white rounded-2xl flex flex-col items-center justify-center hover:from-dark-green hover:to-primary-green transition-all duration-300 transform hover:scale-105 hover:shadow-xl relative overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <svg className="w-8 h-8 mb-3 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <span className="text-sm font-bold text-center relative z-10 leading-tight">Facteurs<br/>environnementaux</span>
-              </button>
-
-              {/* Hôpitaux Généraux */}
-              <button 
-                onClick={() => handleShowFacilities('HOSPITAL')}
-                className="group aspect-square bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-2xl flex flex-col items-center justify-center hover:from-blue-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl relative overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <svg className="w-8 h-8 mb-3 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-                <span className="text-sm font-bold text-center relative z-10 leading-tight">Hôpitaux<br/>Généraux</span>
-              </button>
-
-              {/* Centres de pneumologies */}
-              <button 
-                onClick={() => handleShowFacilities('PNEUMOLOGY_CENTER')}
-                className="group aspect-square bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-2xl flex flex-col items-center justify-center hover:from-purple-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 hover:shadow-xl relative overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <svg className="w-8 h-8 mb-3 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-                <span className="text-sm font-bold text-center relative z-10 leading-tight">Centres de<br/>pneumologie</span>
-              </button>
-            </div>
-
-            {/* Tabs services modernisés */}
-            <div className="border-t border-gray-200/50 pt-6">
-              <div className="flex gap-3 mb-4 p-1 bg-gray-100/50 rounded-xl">
-                <button className="flex-1 px-4 py-2 bg-gradient-to-r from-primary-green to-dark-green text-white rounded-lg text-sm font-semibold shadow-sm transition-all duration-300">
-                  Services en ligne
-                </button>
-                <button className="flex-1 px-4 py-2 bg-white text-gray-600 rounded-lg text-sm hover:bg-gray-50 transition-all duration-300">
-                  Service 24x7
-                </button>
-                <button className="flex-1 px-4 py-2 bg-white text-gray-600 rounded-lg text-sm hover:bg-gray-50 transition-all duration-300">
-                  Autres services
-                </button>
-              </div>
-              <div className="text-center py-6">
-                <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-50 to-green-50 rounded-xl border border-blue-100/50">
-                  <svg className="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                  </svg>
-                  <span className="text-gray-600 font-medium">Services à venir</span>
+            <div className="space-y-4">
+              {preventionActions.length > 0 ? preventionActions.map((action, idx) => (
+                <div key={action.id} className="group p-5 bg-slate-50 rounded-2xl border border-transparent hover:border-emerald-100 hover:bg-emerald-50/50 transition-all flex items-start gap-4">
+                  <span className="text-2xl">{
+                    action.action_type === 'AVOID_ZONE' ? '🚫' :
+                      action.action_type === 'WEAR_MASK' ? '😷' : '📋'
+                  }</span>
+                  <div className="flex-1">
+                    <p className="text-[15px] font-bold text-slate-800 leading-snug">{action.recommendation_text || action.text}</p>
+                    <span className="text-[10px] font-black text-rose-500 uppercase tracking-widest mt-2 block italic">🔥 Urgent</span>
+                  </div>
                 </div>
-              </div>
+              )) : (
+                <div className="py-10 text-center text-slate-400 font-medium italic">Aucune action urgente</div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Message d'erreur modernisé */}
+        {/* SECTION SERVICES & SERVICES À VENIR */}
+        <div className="bg-white rounded-[40px] p-10 border border-slate-200/60 shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-10">
+            <div className="space-y-1">
+              <h3 className="text-2xl font-black text-slate-900 tracking-tight leading-none">Services & Facteurs</h3>
+              <p className="text-slate-400 font-medium">Trouvez de l'aide à proximité immédiatement.</p>
+            </div>
+            {/* Segmented control style tabs */}
+            <div className="bg-slate-100 p-1.5 rounded-2xl flex gap-1">
+              <button className="px-4 py-2 bg-white rounded-[12px] shadow-sm text-xs font-black text-slate-900">Services en ligne</button>
+              <button className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors">Service 24x7</button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+            <button onClick={() => handleShowFacilities(null)} className="group p-8 rounded-[32px] bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex flex-col items-center gap-4 transition-all hover:shadow-xl hover:-translate-y-1">
+              <svg className="w-10 h-10 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+              <span className="font-black text-center text-sm uppercase tracking-tighter leading-tight">Facteurs Environnementaux</span>
+            </button>
+            <button onClick={() => handleShowFacilities('HOSPITAL')} className="group p-8 rounded-[32px] bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex flex-col items-center gap-4 transition-all hover:shadow-xl hover:-translate-y-1">
+              <svg className="w-10 h-10 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+              <span className="font-black text-center text-sm uppercase tracking-tighter leading-tight">Hôpitaux Généraux</span>
+            </button>
+            <button onClick={() => handleShowFacilities('PNEUMOLOGY_CENTER')} className="group p-8 rounded-[32px] bg-gradient-to-br from-purple-500 to-pink-600 text-white flex flex-col items-center gap-4 transition-all hover:shadow-xl hover:-translate-y-1">
+              <svg className="w-10 h-10 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+              <span className="font-black text-center text-sm uppercase tracking-tighter leading-tight">Centres Pneumologie</span>
+            </button>
+          </div>
+
+          <div className="py-6 border-t border-slate-100 flex items-center justify-center gap-4 text-slate-400">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+            <span className="text-sm font-bold italic tracking-tight uppercase">Expansion des services prévue prochainement</span>
+          </div>
+        </div>
+
+        {/* GESTION DES ÉTATS : ERREUR & CHARGEMENT */}
         {error && (
-          <div className="bg-gradient-to-r from-red-50 to-red-100 border border-red-200/50 text-red-700 px-6 py-4 rounded-2xl shadow-lg backdrop-blur-sm animate-shake flex items-center gap-3">
-            <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
-              <svg className="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-            </div>
-            <span className="font-medium">{error}</span>
+          <div className="bg-rose-50 border-2 border-rose-100 text-rose-700 p-6 rounded-[32px] flex items-center gap-5 animate-pulse">
+            <span className="text-2xl">⚠️</span>
+            <p className="font-black italic">{error}</p>
           </div>
         )}
 
-        {/* Message de chargement modernisé */}
         {loading && (
-          <div className="text-center py-12">
-            <div className="inline-flex items-center gap-4 px-8 py-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100/50">
-              <div className="w-8 h-8 border-4 border-primary-green/30 border-t-primary-green rounded-full animate-spin"></div>
-              <span className="text-gray-700 font-medium">Chargement des données...</span>
-            </div>
+          <div className="fixed bottom-10 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-md px-8 py-4 rounded-full shadow-2xl border border-white flex items-center gap-4 z-[100]">
+            <div className="w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+            <span className="text-sm font-black text-slate-800 tracking-tighter uppercase italic">Mise à jour des biométries...</span>
           </div>
         )}
-      </div>
+      </main>
 
-      {/* Modale des établissements de santé */}
+      {/* 3. MODALE ÉTABLISSEMENTS : STYLE iOS FULL SCREEN SHEET */}
       {showFacilitiesModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden animate-slide-up">
-            {/* En-tête */}
-            <div className="bg-gradient-to-r from-primary-green to-dark-green text-white p-6 flex items-center justify-between">
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="absolute inset-0 bg-[#0F172A]/80 backdrop-blur-md animate-fade-in" onClick={() => setShowFacilitiesModal(false)} />
+          <div className="relative bg-[#F8FAFC] w-full max-w-2xl rounded-t-[40px] sm:rounded-[40px] max-h-[90vh] overflow-hidden shadow-2xl animate-in slide-in-from-bottom-20 duration-500">
+
+            <div className="sticky top-0 bg-white border-b border-slate-100 p-8 flex justify-between items-center z-10">
               <div>
-                <h3 className="text-xl font-bold">
-                  {facilitiesType === 'HOSPITAL' ? 'Hôpitaux Généraux' : 
-                   facilitiesType === 'PNEUMOLOGY_CENTER' ? 'Centres de Pneumologie' : 
-                   'Tous les Établissements'}
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight">
+                  {facilitiesType === 'HOSPITAL' ? 'Hôpitaux Généraux' :
+                    facilitiesType === 'PNEUMOLOGY_CENTER' ? 'Centres de Pneumologie' : 'Établissements'}
                 </h3>
-                <p className="text-sm opacity-90 mt-1">Dans un rayon de 10 km</p>
+                <p className="text-emerald-500 font-bold text-xs uppercase tracking-widest mt-1">Rayon 10 KM • GPS Actif</p>
               </div>
-              <button 
-                onClick={() => setShowFacilitiesModal(false)}
-                className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-all"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <button onClick={() => setShowFacilitiesModal(false)} className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center text-slate-900 font-black">✕</button>
             </div>
 
-            {/* Contenu */}
-            <div className="p-6 overflow-y-auto max-h-[calc(80vh-120px)]">
+            <div className="p-8 overflow-y-auto max-h-[calc(90vh-140px)] space-y-4">
               {loadingFacilities ? (
-                <div className="text-center py-12">
-                  <div className="w-12 h-12 border-4 border-primary-green/30 border-t-primary-green rounded-full animate-spin mx-auto"></div>
-                  <p className="text-gray-600 mt-4">Recherche en cours...</p>
+                <div className="py-20 text-center space-y-4 animate-pulse">
+                  <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto" />
+                  <p className="text-slate-400 font-black italic tracking-tighter uppercase">Scanning de la zone...</p>
                 </div>
               ) : facilities.length === 0 ? (
-                <div className="text-center py-12">
-                  <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                  <p className="text-gray-600 font-medium">Aucun établissement trouvé à proximité</p>
+                <div className="py-20 text-center opacity-40">
+                  <p className="text-2xl mb-2">📍</p>
+                  <p className="font-black uppercase tracking-widest text-sm">Zone non couverte</p>
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  {facilities.map((facility) => (
-                    <div key={facility.id} className="bg-gray-50 rounded-xl p-4 hover:bg-gray-100 transition-all border border-gray-200">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <h4 className="font-bold text-gray-900 text-lg">{facility.name}</h4>
-                          <p className="text-sm text-gray-600 mt-1">{facility.address}</p>
-                          
-                          <div className="flex flex-wrap gap-2 mt-3">
-                            <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
-                              {facility.facility_type_display}
-                            </span>
-                            {facility.has_emergency && (
-                              <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold">
-                                Urgences 24h/24
-                              </span>
-                            )}
-                            {facility.has_pneumology && (
-                              <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">
-                                Service Pneumologie
-                              </span>
-                            )}
-                          </div>
-
-                          {facility.phone && (
-                            <div className="flex items-center gap-2 mt-3 text-sm text-gray-700">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                              </svg>
-                              <a href={`tel:${facility.phone}`} className="hover:text-primary-green font-medium">
-                                {facility.phone}
-                              </a>
-                            </div>
-                          )}
-
-                          {facility.opening_hours && (
-                            <p className="text-xs text-gray-500 mt-2">
-                              🕒 {facility.opening_hours}
-                            </p>
-                          )}
-                        </div>
-
-                        {facility.distance_km !== null && (
-                          <div className="flex-shrink-0 text-right">
-                            <div className="bg-primary-green text-white px-3 py-2 rounded-lg">
-                              <p className="text-2xl font-bold">{facility.distance_km}</p>
-                              <p className="text-xs opacity-90">km</p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
+              ) : facilities.map((f) => (
+                <div key={f.id} className="bg-white rounded-[28px] p-6 border border-slate-200/60 shadow-sm flex items-center justify-between group hover:border-emerald-200 transition-all">
+                  <div className="flex-1">
+                    <h4 className="font-black text-slate-900 text-lg leading-none mb-1">{f.name}</h4>
+                    <p className="text-sm text-slate-400 font-medium">{f.address}</p>
+                    <div className="flex gap-2 mt-4">
+                      {f.has_emergency && <span className="px-3 py-1 bg-rose-50 text-rose-600 rounded-lg text-[10px] font-black uppercase">Urgences 24h</span>}
+                      {f.has_pneumology && <span className="px-3 py-1 bg-purple-50 text-purple-600 rounded-lg text-[10px] font-black uppercase">Pneumologie</span>}
                     </div>
-                  ))}
+                  </div>
+                  <div className="bg-slate-900 text-white px-5 py-4 rounded-3xl text-center group-hover:bg-emerald-600 transition-colors">
+                    <p className="text-2xl font-black leading-none">{f.distance_km}</p>
+                    <p className="text-[10px] font-bold uppercase opacity-60">km</p>
+                  </div>
                 </div>
-              )}
+              ))}
             </div>
           </div>
         </div>

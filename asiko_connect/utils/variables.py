@@ -7,15 +7,15 @@ des moyennes IQA au cours des phases avant changement
 de phase
 ''' 
 
-DUREE_CALCUL_IQA_PHASE_1=60
-DUREE_CALCUL_IQA_PHASE_2=60
-DUREE_CALCUL_IQA_PHASE_3=120
+DUREE_CALCUL_IQA_PHASE_1=5
+DUREE_CALCUL_IQA_PHASE_2=5
+DUREE_CALCUL_IQA_PHASE_3=10
 
 
 '''Temps avant changement de phase en secondes'''
-PASSAGE_PHASE_1=60 # en secondes TASK ALERTS
-PASSAGE_PHASE_1_TO_2=60  # en secondes TASK ALERTS
-PASSAGE_PHASE_2_TO_3=180  # en secondes  TASK ALERTS
+PASSAGE_PHASE_1=5 # en secondes TASK ALERTS
+PASSAGE_PHASE_1_TO_2=5  # en secondes TASK ALERTS
+PASSAGE_PHASE_2_TO_3=10  # en secondes  TASK ALERTS
 
 
 '''Message à vocaliser 

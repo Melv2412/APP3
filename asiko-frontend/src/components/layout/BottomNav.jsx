@@ -1,27 +1,34 @@
-/**
- * Composant BottomNav
- * Navigation mobile en bas d'écran - Design moderne
- */
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
+/**
+ * BottomNav - Version Premium Medical Health-Tech
+ * Design: Floating Pill with Glassmorphism
+ * Animations: Heartbeat active state & Entry staggered fade
+ */
 const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Animation d'entrée au montage du composant
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
 
   const navItems = [
-    { path: '/dashboard', icon: 'home', label: 'Accueil', color: 'from-primary-green to-dark-green' },
-    { path: '/predictions', icon: 'stats', label: 'Prédictions', color: 'from-blue-500 to-blue-600' },
-    { path: '/sensors', icon: 'sensor', label: 'Capteurs', color: 'from-purple-500 to-purple-600' },
-    { path: '/alerts', icon: 'bell', label: 'Alertes', color: 'from-red-500 to-red-600' },
-    { path: '/telemedicine', icon: 'chat', label: 'Conseil', color: 'from-green-500 to-green-600' },
+    { path: '/dashboard', icon: 'home', label: 'Accueil', color: 'from-emerald-500 to-teal-600' },
+    { path: '/predictions', icon: 'stats', label: 'Analyse', color: 'from-blue-500 to-indigo-600' },
+    { path: '/sensors', icon: 'sensor', label: 'Capteurs', color: 'from-cyan-500 to-blue-500' },
+    { path: '/alerts', icon: 'bell', label: 'Alertes', color: 'from-rose-500 to-red-600' },
+    { path: '/telemedicine', icon: 'chat', label: 'Conseil', color: 'from-teal-500 to-emerald-600' },
   ];
 
-  const isActive = (path) => {
-    return location.pathname === path || location.pathname.startsWith(path + '/');
-  };
+  const isActive = (path) => location.pathname === path;
 
-  const getIcon = (iconName, isActive) => {
-    const iconClasses = `w-6 h-6 ${isActive ? 'text-white' : 'text-gray-500'}`;
+  const getIcon = (iconName, active) => {
+    const iconClasses = `w-6 h-6 transition-all duration-300 ${active ? 'text-white scale-110' : 'text-slate-400 group-hover:text-slate-600'
+      }`;
 
     switch (iconName) {
       case 'home':
@@ -39,7 +46,7 @@ const BottomNav = () => {
       case 'sensor':
         return (
           <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
         );
       case 'bell':
@@ -51,64 +58,81 @@ const BottomNav = () => {
       case 'chat':
         return (
           <svg className={iconClasses} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
           </svg>
         );
-      default:
-        return null;
+      default: return null;
     }
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-gray-200/50 shadow-2xl z-50">
-      <div className="container mx-auto px-2">
-        <div className="flex justify-around items-center py-3">
-          {navItems.map((item, index) => {
-            const active = isActive(item.path);
-            return (
-              <button
-                key={item.path}
-                onClick={() => navigate(item.path)}
-                className={`relative flex flex-col items-center justify-center px-4 py-3 rounded-2xl transition-all duration-300 transform hover:scale-110 active:scale-95 group ${
-                  active
-                    ? `bg-gradient-to-br ${item.color} text-white shadow-lg scale-110`
-                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100/50'
-                }`}
-                style={{ animationDelay: `${index * 100}ms` }}
-                aria-label={item.label}
-              >
-                {/* Indicateur actif avec animation */}
-                {active && (
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full border-2 border-gray-200 animate-pulse">
-                    <div className="w-full h-full bg-green-400 rounded-full animate-ping"></div>
-                  </div>
-                )}
+    <div className={`
+      fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-[100] md:hidden
+      transition-all duration-1000 ease-out transform
+      ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}
+    `}>
+      {/* Conteneur principal Glassmorphism */}
+      <nav className="
+        relative flex items-center justify-between px-2 py-2
+        bg-white/70 backdrop-blur-2xl 
+        border border-white/40 rounded-[32px] 
+        shadow-[0_8px_32px_0_rgba(31,38,135,0.15)]
+      ">
+        {navItems.map((item) => {
+          const active = isActive(item.path);
+          return (
+            <button
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              className="relative flex flex-col items-center flex-1 py-2 group outline-none"
+            >
+              {/* Background pill pour l'item actif */}
+              {active && (
+                <div className={`
+                  absolute inset-0 mx-1 my-1 rounded-[24px] 
+                  bg-gradient-to-br ${item.color} 
+                  shadow-lg shadow-emerald-500/20
+                  animate-[heartbeat_1.5s_ease-in-out_infinite]
+                `} />
+              )}
 
-                {/* Icône avec animation */}
-                <div className={`transition-transform duration-300 ${active ? 'scale-110' : 'group-hover:scale-110'}`}>
+              {/* Icône et Label */}
+              <div className="relative z-10 flex flex-col items-center">
+                <div className={`
+                  p-1 transition-transform duration-300
+                  ${active ? 'scale-110 mb-0' : 'group-hover:-translate-y-1'}
+                `}>
                   {getIcon(item.icon, active)}
                 </div>
 
-                {/* Label avec animation */}
-                <span className={`text-xs mt-1 font-medium transition-all duration-300 ${
-                  active ? 'text-white' : 'group-hover:text-gray-900'
-                }`}>
+                <span className={`
+                  text-[10px] font-semibold tracking-wide transition-all duration-300
+                  ${active ? 'text-white opacity-100' : 'text-slate-400 opacity-80'}
+                `}>
                   {item.label}
                 </span>
+              </div>
 
-                {/* Effet de brillance pour l'élément actif */}
-                {active && (
-                  <div className="absolute inset-0 bg-gradient-to-t from-white/20 to-transparent rounded-2xl opacity-50"></div>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+              {/* Indicateur point lumineux sous l'icône active */}
+              {active && (
+                <div className="absolute -bottom-0.5 w-1 h-1 bg-white rounded-full blur-[1px]" />
+              )}
+            </button>
+          );
+        })}
+      </nav>
 
-      {/* Ligne décorative subtile */}
-      <div className="h-px bg-gradient-to-r from-transparent via-primary-green/20 to-transparent"></div>
-    </nav>
+      {/* Styles d'animations personnalisés via injectés via style tag (Tailwind natif ne gère pas le heartbeat complexe par défaut) */}
+      <style>{`
+        @keyframes heartbeat {
+          0% { transform: scale(1); }
+          14% { transform: scale(1.05); }
+          28% { transform: scale(1); }
+          42% { transform: scale(1.05); }
+          70% { transform: scale(1); }
+        }
+      `}</style>
+    </div>
   );
 };
 
