@@ -1,8 +1,13 @@
 
 
 export function connectAlertsStream(onMessage) {
+    const host = window.location.hostname;
+    const streamURL = host.includes('devtunnels.ms') 
+        ? `https://${host.replace('5173', '8000')}/api/alerts/stream/`
+        : "http://localhost:8000/api/alerts/stream/";
+
     const eventSource = new EventSource(
-        "http://127.0.0.1:8000/api/alerts/stream/",
+        streamURL,
         { withCredentials: true }
     );
 

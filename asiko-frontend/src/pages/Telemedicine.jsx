@@ -1,49 +1,9 @@
+/**
+ * Telemedicine - Version Premium Medical iOS
+ */
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import chatService from '../services/chat';
-
-// Icônes SVG inline
-const ChatIcon = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-  </svg>
-);
-
-const UserIcon = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-  </svg>
-);
-
-const SendIcon = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-  </svg>
-);
-
-const ChevronLeftIcon = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-  </svg>
-);
-
-const DocumentIcon = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-  </svg>
-);
-
-const CheckIcon = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-);
-
-const SpinnerIcon = ({ className }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-  </svg>
-);
 
 const Telemedicine = () => {
   const { user } = useAuth();
@@ -57,22 +17,16 @@ const Telemedicine = () => {
   const [showDoctorList, setShowDoctorList] = useState(false);
   
   const messagesEndRef = useRef(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
 
   useEffect(() => {
     fetchThreads();
-    if (user?.role === 'PATIENT') {
-      fetchDoctors();
-    }
+    if (user?.role === 'PATIENT') fetchDoctors();
   }, [user]);
 
   useEffect(() => {
     if (selectedThread) {
       fetchMessages(selectedThread.id);
-      // Polling pour les nouveaux messages (toutes les 5 secondes pour le MVP)
       const interval = setInterval(() => fetchMessages(selectedThread.id), 5000);
       return () => clearInterval(interval);
     }
@@ -84,46 +38,35 @@ const Telemedicine = () => {
     try {
       const data = await chatService.getThreads();
       setThreads(data);
-    } catch (err) {
-      console.error("Erreur threads:", err);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { console.error(err); }
+    finally { setLoading(false); }
   };
 
   const fetchDoctors = async () => {
     try {
       const data = await chatService.getDoctors();
       setDoctors(data);
-    } catch (err) {
-      console.error("Erreur docteurs:", err);
-    }
+    } catch (err) { console.error(err); }
   };
 
   const fetchMessages = async (threadId) => {
     try {
       const data = await chatService.getMessages(threadId);
       setMessages(data);
-    } catch (err) {
-      console.error("Erreur messages:", err);
-    }
+    } catch (err) { console.error(err); }
   };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !selectedThread) return;
-
     setSending(true);
     try {
       const data = await chatService.sendMessage(selectedThread.id, newMessage);
       setMessages([...messages, data]);
       setNewMessage('');
-      fetchThreads(); // Pour mettre à jour le dernier message dans la liste
-    } catch (err) {
-      console.error("Erreur envoi:", err);
-    } finally {
-      setSending(false);
-    }
+      fetchThreads();
+    } catch (err) { console.error(err); }
+    finally { setSending(false); }
   };
 
   const handleStartChat = async (doctorId) => {
@@ -132,9 +75,7 @@ const Telemedicine = () => {
       setSelectedThread(thread);
       setShowDoctorList(false);
       fetchThreads();
-    } catch (err) {
-      console.error("Erreur création thread:", err);
-    }
+    } catch (err) { console.error(err); }
   };
 
   const handleToggleJournal = async () => {
@@ -142,206 +83,127 @@ const Telemedicine = () => {
     try {
       const result = await chatService.toggleJournalSharing(selectedThread.id);
       setSelectedThread({ ...selectedThread, is_journal_shared: result.is_journal_shared });
-      // Notification simple (optionnelle)
-      alert(result.message);
-    } catch (err) {
-      console.error("Erreur toggle journal:", err);
-    }
+    } catch (err) { console.error(err); }
   };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <SpinnerIcon className="w-8 h-8 text-primary-green animate-spin" />
+      <div className="min-h-screen bg-[#F8F9FB] flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto h-[calc(100vh-180px)] mt-4 flex flex-col md:flex-row bg-white rounded-asiko-lg shadow-sm border border-asiko-gray overflow-hidden">
+    <div className="min-h-screen bg-[#F8F9FB] pb-32 pt-8 px-6">
+      <div className="max-w-5xl mx-auto h-[70vh] flex bg-white rounded-[40px] border border-slate-100 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.1)] overflow-hidden animate-in zoom-in duration-700">
         
-        {/* Sidebar: Liste des threads */}
-        <div className={`w-full md:w-80 border-r border-asiko-gray flex flex-col ${selectedThread ? 'hidden md:flex' : 'flex'}`}>
-          <div className="p-4 border-b border-asiko-gray flex justify-between items-center">
-            <h2 className="font-bold text-heading-sm">Conversations</h2>
+        {/* SIDEBAR */}
+        <div className={`w-full md:w-80 border-r border-slate-50 flex flex-col ${selectedThread ? 'hidden md:flex' : 'flex'}`}>
+          <div className="p-6 border-b border-slate-50 flex justify-between items-center">
+            <h2 className="text-lg font-black text-slate-900 tracking-tight">Conseils</h2>
             {user?.role === 'PATIENT' && (
-              <button 
-                onClick={() => setShowDoctorList(!showDoctorList)}
-                className="p-2 bg-primary-green text-white rounded-full hover:bg-dark-green transition-colors"
-                title="Nouveau message"
-              >
-                <ChatIcon className="w-5 h-5" />
+              <button onClick={() => setShowDoctorList(!showDoctorList)} className="w-10 h-10 bg-emerald-500 text-white rounded-2xl shadow-lg shadow-emerald-200 flex items-center justify-center">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
               </button>
             )}
           </div>
 
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto p-2 no-scrollbar">
             {showDoctorList ? (
-              <div className="p-2">
-                <div className="flex items-center text-asiko-gray-dark mb-2 px-2">
-                  <ChevronLeftIcon className="w-4 h-4 cursor-pointer" onClick={() => setShowDoctorList(false)} />
-                  <span className="text-body-sm font-semibold ml-1">Choisir un médecin</span>
-                </div>
+              <div className="space-y-2 pt-2">
+                <button onClick={() => setShowDoctorList(false)} className="flex items-center gap-2 px-4 py-2 text-[11px] font-black text-slate-400 uppercase tracking-widest">
+                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg> Retour
+                </button>
                 {doctors.map(doc => (
-                  <div 
-                    key={doc.id}
-                    onClick={() => handleStartChat(doc.id)}
-                    className="p-3 flex items-center gap-3 hover:bg-asiko-gray-light cursor-pointer rounded-asiko transition-colors"
-                  >
-                    <div className="w-10 h-10 bg-asiko-blue-light rounded-full flex items-center justify-center text-asiko-blue">
-                      <UserIcon className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-body-md">Dr. {doc.last_name || doc.username}</p>
-                      <p className="text-body-sm text-asiko-gray-dark">Médecin généraliste</p>
-                    </div>
+                  <div key={doc.id} onClick={() => handleStartChat(doc.id)} className="p-4 bg-slate-50 hover:bg-emerald-50 rounded-3xl cursor-pointer transition-all border border-transparent hover:border-emerald-100 mx-2">
+                    <p className="font-black text-slate-900 text-sm">Dr. {doc.last_name || doc.username}</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Spécialiste IQA</p>
                   </div>
                 ))}
               </div>
             ) : (
-              threads.map(thread => {
-                if (!user || !thread.doctor_details || !thread.patient_details) return null;
-                const partner = user.role === 'PATIENT' ? thread.doctor_details : thread.patient_details;
-                return (
-                  <div 
-                    key={thread.id}
-                    onClick={() => setSelectedThread(thread)}
-                    className={`p-4 border-b border-asiko-gray-light cursor-pointer hover:bg-asiko-gray-light transition-colors ${selectedThread?.id === thread.id ? 'bg-light-green' : ''}`}
-                  >
-                    <div className="flex justify-between items-start mb-1">
-                      <p className="font-semibold text-body-md">
-                        {user.role === 'PATIENT' ? `Dr. ${partner.last_name || partner.username}` : (partner.username || 'Patient')}
-                      </p>
-                      {thread.unread_count > 0 && (
-                        <span className="bg-asiko-red text-white text-[10px] px-1.5 py-0.5 rounded-full">
-                          {thread.unread_count}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-body-sm text-asiko-gray-dark truncate">
-                      {thread.last_message ? thread.last_message.content : "Nouvelle conversation"}
-                    </p>
-                  </div>
-                );
-              })
-            )}
-            {threads.length === 0 && !showDoctorList && (
-              <div className="p-8 text-center text-asiko-gray-dark">
-                <ChatIcon className="w-12 h-12 mx-auto mb-2 opacity-20" />
-                <p className="text-body-sm">Aucune conversation active.</p>
+              <div className="space-y-2 pt-2">
+                {threads.map(thread => {
+                   const partner = user.role === 'PATIENT' ? thread.doctor_details : thread.patient_details;
+                   const active = selectedThread?.id === thread.id;
+                   return (
+                     <div key={thread.id} onClick={() => setSelectedThread(thread)} className={`p-4 rounded-[28px] cursor-pointer transition-all mx-2 ${active ? 'bg-slate-900 text-white' : 'bg-transparent text-slate-900 hover:bg-slate-50' }`}>
+                        <div className="flex justify-between items-center mb-1">
+                           <p className="font-black text-sm">{user.role === 'PATIENT' ? `Dr. ${partner.last_name}` : partner.username}</p>
+                           {thread.unread_count > 0 && <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>}
+                        </div>
+                        <p className={`text-[11px] font-medium truncate ${active ? 'text-slate-400' : 'text-slate-500'}`}>
+                           {thread.last_message?.content || 'Nouvelle consultation...'}
+                        </p>
+                     </div>
+                   );
+                })}
               </div>
             )}
           </div>
         </div>
 
-        {/* Zone de Chat */}
-        <div className={`flex-1 flex flex-col bg-asiko-gray-light ${!selectedThread ? 'hidden md:flex' : 'flex'}`}>
-          {selectedThread ? (
-            <>
-              {/* Header Chat */}
-              <div className="p-4 bg-white border-b border-asiko-gray flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                  <button className="md:hidden p-1 mr-1" onClick={() => setSelectedThread(null)}>
-                    <ChevronLeftIcon className="w-6 h-6" />
-                  </button>
-                  <div className="w-10 h-10 bg-primary-green/10 rounded-full flex items-center justify-center text-primary-green font-bold">
-                    {user.role === 'PATIENT' ? 'DR' : 'PT'}
+        {/* CHAT AREA */}
+        <div className={`flex-1 flex flex-col bg-slate-50/30 ${!selectedThread ? 'hidden md:flex' : 'flex'}`}>
+           {selectedThread ? (
+             <>
+               <div className="p-6 bg-white/80 backdrop-blur-md border-b border-slate-50 flex justify-between items-center">
+                  <div className="flex items-center gap-4">
+                     <button className="md:hidden" onClick={() => setSelectedThread(null)}><svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M15 18l-6-6 6-6" /></svg></button>
+                     <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500 font-black text-sm">
+                        {user.role === 'PATIENT' ? 'DR' : 'PT'}
+                     </div>
+                     <div>
+                        <h3 className="text-sm font-black text-slate-900 uppercase tracking-tight">
+                           {user.role === 'PATIENT' ? `Dr. ${selectedThread.doctor_details.last_name}` : selectedThread.patient_details.username}
+                        </h3>
+                        <div className="flex items-center gap-1.5">
+                           <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Disponible</span>
+                        </div>
+                     </div>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-body-md">
-                      {user.role === 'PATIENT' 
-                        ? `Dr. ${selectedThread.doctor_details.last_name}` 
-                        : selectedThread.patient_details.username}
-                    </h3>
-                    <p className="text-[10px] text-asiko-green-light flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 bg-asiko-green-light rounded-full"></span> En ligne
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex gap-2">
-                  {user.role === 'PATIENT' ? (
-                    <button 
-                      onClick={handleToggleJournal}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-body-sm font-semibold transition-all ${
-                        selectedThread.is_journal_shared 
-                        ? 'bg-asiko-green-success text-dark-green border border-primary-green' 
-                        : 'bg-white text-asiko-gray-dark border border-asiko-gray'
-                      }`}
-                    >
-                      <DocumentIcon className="w-4 h-4" />
-                      {selectedThread.is_journal_shared ? 'Carnet partagé' : 'Partager carnet'}
+                  
+                  {user.role === 'PATIENT' && (
+                    <button onClick={handleToggleJournal} className={`px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${selectedThread.is_journal_shared ? 'bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-200' : 'bg-white text-slate-400 border-slate-100'}`}>
+                       {selectedThread.is_journal_shared ? 'Journal Partagé' : 'Partager Journal'}
                     </button>
-                  ) : (
-                    selectedThread.is_journal_shared && (
-                      <button 
-                        onClick={() => window.open(`/journal?user_id=${selectedThread.patient}`, '_blank')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-asiko-blue-light text-asiko-blue border border-asiko-blue text-body-sm font-semibold hover:bg-asiko-blue hover:text-white transition-all cursor-pointer"
-                        title="Cliquez pour voir le carnet du patient"
-                      >
-                        <CheckIcon className="w-4 h-4" />
-                        Voir le carnet partagé
-                      </button>
-                    )
                   )}
-                </div>
-              </div>
+               </div>
 
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
-                {messages.map((msg, idx) => (
-                  <div 
-                    key={msg.id || idx} 
-                    className={`max-w-[80%] p-3 rounded-asiko shadow-sm ${
-                      msg.is_me 
-                        ? 'self-end bg-primary-green text-white rounded-tr-none' 
-                        : 'self-start bg-white text-asiko-gray-darker rounded-tl-none border border-asiko-gray/30'
-                    }`}
-                  >
-                    <p className="text-body-md">{msg.content}</p>
-                    <p className={`text-[9px] mt-1 text-right ${msg.is_me ? 'text-white/70' : 'text-asiko-gray-dark'}`}>
-                      {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                  </div>
-                ))}
-                <div ref={messagesEndRef} />
-              </div>
+               <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar">
+                  {messages.map((m, i) => (
+                    <div key={i} className={`flex ${m.is_me ? 'justify-end' : 'justify-start'}`}>
+                       <div className={`max-w-[75%] p-4 rounded-[28px] shadow-sm ${m.is_me ? 'bg-slate-900 text-white rounded-tr-lg' : 'bg-white text-slate-900 rounded-tl-lg border border-slate-50'}`}>
+                          <p className="text-[14px] font-medium leading-relaxed">{m.content}</p>
+                          <p className={`text-[8px] mt-2 font-bold uppercase tracking-widest ${m.is_me ? 'text-slate-500' : 'text-slate-300'}`}>
+                             {new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                       </div>
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+               </div>
 
-              {/* Input Zone */}
-              <form onSubmit={handleSendMessage} className="p-4 bg-white border-t border-asiko-gray flex gap-2">
-                <input 
-                  type="text" 
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Tapez votre message..."
-                  className="flex-1 bg-asiko-gray-light border-none rounded-full px-4 py-2 text-body-md focus:ring-1 focus:ring-primary-green transition-all"
-                  disabled={sending}
-                />
-                <button 
-                  type="submit"
-                  disabled={sending || !newMessage.trim()}
-                  className="bg-primary-green text-white p-2 rounded-full disabled:opacity-50 hover:bg-dark-green transition-colors"
-                >
-                  <SendIcon className="w-5 h-5" />
-                </button>
-              </form>
-            </>
-          ) : (
-            <div className="flex-1 flex flex-col items-center justify-center text-center p-8 text-asiko-gray-dark">
-              <div className="w-20 h-20 bg-asiko-gray-light rounded-full border-2 border-dashed border-asiko-gray flex items-center justify-center mb-4">
-                <ChatIcon className="w-10 h-10 opacity-30" />
-              </div>
-              <h3 className="font-bold text-heading-sm mb-1">Sélectionnez une discussion</h3>
-              <p className="text-body-sm max-w-xs">
-                {user.role === 'PATIENT' 
-                  ? "Choisissez un médecin dans la liste ou démarrez une nouvelle discussion." 
-                  : "Sélectionnez un patient pour démarrer la consultation préventive."}
-              </p>
-            </div>
-          )}
+               <form onSubmit={handleSendMessage} className="p-6 bg-white/80 backdrop-blur-md flex gap-3">
+                  <input type="text" value={newMessage} onChange={e => setNewMessage(e.target.value)} placeholder="Posez une question..." className="flex-1 bg-slate-50 border-none rounded-2xl px-6 py-4 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 transition-all placeholder:text-slate-300" disabled={sending} />
+                  <button type="submit" disabled={sending || !newMessage.trim()} className="w-14 h-14 bg-emerald-500 text-white rounded-2xl shadow-xl shadow-emerald-100 flex items-center justify-center transition-transform active:scale-95 disabled:opacity-50">
+                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                  </button>
+               </form>
+             </>
+           ) : (
+             <div className="flex-1 flex flex-col items-center justify-center p-12 text-center opacity-40">
+                <div className="text-6xl mb-6">💬</div>
+                <h3 className="text-xl font-black text-slate-900 mb-2">Conseil Médical</h3>
+                <p className="text-sm font-bold text-slate-400 max-w-xs">Sélectionnez un expert pour discuter de votre santé respiratoire.</p>
+             </div>
+           )}
         </div>
       </div>
-    );
+    </div>
+  );
 };
 
 export default Telemedicine;

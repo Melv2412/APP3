@@ -210,10 +210,7 @@ class SensorMeasurementViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_401_UNAUTHORIZED
             )
         
-        queryset = self.get_queryset()
-        if not user.is_doctor:
-            queryset = queryset.filter(user=user)
-        
+        queryset = self.get_queryset().filter(user=user)
         latest_measurement = queryset.first()
         
         if not latest_measurement:
@@ -328,10 +325,7 @@ class PredictionViewSet(viewsets.ReadOnlyModelViewSet):
                 status=status.HTTP_401_UNAUTHORIZED
             )
         
-        queryset = self.get_queryset()
-        if not user.is_doctor:
-            queryset = queryset.filter(user=user)
-        
+        queryset = self.get_queryset().filter(user=user)
         latest_prediction = queryset.first()
         
         if not latest_prediction:

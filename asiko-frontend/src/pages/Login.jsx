@@ -1,6 +1,5 @@
 /**
- * Page Login
- * Page de connexion - Design moderne avec animations Tailwind
+ * Page Login - Version Premium Medical iOS
  */
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -35,21 +34,9 @@ const Login = () => {
       await login(formData.email, formData.password);
       navigate('/dashboard');
     } catch (err) {
-      // Gérer différents types d'erreurs
-      let errorMessage = 'Erreur de connexion';
-      
-      if (err.response?.data?.error) {
-        errorMessage = err.response.data.error;
-      } else if (err.response?.data?.detail) {
-        errorMessage = err.response.data.detail;
-      } else if (err.message) {
-        errorMessage = err.message;
-      } else if (err.response?.status === 401) {
-        errorMessage = 'Identifiants invalides. Vérifiez votre email et mot de passe.';
-      } else if (err.response?.status === 400) {
-        errorMessage = 'Données invalides. Vérifiez vos informations.';
-      }
-      
+      let errorMessage = 'Identifiants invalides';
+      if (err.response?.data?.error) errorMessage = err.response.data.error;
+      else if (err.response?.data?.detail) errorMessage = err.response.data.detail;
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -57,138 +44,97 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary-green/10 via-white to-primary-green/5 flex flex-col items-center justify-center px-4 py-8">
-      {/* Styles CSS personnalisés pour les délais d'animation */}
-      <style jsx>{`
-        .animation-delay-200 { animation-delay: 200ms; }
-        .animation-delay-400 { animation-delay: 400ms; }
-        .animation-delay-600 { animation-delay: 600ms; }
-        .animation-delay-800 { animation-delay: 800ms; }
-        .animation-delay-1000 { animation-delay: 1000ms; }
-      `}</style>
-      
-      {/* Container principal avec animation d'entrée */}
-      <div className="w-full max-w-md animate-fade-in">
-        {/* Titre AsikoConnect avec animation */}
-        <div className="text-center mb-8">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-primary-green to-dark-green bg-clip-text text-transparent mb-2 animate-slide-up">
-            AsikoConnect
-          </h1>
-          <p className="text-gray-600 text-sm animate-slide-up animation-delay-200">
-            Votre santé, notre priorité
-          </p>
-        </div>
+    <div className="min-h-screen bg-[#F8F9FB] flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
+      {/* BACKGROUND ELEMENTS */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-100/50 rounded-full blur-[100px] animate-pulse"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-100/50 rounded-full blur-[100px] animate-pulse"></div>
 
-        {/* Formulaire de connexion avec ombre et animation */}
-        <form 
-          onSubmit={handleSubmit} 
-          className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 p-8 space-y-6 animate-slide-up animation-delay-400"
-        >
-          {/* Email avec icône et animation */}
-          <div className="relative group">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-gray-400 group-focus-within:text-primary-green transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-              </svg>
-            </div>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="votre.email@exemple.com"
-              required
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-green focus:border-transparent transition-all duration-300 hover:border-primary-green/50 bg-gray-50/50 focus:bg-white"
-            />
-          </div>
-
-          {/* Password avec icône et animation */}
-          <div className="relative group">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg className="h-5 w-5 text-gray-400 group-focus-within:text-primary-green transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-            </div>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Votre mot de passe"
-              required
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-green focus:border-transparent transition-all duration-300 hover:border-primary-green/50 bg-gray-50/50 focus:bg-white"
-            />
-          </div>
-
-          {/* Remember me & Forgot password avec animation */}
-          <div className="flex items-center justify-between animate-fade-in animation-delay-600">
-            <label className="flex items-center cursor-pointer group">
-              <input
-                type="checkbox"
-                name="rememberMe"
-                checked={formData.rememberMe}
-                onChange={handleChange}
-                className="mr-3 w-4 h-4 text-primary-green border-gray-300 rounded focus:ring-primary-green transition-all duration-200 hover:scale-110"
-              />
-              <span className="text-gray-700 text-sm group-hover:text-primary-green transition-colors">
-                Se souvenir de moi
-              </span>
-            </label>
-            <Link 
-              to="/forgot-password" 
-              className="text-primary-green hover:text-dark-green text-sm font-medium transition-colors duration-200 hover:scale-105"
-            >
-              Mot de passe oublié ?
-            </Link>
-          </div>
-
-          {/* Error message avec animation */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm text-center animate-shake">
-              <svg className="inline w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
-              {error}
-            </div>
-          )}
-
-          {/* Bouton Connexion avec animation */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-gradient-to-r from-primary-green to-dark-green text-white font-bold py-4 rounded-xl hover:from-dark-green hover:to-primary-green transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
-          >
-            {loading ? (
-              <div className="flex items-center justify-center">
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Connexion...
+      <div className="w-full max-w-sm z-10">
+        {/* BRAND IDENTITY */}
+        <div className="text-center mb-10 animate-in slide-in-from-top duration-700">
+           <div className="w-16 h-16 bg-white rounded-[20px] shadow-xl shadow-emerald-500/10 flex items-center justify-center mx-auto mb-6 border border-white">
+              <div className="w-10 h-10 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-lg flex items-center justify-center text-white">
+                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                 </svg>
               </div>
-            ) : (
-              'Se connecter'
-            )}
-          </button>
-
-          {/* Lien Register avec animation */}
-          <div className="text-center animate-fade-in animation-delay-800">
-            <p className="text-gray-600 text-sm">
-              Nouveau sur AsikoConnect ?{' '}
-              <Link 
-                to="/register/type" 
-                className="text-primary-green font-semibold hover:text-dark-green transition-colors duration-200 hover:scale-105 inline-block"
-              >
-                Créer un compte
-              </Link>
-            </p>
-          </div>
-        </form>
-
-        {/* Footer avec animation */}
-        <div className="text-center text-xs text-gray-500 mt-6 animate-fade-in animation-delay-1000">
-          <p>Propulsé par KENHILI</p>
+           </div>
+           <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-2">AsikoConnect</h1>
+           <p className="text-[11px] font-black text-emerald-600 uppercase tracking-[0.2em]">Santé Respiratoire Connectée</p>
         </div>
+
+        {/* LOGIN CARD */}
+        <div className="bg-white/70 backdrop-blur-2xl p-8 rounded-[40px] border border-white shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08)] animate-in zoom-in duration-700">
+           <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Adresse Email</label>
+                 <div className="relative">
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="nom@exemple.com"
+                      required
+                      className="w-full bg-slate-50 border-none rounded-2xl px-5 py-3.5 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 transition-all placeholder:text-slate-300"
+                    />
+                 </div>
+              </div>
+
+              <div>
+                 <div className="flex justify-between items-center mb-2 ml-1">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Mot de passe</label>
+                    <Link to="/forgot-password" size="sm" className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Oublié ?</Link>
+                 </div>
+                 <div className="relative">
+                    <input
+                      type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="••••••••"
+                      required
+                      className="w-full bg-slate-50 border-none rounded-2xl px-5 py-3.5 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 transition-all placeholder:text-slate-300"
+                    />
+                 </div>
+              </div>
+
+              {error && (
+                <div className="bg-red-50 text-red-500 p-3 rounded-2xl border border-red-100 text-[10px] font-bold uppercase tracking-widest text-center animate-shake">
+                   {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-slate-900 text-white font-black py-4 rounded-[20px] text-xs uppercase tracking-[0.2em] shadow-xl shadow-slate-200 active:scale-95 transition-all flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <>
+                    Continuer
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                       <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </>
+                )}
+              </button>
+           </form>
+
+           <div className="mt-8 text-center pt-6 border-t border-slate-50">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                 Pas encore de compte ?{' '}
+                 <Link to="/register/type" className="text-emerald-600 ml-1">S'inscrire</Link>
+              </p>
+           </div>
+        </div>
+
+        {/* FOOTER */}
+        <p className="text-center text-[9px] font-bold text-slate-300 uppercase tracking-[0.3em] mt-10">
+           Propulsé par KENHILI • 2026
+        </p>
       </div>
     </div>
   );

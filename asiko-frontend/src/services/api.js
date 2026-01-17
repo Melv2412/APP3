@@ -4,8 +4,16 @@
  */
 import axios from 'axios';
 
-// const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-const API_BASE_URL = 'https://7znhv71w-8000.uks1.devtunnels.ms/api';
+const getBaseURL = () => {
+  const host = window.location.hostname;
+  if (host.includes('devtunnels.ms') || host.includes('github.dev')) {
+    // Si on est sur un tunnel, le backend est sur le port 8000 du même tunnel
+    return `https://${host.replace('5173', '8000')}/api`;
+  }
+  return 'http://localhost:8000/api';
+};
+
+const API_BASE_URL = getBaseURL();
 // Créer l'instance axios
 const api = axios.create({
   baseURL: API_BASE_URL,

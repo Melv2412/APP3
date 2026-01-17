@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import Header from './Header';
 import BottomNav from './BottomNav';
 import Sidebar from './Sidebar';
@@ -12,6 +13,8 @@ import Sidebar from './Sidebar';
 const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const { user } = useAuth();
+  const isDoctor = user?.role === 'DOCTOR';
 
   // Scroll to top automatique lors du changement de page (comportement natif)
   useEffect(() => {
@@ -19,18 +22,15 @@ const Layout = () => {
   }, [location.pathname]);
 
   return (
-    <div className="relative min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-emerald-100 selection:text-emerald-900">
+    <div className={`relative min-h-screen bg-slate-50 text-slate-800 font-sans selection:bg-${isDoctor ? 'indigo' : 'emerald'}-100 selection:text-${isDoctor ? 'indigo' : 'emerald'}-900`}>
 
-      {/* --- FOND D'AMBIANCE (Fixed) --- 
-          Création d'une atmosphère "Clean & Sterile" mais chaleureuse
-          Utilisation de gradients fixes pour éviter le repeint lors du scroll
-      */}
+      {/* --- FOND D'AMBIANCE (Fixed) --- */}
       <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         {/* Lumière principale en haut à gauche */}
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-gradient-to-br from-emerald-50/60 to-transparent rounded-full blur-[120px]" />
+        <div className={`absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-gradient-to-br from-${isDoctor ? 'indigo' : 'emerald'}-50/60 to-transparent rounded-full blur-[120px]`} />
         {/* Contre-lumière douce en bas à droite */}
-        <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-gradient-to-tl from-blue-50/50 to-transparent rounded-full blur-[100px]" />
-        {/* Texture subtile de bruit (optionnel, ajoute du réalisme premium) */}
+        <div className={`absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-gradient-to-tl from-${isDoctor ? 'blue' : 'emerald'}-50/50 to-transparent rounded-full blur-[100px]`} />
+        {/* Texture subtile de bruit */}
         <div className="absolute inset-0 opacity-[0.015] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
       </div>
 

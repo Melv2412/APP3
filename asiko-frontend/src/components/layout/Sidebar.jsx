@@ -1,6 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useAlerts } from '../../context/AlertsContext';
+import { getActiveAlertsCount } from '../../services/alerts';
 
 /**
  * Sidebar - Version Premium Medical iOS
@@ -11,6 +13,20 @@ const Sidebar = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { alerts } = useAlerts();
+  const [activeCount, setActiveCount] = useState(0);
+  const isDoctor = user?.role === 'DOCTOR';
+
+  // Sync le compteur d'alertes réelles
+  useEffect(() => {
+    const fetchCount = async () => {
+      try {
+        const count = await getActiveAlertsCount();
+        setActiveCount(count);
+      } catch (e) { console.warn("Sidebar count sync fail"); }
+    };
+    fetchCount();
+  }, [alerts, isOpen]); // Se met à jour sur nouvelle alerte live OU ouverture menu
 
   // Empêcher le scroll du body quand le menu est ouvert (UX Mobile Native)
   useEffect(() => {
@@ -26,16 +42,17 @@ const Sidebar = ({ isOpen, onClose }) => {
   const menuItems = [
     ...(user?.role === 'DOCTOR' ? [{ path: '/dashboard/doctor', label: 'Espace Médecin', icon: 'doctor' }] : []),
     { section: 'Principal' },
-    { path: '/dashboard', label: 'Vue d\'ensemble', icon: 'home' },
-    { path: '/predictions', label: 'Analyses IA', icon: 'stats' },
-    { path: '/sensors', label: 'Biométrie', icon: 'sensor' },
+    { path: '/dashboard', label: 'Accueil', icon: 'home' },
+    { path: '/predictions', label: 'Analyse', icon: 'stats' },
+    { path: '/sensors', label: 'Capteurs', icon: 'sensor' },
     { section: 'Santé & Suivi' },
-    { path: '/alerts', label: 'Alertes', icon: 'bell', badge: 2 }, // Exemple de badge
+    { path: '/alerts', label: 'Alertes', icon: 'bell', badge: activeCount > 0 ? activeCount : null },
     { path: '/actions', label: 'Prévention', icon: 'actions' },
     { path: '/journal', label: 'Mon Carnet', icon: 'journal' },
-    { path: '/telemedicine', label: 'Téléconsultation', icon: 'chat' },
+    { path: '/telemedicine', label: 'Conseil', icon: 'chat' },
     { section: 'Compte' },
     { path: '/map', label: 'Carte Santé', icon: 'map' },
+    { path: '/health-profile', label: 'Profil de Santé', icon: 'health' },
     { path: '/profile', label: 'Réglages & Profil', icon: 'profile' },
   ];
 
@@ -55,7 +72,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   // Icônes style SF Symbols (Lignes fines, géométrie pure)
   const getIcon = (name, active) => {
-    const cls = `w-[22px] h-[22px] transition-colors duration-300 ${active ? 'text-emerald-600' : 'text-slate-400 group-hover:text-slate-600'}`;
+    const cls = `w-[22px] h-[22px] transition-colors duration-300 ${active ? (isDoctor ? 'text-indigo-600' : 'text-emerald-600') : 'text-slate-400 group-hover:text-slate-600'}`;
     const stroke = active ? 2.5 : 2; // L'icône active est légèrement plus grasse
 
     switch (name) {
@@ -68,6 +85,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       case 'journal': return <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={stroke}><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>;
       case 'chat': return <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={stroke}><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>;
       case 'profile': return <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={stroke}><path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>;
+      case 'health': return <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={stroke}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>;
       case 'doctor': return <svg className={cls} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={stroke}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>;
       default: return null;
     }
@@ -79,7 +97,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         Animation douce d'opacité
       */}
       <div
-        className={`fixed inset-0 bg-slate-900/20 backdrop-blur-[4px] z-[60] transition-opacity duration-500 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        className={`fixed inset-0 bg-slate-900/20 backdrop-blur-[4px] z-[1100] transition-opacity duration-500 ease-in-out ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
         onClick={onClose}
       />
@@ -91,7 +109,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         className={`
           fixed top-0 left-0 h-full w-[85%] max-w-[320px] 
           bg-white/85 backdrop-blur-2xl backdrop-saturate-150
-          border-r border-white/50 shadow-2xl z-[70]
+          border-r border-white/50 shadow-2xl z-[1200]
           transform transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
@@ -112,7 +130,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                 </div>
                 {/* Indicateur Edit */}
                 <div className="absolute bottom-0 right-0 bg-white rounded-full p-1 border border-slate-100 shadow-sm">
-                  <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                  <div className={`w-3 h-3 bg-${isDoctor ? 'indigo' : 'emerald'}-500 rounded-full`}></div>
                 </div>
               </div>
 
@@ -163,7 +181,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                     w-full group flex items-center gap-4 px-4 py-3.5 rounded-[16px] text-left relative
                     transition-all duration-200 outline-none
                     ${isActive
-                      ? 'bg-emerald-50/80 text-emerald-900'
+                      ? (isDoctor ? 'bg-indigo-50/80 text-indigo-900' : 'bg-emerald-50/80 text-emerald-900')
                       : 'hover:bg-slate-100/50 text-slate-600 active:scale-[0.98]'
                     }
                   `}
@@ -187,7 +205,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
                   {/* Chevron indicateur iOS (Subtil) */}
                   <svg
-                    className={`w-4 h-4 text-slate-300 transition-transform duration-300 ${isActive ? 'translate-x-1 text-emerald-500' : ''}`}
+                    className={`w-4 h-4 text-slate-300 transition-transform duration-300 ${isActive ? `translate-x-1 ${isDoctor ? 'text-indigo-500' : 'text-emerald-500'}` : ''}`}
                     fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
