@@ -1,32 +1,11 @@
-# alerts/tasks.py (VERSION FINALE STRUCTURÉE)
+from celery import shared_task
 from django.utils import timezone
 from asiko_connect.utils.notify import notify_esp
 from asiko_connect.utils.variables import *
 from .models import Alert
 from .services import compute_average_iqa
-
-# Import pour génération d'actions préventives
-try:
-    from asiko_connect.apps.treatments.services import generate_prevention_actions_for_alert
-except ImportError:
-    # Si l'app treatments n'est pas encore migrée, on ignore
-    def generate_prevention_actions_for_alert(alert):
-        return []
-
-# Import celery optionnel (pour éviter erreur si celery n'est pas installé)
-try:
-    from celery import shared_task
-except ImportError:
-    # Celery n'est pas installé, créer un décorateur factice
-    def shared_task(*args, **kwargs):
-        # Si appelé avec des arguments (@shared_task(...))
-        if args and callable(args[0]):
-            # Décorateur sans arguments : @shared_task
-            return args[0]
-        # Décorateur avec arguments : @shared_task(...)
-        def decorator(func):
-            return func
-        return decorator
+from celery import shared_task
+from django.utils import timezone
 
 
 @shared_task(bind=True, autoretry_for=(Exception,), retry_backoff=10, retry_kwargs={"max_retries": 3})
@@ -68,13 +47,6 @@ def phase1_timer_task(self, alert_id):
 
     print(f"[PHASE 1 → PHASE 2] Alerte {alert.id}")
     notify_esp(alert)
-    
-    # 🎯 Génération d'actions préventives pour Phase 2
-    try:
-        actions = generate_prevention_actions_for_alert(alert)
-        print(f"[ACTIONS] {len(actions)} action(s) préventive(s) générée(s) pour Phase 2")
-    except Exception as e:
-        print(f"[ACTIONS] Erreur lors de la génération d'actions: {e}")
 
     # ⏱ Lancement du timer phase 2 (PAS immédiat)
     phase2_timer_task.apply_async(
@@ -112,13 +84,6 @@ def phase2_timer_task(self, alert_id):
 
         notify_esp(alert)
         print(f"[PHASE 2 → PHASE 3] Alerte {alert.id}")
-        
-        # 🎯 Génération d'actions préventives pour Phase 3 (critique)
-        try:
-            actions = generate_prevention_actions_for_alert(alert)
-            print(f"[ACTIONS] {len(actions)} action(s) préventive(s) générée(s) pour Phase 3 (CRITIQUE)")
-        except Exception as e:
-            print(f"[ACTIONS] Erreur lors de la génération d'actions: {e}")
 
         # ⏱ Désactivation automatique après PHASE 3 (5 minutes)
         phase3_timer_task.apply_async(

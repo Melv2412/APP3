@@ -27,8 +27,7 @@ except (ImportError, AttributeError):
 from asiko_connect.utils.calculs import SEUIL_CRITIQUE
 from asiko_connect.utils.notify import notify_frontend
 from django.http import StreamingHttpResponse
-from queue import Queue
-from asiko_connect.utils.notify import clients
+
 
 class SensorMeasurementCreateView(generics.CreateAPIView):
     serializer_class = SensorMeasurementSerializer
@@ -384,7 +383,12 @@ class SensorDataAPIView(APIView):
                 phase_1_started_at=timezone.now(),
                 is_active=True
             )
-            notify_frontend(MESSAGE_A_VOCAL)
+            notify_frontend(
+                user_id=sensor.owner.id,
+                message=MESSAGE_A_VOCAL,
+                alert_id=alert.id,
+                phase=alert.phase
+            )
 
             # 🎯 Génération d'actions préventives pour Phase 1 (avertissement)
             try:

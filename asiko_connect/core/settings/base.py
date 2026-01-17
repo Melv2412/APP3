@@ -5,12 +5,6 @@ Contient les paramètres communs à tous les environnements.
 import os
 from pathlib import Path
 from decouple import config, Csv
-# Import celery optionnel (pour éviter erreur si celery n'est pas installé)
-try:
-    from celery.schedules import crontab
-except ImportError:
-    # Celery n'est pas installé, crontab n'est pas utilisé
-    pass
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -47,12 +41,15 @@ INSTALLED_APPS = [
     'asiko_connect.apps.sensors',
     'asiko_connect.apps.predictions',
     'asiko_connect.apps.environment',
+    'asiko_connect.apps.environments',
+    'asiko_connect.apps.community',
     'asiko_connect.apps.alerts',
     'asiko_connect.apps.telemedicine',
     'asiko_connect.apps.treatments',
-    'asiko_connect.apps.community',
     'asiko_connect.apps.dashboard',
 ]
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -224,18 +221,5 @@ AI_MICROSERVICE_TIMEOUT = config('AI_MICROSERVICE_TIMEOUT', default=30, cast=int
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 
-# project/settings.py (PARTIE CELERY / REDIS)
-CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
-CELERY_ACCEPT_CONTENT = ["json"]
-CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/0"
-CELERY_TIMEZONE = "UTC"
 
-
-ASGI_APPLICATION = 'asiko_connect.asgi.application'
-# channels settings
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    }
-}
+REDIS_URL = "redis://127.0.0.1:6379/0"

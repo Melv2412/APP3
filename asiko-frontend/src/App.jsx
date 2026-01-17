@@ -4,6 +4,8 @@
  */
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { AlertsProvider } from './context/AlertsContext';
+
 
 // Pages
 import Login from './pages/Login';
@@ -24,8 +26,10 @@ import Telemedicine from './pages/Telemedicine';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
+
   return (
     <AuthProvider>
+<<<<<<< Updated upstream
       <BrowserRouter>
         <Routes>
           {/* Route par défaut : redirige vers login */}
@@ -129,6 +133,105 @@ function App() {
                    </Route>
         </Routes>
       </BrowserRouter>
+=======
+      <AlertsProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Route par défaut : redirige vers login */}
+            <Route path="/" element={<Navigate to="/login" replace />} />
+
+            {/* Routes sans layout (Login, Register) */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register/type" element={<RegisterType />} />
+            <Route path="/register" element={<Register />} />
+
+            {/* Routes avec layout (protégées) */}
+            <Route element={<Layout />}>
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/predictions"
+                element={
+                  <ProtectedRoute>
+                    <Predictions />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dashboard/doctor"
+                element={
+                  <ProtectedRoute requireRole="DOCTOR">
+                    <DashboardDoctor />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/sensors"
+                element={
+                  <ProtectedRoute>
+                    <Sensors />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/alerts"
+                element={
+                  <ProtectedRoute>
+                    <Alerts />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/map"
+                element={
+                  <ProtectedRoute>
+                    <Map />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/health-profile"
+                element={
+                  <ProtectedRoute>
+                    <HealthProfile />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/actions"
+                element={
+                  <ProtectedRoute>
+                    <PreventionActions />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/journal"
+                element={
+                  <ProtectedRoute>
+                    <HealthJournal />
+                  </ProtectedRoute>
+                }
+              />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </AlertsProvider>
+>>>>>>> Stashed changes
     </AuthProvider>
   );
 }

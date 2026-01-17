@@ -1,16 +1,28 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getActiveAlerts, getAlerts, deactivateAlert, getActiveAlertsCount } from '../services/alerts';
+<<<<<<< Updated upstream
 import Card from '../components/common/Card';
 import Badge from '../components/common/Badge';
 import Button from '../components/common/Button';
+=======
+import { useAlerts } from "../context/AlertsContext";
+
+>>>>>>> Stashed changes
 
 const Alerts = () => {
   const { user } = useAuth();
   const [alerts, setAlerts] = useState([]);
   const [activeAlertsCount, setActiveAlertsCount] = useState(0);
   const [loading, setLoading] = useState(true);
+<<<<<<< Updated upstream
   const [filter, setFilter] = useState('active');
+=======
+  const [error, setError] = useState('');
+  const [filter, setFilter] = useState('active'); // active, all
+  const { alerts: liveAlerts } = useAlerts();
+
+>>>>>>> Stashed changes
 
   // Logique strictement identique
   useEffect(() => {
@@ -31,6 +43,95 @@ const Alerts = () => {
     fetchAlerts();
   }, [filter]);
 
+<<<<<<< Updated upstream
+=======
+
+
+  useEffect(() => {
+    if (liveAlerts.length === 0) return;
+
+    const latest = liveAlerts[0];
+
+    // Optionnel : toast
+    console.log("Nouvelle alerte SSE :", latest.message);
+
+    // Rafraîchir la liste REST
+    const refresh = async () => {
+      try {
+        const count = await getActiveAlertsCount();
+        setActiveAlertsCount(count);
+
+        if (filter === "active") {
+          const activeAlerts = await getActiveAlerts();
+          setAlerts(Array.isArray(activeAlerts) ? activeAlerts : []);
+        } else {
+          const allAlerts = await getAlerts({ ordering: "-created_at" });
+          const data = allAlerts.results || allAlerts || [];
+          setAlerts(Array.isArray(data) ? data : []);
+        }
+      } catch (e) {
+        console.warn("Refresh après SSE échoué");
+      }
+    };
+
+    refresh();
+  }, [liveAlerts]);
+
+
+  const handleDeactivate = async (alertId) => {
+    try {
+      await deactivateAlert(alertId);
+      // Rafraîchir la liste
+      if (filter === 'active') {
+        const activeAlerts = await getActiveAlerts();
+        setAlerts(Array.isArray(activeAlerts) ? activeAlerts : []);
+        const count = await getActiveAlertsCount();
+        setActiveAlertsCount(count);
+      } else {
+        const allAlerts = await getAlerts({ ordering: '-created_at' });
+        const data = allAlerts.results || allAlerts || [];
+        setAlerts(Array.isArray(data) ? data : []);
+      }
+    } catch (err) {
+      setError('Erreur lors de la désactivation de l\'alerte');
+      console.error(err);
+    }
+  };
+
+  // Fonction pour obtenir le texte de la phase
+  const getPhaseText = (phase) => {
+    const phases = {
+      'PHASE_1': 'Phase 1',
+      'PHASE_2': 'Phase 2',
+      'PHASE_3': 'Phase 3'
+    };
+    return phases[phase] || phase;
+  };
+
+  // Fonction pour obtenir la couleur de la phase
+  const getPhaseColor = (phase) => {
+    const colors = {
+      'PHASE_1': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+      'PHASE_2': 'bg-orange-100 text-orange-800 border-orange-200',
+      'PHASE_3': 'bg-red-100 text-red-800 border-red-200'
+    };
+    return colors[phase] || 'bg-gray-100 text-gray-800 border-gray-200';
+  };
+
+  // Fonction pour formater la date
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+>>>>>>> Stashed changes
   return (
     <div className="min-h-screen bg-[#FBFBFD] pb-32">
       {/* Header Immersif */}
@@ -38,11 +139,45 @@ const Alerts = () => {
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <h1 className="text-[22px] font-bold tracking-tight text-gray-900">Alertes</h1>
 
+<<<<<<< Updated upstream
           {/* Segmented Control Réaliste */}
           <div className="flex bg-gray-200/50 p-1 rounded-xl w-[220px]">
             <button
               onClick={() => setFilter('active')}
               className={`flex-1 text-[13px] font-bold py-1.5 rounded-lg transition-all ${filter === 'active' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'
+=======
+      {/* Filtres */}
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={() => setFilter('active')}
+          className={`px-4 py-2 rounded-lg text-sm font-semibold ${filter === 'active'
+            ? 'bg-primary-green text-white'
+            : 'bg-gray-100 text-gray-600'
+            }`}
+        >
+          Actives ({activeAlertsCount})
+        </button>
+        <button
+          onClick={() => setFilter('all')}
+          className={`px-4 py-2 rounded-lg text-sm font-semibold ${filter === 'all'
+            ? 'bg-primary-green text-white'
+            : 'bg-gray-100 text-gray-600'
+            }`}
+        >
+          Toutes
+        </button>
+      </div>
+
+      {/* Liste des alertes */}
+      {loading ? (
+        <div className="text-center py-8 text-gray-500">Chargement...</div>
+      ) : alerts.length > 0 ? (
+        <div className="space-y-4">
+          {alerts.map((alert) => (
+            <div
+              key={alert.id}
+              className={`bg-white rounded-lg shadow-sm p-6 border-2 ${alert.is_active ? 'border-red-200' : 'border-gray-200'
+>>>>>>> Stashed changes
                 }`}
             >
               Actives

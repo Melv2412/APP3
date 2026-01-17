@@ -2,7 +2,8 @@
 
 from django.db import models
 from django.conf import settings
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _  
+from asiko_connect.apps.users.models import User
 
 from asiko_connect.utils.calculs import calculate_air_quality_index
 
@@ -84,6 +85,7 @@ class Zone(models.Model):
 class Sensor(models.Model):
     device_id = models.CharField(max_length=100, unique=True)
     zone = models.ForeignKey(Zone, on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, on_delete=models.CASCADE)  # <-- qui reçoit l'alerte
 
     def __str__(self):
         return self.device_id
