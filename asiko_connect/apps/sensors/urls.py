@@ -4,7 +4,6 @@ from .views import (
     SensorMeasurementCreateView, 
     SensorMeasurementViewSet,
     PredictionViewSet,
-    sse_notifications
 )
 
 # URLs pour SensorMeasurement (ViewSet)
@@ -44,5 +43,4 @@ urlpatterns = [
     
     # Endpoints existants (conservés pour compatibilité)
     path("data/", SensorDataAPIView.as_view(), name='sensor-data'),
-    path('sse/notifications/', sse_notifications, name='sse_notifications'),
 ]

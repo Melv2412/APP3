@@ -423,23 +423,3 @@ class SensorDataAPIView(APIView):
         return Response({"status": "ok"}, status=status.HTTP_201_CREATED)
 
 
-
-def sse_notifications(request):
-    """
-    Endpoint SSE pour que le frontend reçoive les messages en temps réel.
-    """
-    client_queue = Queue()
-    clients.append(client_queue)
-
-    def event_stream():
-        try:
-            while True:
-                message = client_queue.get()  # attend un message
-                yield f"data: {message}\n\n"  # format SSE
-        except GeneratorExit:
-            # Quand le client se déconnecte, on enlève sa queue
-            clients.remove(client_queue)
-
-    response = StreamingHttpResponse(event_stream(), content_type='text/event-stream')
-    response['Cache-Control'] = 'no-cache'
-    return response
