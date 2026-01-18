@@ -21,6 +21,11 @@ import HealthJournal from './pages/HealthJournal';
 import Telemedicine from './pages/Telemedicine';
 import ProtectedRoute from './components/ProtectedRoute';
 
+
+
+
+
+
 function App() {
 
   return (

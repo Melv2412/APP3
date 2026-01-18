@@ -25,7 +25,8 @@ except (ImportError, AttributeError):
     phase1_timer_task = None
 
 from asiko_connect.utils.calculs import SEUIL_CRITIQUE
-from asiko_connect.utils.notify import notify_frontend
+from asiko_connect.utils.notify import notify_frontend  
+
 from django.http import StreamingHttpResponse
 
 

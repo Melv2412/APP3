@@ -32,3 +32,4 @@ def compute_average_iqa(sensor, start_time, duration_seconds, alert=None):
     print(f"[DEBUG] Moyenne IQA: {avg_iqa}")
 
     return round(avg_iqa, 2) if avg_iqa is not None else None
+

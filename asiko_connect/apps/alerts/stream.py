@@ -1,35 +1,32 @@
 import json
-import redis
-from django.http import StreamingHttpResponse
+import time
+import jwt
 from django.conf import settings
-from rest_framework_simplejwt.authentication import JWTAuthentication
+from django.http import StreamingHttpResponse
+from .event_bus import get_user_queue
 
-redis_client = redis.Redis.from_url(settings.REDIS_URL, decode_responses=True)
+def sse_alert_stream(request):
+    token = request.GET.get("token")
 
-def alerts_stream(request):
-    # # Auth JWT depuis cookie
-    # auth = JWTAuthentication()
-    # validated = auth.authenticate(request)
+    if not token:
+        return StreamingHttpResponse("Unauthorized", status=401)
 
-    # if not validated:
-    #     print("foua")
-    #     return StreamingHttpResponse(status=401)
+    try:
+        decoded = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        user_id = decoded["user_id"]
+    except Exception:
+        return StreamingHttpResponse("Invalid token", status=401)
 
-    # user, _ = validated
-    userid=1  # pour tester sans auth car sse ne fonctionne pas avec auth
-    channel = f"alerts:user:{userid}"
+    queue = get_user_queue(user_id)
 
-    pubsub = redis_client.pubsub()
-    pubsub.subscribe(channel)
+    def event_generator():
+        while True:
+            if not queue.empty():
+                data = queue.get()
+                yield f"data: {json.dumps(data)}\n\n"
+            time.sleep(0.5)
 
-    def event_stream():
-        for message in pubsub.listen():
-            if message["type"] == "message":
-                yield f"data: {message['data']}\n\n"
-
-    response = StreamingHttpResponse(
-        event_stream(),
-        content_type="text/event-stream"
-    )
+    response = StreamingHttpResponse(event_generator(), content_type="text/event-stream")
     response["Cache-Control"] = "no-cache"
+    response["X-Accel-Buffering"] = "no"
     return response

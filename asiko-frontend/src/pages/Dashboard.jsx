@@ -6,9 +6,15 @@ import { getPreventionActions } from '../services/treatments';
 import { getNearbyFacilities } from '../services/dashboard';
 import { Link } from 'react-router-dom';
 import MapWidget from '../components/common/MapWidget';
+import useAlertSSE from "../hooks/useAlertSSE";
+
+
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const token = localStorage.getItem("access_token");
+  useAlertSSE(token);
+
   const [prediction, setPrediction] = useState(null);
   const [environmentData, setEnvironmentData] = useState(null);
   const [preventionActions, setPreventionActions] = useState([]);
@@ -68,7 +74,10 @@ const Dashboard = () => {
       }
     };
     fetchData();
-  }, [userPosition.lat, userPosition.lng]);
+  }, [userPosition.lat, userPosition.lng]);    
+
+
+
 
   // FONCTIONS UTILITAIRES DE STYLE (CONSERVÉES)
   const getRiskLevelText = (level) => {

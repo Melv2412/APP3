@@ -3,7 +3,7 @@ URLs pour l'app alerts.
 """
 from django.urls import path
 from .views import AlertViewSet
-from .stream import alerts_stream
+from .stream import sse_alert_stream
 
 # URLs pour Alert (sans router pour éviter conflit format_suffix_patterns)
 alert_list = AlertViewSet.as_view({
@@ -29,5 +29,5 @@ urlpatterns = [
     path('alerts/<int:pk>/deactivate/', AlertViewSet.as_view({'patch': 'deactivate'}), name='alert-deactivate'),
     path('alerts/active/', AlertViewSet.as_view({'get': 'active'}), name='alert-active'),
     path('alerts/active-count/', AlertViewSet.as_view({'get': 'active_count'}), name='alert-active-count'),
-    path("stream/", alerts_stream),
+    path("alerts/stream/", sse_alert_stream),
 ]
