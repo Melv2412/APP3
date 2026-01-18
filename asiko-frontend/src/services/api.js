@@ -10,7 +10,7 @@ const getBaseURL = () => {
     // Si on est sur un tunnel, le backend est sur le port 8000 du même tunnel
     return `https://${host.replace('5173', '8000')}/api`;
   }
-  return 'http://localhost:8000/api';
+  return 'https://7znhv71w-8000.uks1.devtunnels.ms/api';
 };
 
 const API_BASE_URL = getBaseURL();

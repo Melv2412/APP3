@@ -6,7 +6,6 @@ import random
 URL = "http://127.0.0.1:8000/api/sensors/data/"
 
 # Token JWT
-TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzY4NzcwMjU2LCJpYXQiOjE3Njg3NjY2NTYsImp0aSI6ImRhZmVjOWU0ZGYzNjRkOTVhOTlhOWVmZDNjYzBjNzljIiwidXNlcl9pZCI6IjEifQ.KUia_h8S9JLhceUBBTCtSB4_E44xb9-St-wOt2oguPQ"
 
 # Headers
 HEADERS = {
