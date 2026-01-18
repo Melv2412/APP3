@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
     'django_extensions',
-    'channels',
+    
     
     # Apps du projet
     'asiko_connect.apps.users',
