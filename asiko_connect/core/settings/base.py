@@ -172,6 +172,7 @@ SIMPLE_JWT = {
 }
 
 # CORS Settings
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = config(
     'CORS_ALLOWED_ORIGINS',
     default='http://localhost:3000,http://localhost:8000,http://localhost:5173',
@@ -223,3 +224,8 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
 
 
 REDIS_URL = "redis://127.0.0.1:6379/0"
+
+# Force allow all for dev tunnels
+CORS_ALLOW_ALL_ORIGINS = True
+ALLOWED_HOSTS = ['*']
+CORS_ALLOW_CREDENTIALS = True

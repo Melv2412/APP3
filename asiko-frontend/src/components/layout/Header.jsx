@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NotificationBell from '../common/NotificationBell';
+import { useAuth } from '../../context/AuthContext';
 
 /**
  * Header - Version Premium Medical iOS
- * Style: Clean, Clinical, Trustworthy
- * Features: Frosted glass, micro-interactions, squircle shapes
  */
 const Header = ({ onMenuClick, showNotifications = true }) => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
+  const isDoctor = user?.role === 'DOCTOR';
 
   // Détection du scroll pour ajuster l'opacité/ombre
   useEffect(() => {
@@ -23,7 +24,7 @@ const Header = ({ onMenuClick, showNotifications = true }) => {
   return (
     <header
       className={`
-        sticky top-0 z-40 w-full transition-all duration-500 ease-in-out
+        sticky top-0 z-[1050] w-full transition-all duration-500 ease-in-out
         ${scrolled
           ? 'bg-white/85 backdrop-blur-xl shadow-sm border-b border-slate-200/60 supports-[backdrop-filter]:bg-white/60'
           : 'bg-white/50 backdrop-blur-lg border-b border-transparent'
@@ -43,9 +44,9 @@ const Header = ({ onMenuClick, showNotifications = true }) => {
               aria-label="Menu Principal"
             >
               <div className="w-6 h-6 flex flex-col justify-center gap-[5px]">
-                <span className="w-5 h-0.5 bg-slate-700 rounded-full transition-all duration-300 group-hover:w-6 group-hover:bg-emerald-600"></span>
-                <span className="w-3 h-0.5 bg-slate-700 rounded-full transition-all duration-300 group-hover:w-6 group-hover:bg-emerald-600 ml-auto group-hover:ml-0"></span>
-                <span className="w-6 h-0.5 bg-slate-700 rounded-full transition-all duration-300 group-hover:bg-emerald-600"></span>
+                <span className={`w-5 h-0.5 bg-slate-700 rounded-full transition-all duration-300 group-hover:w-6 group-hover:bg-${isDoctor ? 'indigo' : 'emerald'}-600`}></span>
+                <span className={`w-3 h-0.5 bg-slate-700 rounded-full transition-all duration-300 group-hover:w-6 group-hover:bg-${isDoctor ? 'indigo' : 'emerald'}-600 ml-auto group-hover:ml-0`}></span>
+                <span className={`w-6 h-0.5 bg-slate-700 rounded-full transition-all duration-300 group-hover:bg-${isDoctor ? 'indigo' : 'emerald'}-600`}></span>
               </div>
             </button>
 
@@ -56,7 +57,7 @@ const Header = ({ onMenuClick, showNotifications = true }) => {
             >
               {/* Logo Icon - Style "App Icon" iOS */}
               <div className="relative w-9 h-9 flex-shrink-0">
-                <div className="absolute inset-0 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-[10px] shadow-lg shadow-emerald-500/20 group-hover:shadow-emerald-500/30 transition-all duration-300"></div>
+                <div className={`absolute inset-0 bg-gradient-to-tr from-${isDoctor ? 'indigo' : 'emerald'}-500 to-${isDoctor ? 'blue' : 'teal'}-400 rounded-[10px] shadow-lg shadow-${isDoctor ? 'indigo' : 'emerald'}-500/20 group-hover:shadow-${isDoctor ? 'indigo' : 'emerald'}-500/30 transition-all duration-300`}></div>
                 <div className="absolute inset-0 flex items-center justify-center text-white">
                   {/* Croix médicale stylisée / Coeur */}
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -67,11 +68,11 @@ const Header = ({ onMenuClick, showNotifications = true }) => {
 
               {/* Texte Logo - Typographie Pro */}
               <div className="flex flex-col justify-center -space-y-0.5">
-                <h1 className="text-lg font-bold text-slate-800 tracking-tight leading-none group-hover:text-emerald-700 transition-colors duration-300">
+                <h1 className={`text-lg font-bold text-slate-800 tracking-tight leading-none group-hover:text-${isDoctor ? 'indigo' : 'emerald'}-700 transition-colors duration-300`}>
                   Asiko<span className="font-normal text-slate-600">Connect</span>
                 </h1>
-                <span className="text-[10px] font-medium text-emerald-600 uppercase tracking-wider hidden sm:block">
-                  Santé Connectée
+                <span className={`text-[10px] font-medium text-${isDoctor ? 'indigo' : 'emerald'}-600 uppercase tracking-wider hidden sm:block`}>
+                  {isDoctor ? 'Espace Médical' : 'Santé Connectée'}
                 </span>
               </div>
             </div>
@@ -93,16 +94,15 @@ const Header = ({ onMenuClick, showNotifications = true }) => {
             {/* Avatar / Profil (Miniature) */}
             <button
               onClick={() => navigate('/profile')}
-              className="relative p-0.5 rounded-full border border-slate-200 hover:border-emerald-300 transition-all duration-300 active:scale-95"
+              className={`relative p-0.5 rounded-full border border-slate-200 hover:border-${isDoctor ? 'indigo' : 'emerald'}-300 transition-all duration-300 active:scale-95`}
             >
               <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
                 {/* Fallback avatar SVG si pas d'image */}
                 <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
-                {/* <img src={userAvatarUrl} alt="Profil" className="w-full h-full object-cover" /> */}
               </div>
-              <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full"></div>
+              <div className={`absolute bottom-0 right-0 w-2.5 h-2.5 bg-${isDoctor ? 'indigo' : 'emerald'}-500 border-2 border-white rounded-full`}></div>
             </button>
 
           </div>

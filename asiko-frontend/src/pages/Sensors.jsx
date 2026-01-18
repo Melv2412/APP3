@@ -1,11 +1,9 @@
 /**
- * Page Données Capteurs
- * Affiche les mesures IoT et leurs évolutions
+ * Page Données Capteurs - Version Premium Medical iOS
  */
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { getSensorMeasurements, getLatestMeasurement } from '../services/sensors';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const Sensors = () => {
   const { user } = useAuth();
@@ -18,195 +16,145 @@ const Sensors = () => {
     const fetchMeasurements = async () => {
       try {
         setLoading(true);
-        
-        // Récupérer la dernière mesure
         try {
           const latest = await getLatestMeasurement();
           setLatestMeasurement(latest);
-        } catch (err) {
-          console.log('Aucune mesure disponible');
-        }
+        } catch (err) { console.log('Aucune mesure'); }
 
-        // Récupérer les dernières mesures (dernières 10)
         try {
           const response = await getSensorMeasurements({ ordering: '-created_at' });
           const data = response.results || response || [];
-          setMeasurements(data.slice(0, 10)); // Limiter à 10 pour l'affichage
-        } catch (err) {
-          console.log('Erreur lors de la récupération des mesures');
-        }
+          setMeasurements(data.slice(0, 10));
+        } catch (err) { console.log('Erreur historique'); }
       } catch (err) {
-        setError('Erreur lors du chargement des données');
-        console.error(err);
+        setError('Erreur de chargement');
       } finally {
         setLoading(false);
       }
     };
-
     fetchMeasurements();
   }, []);
 
-  // Fonction pour formater la date
   const formatDate = (dateString) => {
     if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
     });
   };
 
-  // Fonction pour obtenir le statut d'une valeur
   const getStatusColor = (value, type) => {
     if (type === 'spo2') {
-      if (value >= 95) return 'text-green-600';
-      if (value >= 90) return 'text-yellow-600';
-      return 'text-red-600';
+      if (value >= 95) return 'text-emerald-500';
+      if (value >= 90) return 'text-amber-500';
+      return 'text-red-500';
     }
     if (type === 'temperature') {
-      if (value >= 36.1 && value <= 37.2) return 'text-green-600';
-      if (value >= 35.5 && value <= 38.5) return 'text-yellow-600';
-      return 'text-red-600';
+      if (value >= 36.1 && value <= 37.2) return 'text-emerald-500';
+      if (value >= 35.5 && value <= 38.5) return 'text-amber-500';
+      return 'text-red-500';
     }
-    return 'text-gray-600';
+    return 'text-slate-600';
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24 px-4 py-4">
-      <h1 className="text-2xl font-bold text-gray-800 mb-4">Données Capteurs</h1>
-
-      {/* Section Mesures Actuelles */}
-      {latestMeasurement && (
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-4 border border-gray-200">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Dernière Mesure</h2>
-          <div className="grid grid-cols-2 gap-4">
-            {/* SpO₂ */}
-            <div className="border border-gray-200 rounded-lg p-4">
-              <div className="text-sm text-gray-600 mb-1">SpO₂</div>
-              <div className={`text-2xl font-bold ${getStatusColor(latestMeasurement.spo2, 'spo2')}`}>
-                {latestMeasurement.spo2.toFixed(1)}%
-              </div>
-            </div>
-
-            {/* Température */}
-            <div className="border border-gray-200 rounded-lg p-4">
-              <div className="text-sm text-gray-600 mb-1">Température</div>
-              <div className={`text-2xl font-bold ${getStatusColor(latestMeasurement.temperature, 'temperature')}`}>
-                {latestMeasurement.temperature.toFixed(1)}°C
-              </div>
-            </div>
-
-            {/* Rythme Respiratoire */}
-            <div className="border border-gray-200 rounded-lg p-4">
-              <div className="text-sm text-gray-600 mb-1">Rythme Respiratoire</div>
-              <div className="text-2xl font-bold text-gray-800">
-                {latestMeasurement.respiratory_rate.toFixed(1)}/min
-              </div>
-            </div>
-
-            {/* Fréquence Cardiaque */}
-            <div className="border border-gray-200 rounded-lg p-4">
-              <div className="text-sm text-gray-600 mb-1">Fréquence Cardiaque</div>
-              <div className="text-2xl font-bold text-gray-800">
-                {latestMeasurement.heart_rate.toFixed(0)} bpm
-              </div>
-            </div>
-
-            {/* Tension Artérielle */}
-            <div className="border border-gray-200 rounded-lg p-4">
-              <div className="text-sm text-gray-600 mb-1">Tension Artérielle</div>
-              <div className="text-2xl font-bold text-gray-800">
-                {latestMeasurement.systolic_bp.toFixed(0)} mmHg
-              </div>
-            </div>
-
-            {/* WBC */}
-            <div className="border border-gray-200 rounded-lg p-4">
-              <div className="text-sm text-gray-600 mb-1">WBC</div>
-              <div className="text-2xl font-bold text-gray-800">
-                {latestMeasurement.wbc.toFixed(1)}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 pt-4 border-t border-gray-200">
-            <div className="text-sm text-gray-600">
-              Mesuré le {formatDate(latestMeasurement.created_at)}
-            </div>
-          </div>
+    <div className="min-h-screen bg-[#F8F9FB] pb-32 pt-8 px-6">
+      <div className="flex justify-between items-end mb-8 animate-in slide-in-from-top duration-700">
+        <div>
+          <p className="text-[11px] font-bold text-emerald-600 uppercase tracking-[0.2em] mb-1">IoT Biomérie</p>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight leading-tight">Capteurs</h1>
         </div>
-      )}
-
-      {/* Section Historique */}
-      <div className="bg-white rounded-lg shadow-sm p-6 mb-4 border border-gray-200">
-        <h2 className="text-xl font-bold text-gray-800 mb-4">Historique des Mesures</h2>
-
-        {loading ? (
-          <div className="text-center py-8 text-gray-500">Chargement...</div>
-        ) : measurements.length > 0 ? (
-          <div className="space-y-3">
-            {measurements.map((measurement) => (
-              <div
-                key={measurement.id}
-                className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex justify-between items-center mb-2">
-                  <div className="text-sm font-semibold text-gray-800">
-                    {formatDate(measurement.created_at)}
-                  </div>
-                  <div className="text-xs text-gray-500">CURB-65: {measurement.curb65}</div>
-                </div>
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div>
-                    <span className="text-gray-600">SpO₂: </span>
-                    <span className="font-semibold">{measurement.spo2.toFixed(1)}%</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Temp: </span>
-                    <span className="font-semibold">{measurement.temperature.toFixed(1)}°C</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">RR: </span>
-                    <span className="font-semibold">{measurement.respiratory_rate.toFixed(1)}/min</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8 text-gray-500">
-            Aucune mesure disponible
-          </div>
+        {latestMeasurement && (
+           <div className="bg-white px-4 py-1.5 rounded-full border border-slate-100 shadow-sm text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+              Live
+           </div>
         )}
       </div>
 
-      {/* Section Tendances */}
-      {latestMeasurement && (latestMeasurement.rr_trend !== 0 || latestMeasurement.spo2_trend !== 0) && (
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-4 border border-gray-200">
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Tendances</h2>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">Rythme Respiratoire</span>
-              <span className={`font-semibold ${latestMeasurement.rr_trend > 0 ? 'text-red-600' : latestMeasurement.rr_trend < 0 ? 'text-green-600' : 'text-gray-600'}`}>
-                {latestMeasurement.rr_trend > 0 ? '↗ Augmentation' : latestMeasurement.rr_trend < 0 ? '↘ Diminution' : '→ Stable'}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-600">SpO₂</span>
-              <span className={`font-semibold ${latestMeasurement.spo2_trend > 0 ? 'text-green-600' : latestMeasurement.spo2_trend < 0 ? 'text-red-600' : 'text-gray-600'}`}>
-                {latestMeasurement.spo2_trend > 0 ? '↗ Amélioration' : latestMeasurement.spo2_trend < 0 ? '↘ Dégradation' : '→ Stable'}
-              </span>
-            </div>
+      {latestMeasurement ? (
+        <div className="space-y-6">
+          {/* DERNIERE MESURE GIGANTE CARD */}
+          <div className="bg-white rounded-[40px] p-8 border border-slate-50 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.05)] relative overflow-hidden animate-in zoom-in duration-500">
+             <div className="absolute top-0 right-0 p-8">
+                <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500 animate-pulse">
+                   <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                     <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                </div>
+             </div>
+
+             <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-6">État Actuel</h2>
+             
+             <div className="grid grid-cols-2 gap-8 mb-8">
+                <div>
+                   <p className="text-[13px] font-black text-slate-900 uppercase tracking-widest mb-1">Oxygène SpO₂</p>
+                   <p className={`text-5xl font-black tracking-tighter ${getStatusColor(latestMeasurement.spo2, 'spo2')}`}>
+                      {latestMeasurement.spo2.toFixed(1)}<span className="text-2xl opacity-40 ml-1">%</span>
+                   </p>
+                </div>
+                <div>
+                   <p className="text-[13px] font-black text-slate-900 uppercase tracking-widest mb-1">Température</p>
+                   <p className={`text-5xl font-black tracking-tighter ${getStatusColor(latestMeasurement.temperature, 'temperature')}`}>
+                      {latestMeasurement.temperature.toFixed(1)}<span className="text-2xl opacity-40 ml-1">°</span>
+                   </p>
+                </div>
+             </div>
+
+             <div className="grid grid-cols-3 gap-4 pt-6 border-t border-slate-50">
+                {[
+                  { l: 'BPM', v: latestMeasurement.heart_rate.toFixed(0), c: 'text-blue-500' },
+                  { l: 'FR', v: latestMeasurement.respiratory_rate.toFixed(0), c: 'text-purple-500' },
+                  { l: 'BP', v: latestMeasurement.systolic_bp.toFixed(0), c: 'text-amber-500' },
+                ].map((m, i) => (
+                  <div key={i} className="text-center">
+                     <p className={`text-xl font-black ${m.c}`}>{m.v}</p>
+                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{m.l}</p>
+                  </div>
+                ))}
+             </div>
+             
+             <p className="text-[10px] text-center font-bold text-slate-300 uppercase tracking-widest mt-8">
+                Données synchronisées le {formatDate(latestMeasurement.created_at)}
+             </p>
           </div>
+
+          {/* HISTORIQUE DESIGN iOS */}
+          <div className="space-y-4">
+             <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest ml-2">Derniers Relevés</h3>
+             {measurements.map((m, i) => (
+               <div key={m.id} className="bg-white/80 backdrop-blur-md rounded-[28px] p-5 border border-white shadow-sm flex items-center justify-between animate-in slide-in-from-bottom" style={{ animationDelay: `${i * 100}ms` }}>
+                  <div className="flex items-center gap-4">
+                     <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-lg">
+                        📊
+                     </div>
+                     <div>
+                        <p className="text-[13px] font-black text-slate-800">{formatDate(m.created_at)}</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">CURB-65 Score: {m.curb65}</p>
+                     </div>
+                  </div>
+                  <div className="flex gap-4">
+                     <div className="text-right">
+                        <p className="text-sm font-black text-emerald-500">{m.spo2.toFixed(0)}%</p>
+                        <p className="text-[8px] font-black text-slate-400 uppercase">SpO₂</p>
+                     </div>
+                     <div className="text-right">
+                        <p className="text-sm font-black text-red-400">{m.temperature.toFixed(1)}°</p>
+                        <p className="text-[8px] font-black text-slate-400 uppercase">Temp</p>
+                     </div>
+                  </div>
+               </div>
+             ))}
+          </div>
+        </div>
+      ) : (
+        <div className="bg-white rounded-[40px] p-12 text-center border border-slate-100 shadow-sm">
+           <p className="text-5xl mb-6">📡</p>
+           <h3 className="text-xl font-black text-slate-900 mb-2">En attente des capteurs</h3>
+           <p className="text-slate-400 text-sm font-medium max-w-[200px] mx-auto">Veuillez porter vos dispositifs connectés pour le suivi en temps réel.</p>
         </div>
       )}
 
-      {/* Message d'erreur */}
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-          {error}
+        <div className="mt-8 bg-red-50 p-4 rounded-2xl border border-red-100 text-red-600 text-[10px] font-black uppercase text-center tracking-widest">
+           {error}
         </div>
       )}
     </div>

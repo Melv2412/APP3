@@ -55,6 +55,5 @@ export function AlertsProvider({ children }) {
 }
 
 export function useAlerts() {
-    P
     return useContext(AlertsContext);
 }

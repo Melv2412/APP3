@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 /**
  * BottomNav - Version Premium Medical Health-Tech
- * Design: Floating Pill with Glassmorphism
- * Animations: Heartbeat active state & Entry staggered fade
  */
 const BottomNav = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [isVisible, setIsVisible] = useState(false);
+  const isDoctor = user?.role === 'DOCTOR';
 
   // Animation d'entrée au montage du composant
   useEffect(() => {
@@ -17,7 +18,7 @@ const BottomNav = () => {
   }, []);
 
   const navItems = [
-    { path: '/dashboard', icon: 'home', label: 'Accueil', color: 'from-emerald-500 to-teal-600' },
+    { path: isDoctor ? '/dashboard/doctor' : '/dashboard', icon: 'home', label: 'Accueil', color: isDoctor ? 'from-indigo-600 to-blue-700' : 'from-emerald-500 to-teal-600' },
     { path: '/predictions', icon: 'stats', label: 'Analyse', color: 'from-blue-500 to-indigo-600' },
     { path: '/sensors', icon: 'sensor', label: 'Capteurs', color: 'from-cyan-500 to-blue-500' },
     { path: '/alerts', icon: 'bell', label: 'Alertes', color: 'from-rose-500 to-red-600' },
@@ -67,7 +68,7 @@ const BottomNav = () => {
 
   return (
     <div className={`
-      fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-[100] md:hidden
+      fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-md z-[1050]
       transition-all duration-1000 ease-out transform
       ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}
     `}>
@@ -91,7 +92,7 @@ const BottomNav = () => {
                 <div className={`
                   absolute inset-0 mx-1 my-1 rounded-[24px] 
                   bg-gradient-to-br ${item.color} 
-                  shadow-lg shadow-emerald-500/20
+                  shadow-lg shadow-${isDoctor && item.icon === 'home' ? 'indigo' : 'emerald'}-500/20
                   animate-[heartbeat_1.5s_ease-in-out_infinite]
                 `} />
               )}
