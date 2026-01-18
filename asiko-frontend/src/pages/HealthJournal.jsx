@@ -197,8 +197,12 @@ const HealthJournal = () => {
         <div className="mb-10 animate-in slide-in-from-top duration-700">
            <div className="flex justify-between items-start mb-6">
               <div>
-                <p className="text-[11px] font-bold text-emerald-600 uppercase tracking-[0.2em] mb-1">Historique</p>
-                <h1 className="text-3xl font-black text-slate-900 tracking-tight">Mon Carnet</h1>
+                <p className="text-[11px] font-bold text-emerald-600 uppercase tracking-[0.2em] mb-1">
+                  {isOwnJournal ? 'Historique personnel' : `Suivi : ${data.patient_info?.first_name || data.patient_info?.username || 'Patient'}`}
+                </p>
+                <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+                  {isOwnJournal ? 'Mon Carnet' : 'Carnet Patient'}
+                </h1>
               </div>
               {isOwnJournal && (
                 <div className="flex gap-2">

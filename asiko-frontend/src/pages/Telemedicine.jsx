@@ -2,11 +2,13 @@
  * Telemedicine - Version Premium Medical iOS
  */
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import chatService from '../services/chat';
 
 const Telemedicine = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [threads, setThreads] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [selectedThread, setSelectedThread] = useState(null);
@@ -17,7 +19,21 @@ const Telemedicine = () => {
   const [showDoctorList, setShowDoctorList] = useState(false);
   
   const messagesEndRef = useRef(null);
-  const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollContainerRef = useRef(null);
+  const [shouldAutoScroll, setShouldAutoScroll] = useState(true);
+
+  const scrollToBottom = () => {
+    if (shouldAutoScroll) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const handleScroll = (e) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    // Si l'utilisateur est à moins de 100px du bas, on active l'auto-scroll
+    const isAtBottom = scrollHeight - scrollTop - clientHeight < 100;
+    setShouldAutoScroll(isAtBottom);
+  };
 
   useEffect(() => {
     fetchThreads();
@@ -26,11 +42,21 @@ const Telemedicine = () => {
 
   useEffect(() => {
     if (selectedThread) {
-      fetchMessages(selectedThread.id);
-      const interval = setInterval(() => fetchMessages(selectedThread.id), 5000);
+      const refresh = async () => {
+        await fetchMessages(selectedThread.id);
+        // Refresh thread info for sharing status
+        try {
+          const updatedThreads = await chatService.getThreads();
+          const current = updatedThreads.find(t => t.id === selectedThread.id);
+          if (current) setSelectedThread(current);
+        } catch (e) { console.error(e); }
+      };
+      
+      refresh();
+      const interval = setInterval(refresh, 5000);
       return () => clearInterval(interval);
     }
-  }, [selectedThread]);
+  }, [selectedThread?.id]);
 
   useEffect(scrollToBottom, [messages]);
 
@@ -170,9 +196,25 @@ const Telemedicine = () => {
                        {selectedThread.is_journal_shared ? 'Journal Partagé' : 'Partager Journal'}
                     </button>
                   )}
+
+                  {user.role === 'DOCTOR' && selectedThread.is_journal_shared && (
+                    <button 
+                      onClick={() => navigate(`/journal?user_id=${selectedThread.patient}`)} 
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-tighter bg-indigo-50 text-indigo-600 border border-indigo-100 hover:bg-indigo-500 hover:text-white transition-all shadow-sm"
+                    >
+                       <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                       </svg>
+                       Carnet
+                    </button>
+                  )}
                </div>
 
-               <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar">
+               <div 
+                 className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar"
+                 onScroll={handleScroll}
+                 ref={scrollContainerRef}
+               >
                   {messages.map((m, i) => (
                     <div key={i} className={`flex ${m.is_me ? 'justify-end' : 'justify-start'}`}>
                        <div className={`max-w-[75%] p-4 rounded-[28px] shadow-sm ${m.is_me ? 'bg-slate-900 text-white rounded-tr-lg' : 'bg-white text-slate-900 rounded-tl-lg border border-slate-50'}`}>
