@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'asiko_connect.apps.sensors',
     'asiko_connect.apps.predictions',
     'asiko_connect.apps.environment',
-    'asiko_connect.apps.environments',
     'asiko_connect.apps.community',
     'asiko_connect.apps.alerts',
     'asiko_connect.apps.telemedicine',
