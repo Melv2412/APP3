@@ -12,8 +12,7 @@ import useAlertSSE from "../hooks/useAlertSSE";
 
 const Dashboard = () => {
   const { user } = useAuth();
-  const token = localStorage.getItem("access_token");
-  useAlertSSE(token);
+  useAlertSSE();
 
   const [prediction, setPrediction] = useState(null);
   const [environmentData, setEnvironmentData] = useState(null);

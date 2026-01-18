@@ -29,5 +29,5 @@ urlpatterns = [
     path('alerts/<int:pk>/deactivate/', AlertViewSet.as_view({'patch': 'deactivate'}), name='alert-deactivate'),
     path('alerts/active/', AlertViewSet.as_view({'get': 'active'}), name='alert-active'),
     path('alerts/active-count/', AlertViewSet.as_view({'get': 'active_count'}), name='alert-active-count'),
-    path("alerts/stream/", sse_alert_stream),
+    path("stream/", sse_alert_stream),
 ]

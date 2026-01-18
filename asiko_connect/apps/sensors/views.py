@@ -379,7 +379,6 @@ class SensorDataAPIView(APIView):
                 is_active=True
             )
             notify_frontend(
-                user_id=sensor.owner.id,
                 message=MESSAGE_A_VOCAL,
                 alert_id=alert.id,
                 phase=alert.phase

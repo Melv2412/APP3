@@ -1,30 +1,20 @@
 import json
 import time
-import jwt
-from django.conf import settings
 from django.http import StreamingHttpResponse
-from .event_bus import get_user_queue
+from .event_bus import broadcast_queue  # Queue globale
 
 def sse_alert_stream(request):
-    token = request.GET.get("token")
-
-    if not token:
-        return StreamingHttpResponse("Unauthorized", status=401)
-
-    try:
-        decoded = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-        user_id = decoded["user_id"]
-    except Exception:
-        return StreamingHttpResponse("Invalid token", status=401)
-
-    queue = get_user_queue(user_id)
-
+    """
+    Flux SSE global : chaque utilisateur connecté reçoit toutes les alertes
+    sans authentification.
+    """
     def event_generator():
         while True:
-            if not queue.empty():
-                data = queue.get()
+            if not broadcast_queue.empty():
+                data = broadcast_queue.get()
+                print("Broadcasting to SSE:", data)
                 yield f"data: {json.dumps(data)}\n\n"
-            time.sleep(0.5)
+            time.sleep(1)
 
     response = StreamingHttpResponse(event_generator(), content_type="text/event-stream")
     response["Cache-Control"] = "no-cache"

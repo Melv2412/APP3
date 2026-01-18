@@ -1,17 +1,16 @@
 import { useEffect } from "react";
+import { speakFrench } from "../utils/tts";
 
-export default function useAlertSSE(token) {
+export default function useAlertSSE() {
   useEffect(() => {
-    if (!token) return;
-
-    const source = new EventSource(
-      `http://localhost:8000/alerts/stream/?token=${token}`
-    );
+    const source = new EventSource("http://localhost:8000/api/alerts/stream/");
 
     source.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
+      // On ne lit que les messages Phase 1
       if (data.phase === "PHASE_1") {
+        console.log("Received SSE:", data.message);
         speakFrench(data.message);
       }
     };
@@ -22,5 +21,5 @@ export default function useAlertSSE(token) {
     };
 
     return () => source.close();
-  }, [token]);
+  }, []);
 }
