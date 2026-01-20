@@ -46,7 +46,7 @@ def phase1_timer_task(self, alert_id):
     alert.save(update_fields=["phase", "phase_2_started_at"])
 
     print(f"[PHASE 1 → PHASE 2] Alerte {alert.id}")
-    
+
     notify_esp(ESP32_IP)
 
     # ⏱ Lancement du timer phase 2 (PAS immédiat)
@@ -83,7 +83,6 @@ def phase2_timer_task(self, alert_id):
         alert.phase_3_started_at = timezone.now()
         alert.save(update_fields=["phase", "phase_3_started_at"])
 
-        notify_esp(alert)
         print(f"[PHASE 2 → PHASE 3] Alerte {alert.id}")
 
         # ⏱ Désactivation automatique après PHASE 3 (5 minutes)
