@@ -145,4 +145,7 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.WARNING(f'⚠️  Existe déjà: {facility.name}'))
 
         self.stdout.write(self.style.SUCCESS(f'\n🎉 {created_count} établissement(s) créé(s) sur {len(facilities_data)} au total.'))
-        self.stdout.write(self.style.SUCCESS(f'📊 Total dans la base: {HealthFacility.objects.count()}'))
+        self.stdout.write(self.style.SUCCESS(f'📊 Total dans la base: {HealthFacility.objects.count()}')) 
+
+
+

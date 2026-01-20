@@ -25,7 +25,7 @@ except (ImportError, AttributeError):
     phase1_timer_task = None
 
 from asiko_connect.utils.calculs import SEUIL_CRITIQUE
-from asiko_connect.utils.notify import notify_frontend  
+from asiko_connect.utils.notify import notify_frontend, notify_aqi_update  
 
 from django.http import StreamingHttpResponse
 
@@ -420,6 +420,10 @@ class SensorDataAPIView(APIView):
             category=result["category"],
             advice=result["advice"],
             )
+
+        # 📡 BROADCAST IQA LIVE (SSE)
+        notify_aqi_update(result["iqa"], sensor.id)
+        
         return Response({"status": "ok"}, status=status.HTTP_201_CREATED)
 
 

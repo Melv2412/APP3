@@ -14,12 +14,12 @@ DUREE_CALCUL_IQA_PHASE_2=5
 DUREE_CALCUL_IQA_PHASE_3=10
 
 '''Temps avant changement de phase en secondes'''
-PASSAGE_PHASE_1=10 # en secondes TASK ALERTS
-PASSAGE_PHASE_1_TO_2=10  # en secondes TASK ALERTS
+PASSAGE_PHASE_1=5 # en secondes TASK ALERTS
+PASSAGE_PHASE_1_TO_2=5  # en secondes TASK ALERTS
 PASSAGE_PHASE_2_TO_3=10  # en secondes  TASK ALERTS
 
 
 '''Message à vocaliser 
 par le frontend lors de la création d'une alerte'''
 
-MESSAGE_A_VOCAL="Bonsoir monsieur AYEKOUE, Attention, un niveau de pollution élevé a été détecté. Veuillez prendre les précautions nécessaires pour votre santé."
+MESSAGE_A_VOCAL="Bonsoir monsieur Martial, Attention, un niveau de pollution élevé a été détecté. Veuillez prendre les précautions nécessaires pour votre santé."

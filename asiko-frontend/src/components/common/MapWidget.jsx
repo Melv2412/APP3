@@ -39,7 +39,30 @@ const MapWidget = ({ latitude, longitude, height = 'h-64' }) => {
     fetchEnv();
   }, [userPosition.lat, userPosition.lng]);
 
-  const isHealthy = !(environmentData?.pollution_level > 50);
+  // SSE Logic
+  useEffect(() => {
+    const getSSEUrl = () => {
+      const host = window.location.hostname;
+      if (host === 'localhost' || host === '127.0.0.1') return 'http://127.0.0.1:8000/api/alerts/stream/';
+      return 'https://7znhv71w-8000.uks1.devtunnels.ms/api/alerts/stream/';
+    };
+    const eventSource = new EventSource(getSSEUrl());
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if ((data.type === 'aqi_update' || data.iqa) && data.aqi !== undefined) {
+          setEnvironmentData(prev => ({
+            ...prev,
+            pollution_level: data.aqi,
+            pollution_level_text: data.aqi >= 100 ? 'Risque' : (data.aqi > 50 ? 'Modéré' : 'Sain')
+          }));
+        }
+      } catch (e) { console.error('SSE Error', e); }
+    };
+    return () => eventSource.close();
+  }, []);
+
+  const isHealthy = !(environmentData?.pollution_level > 100); // Updated threshold to 100 as per summary
   const status = isHealthy ? 'Sain' : 'Risque';
 
   return (

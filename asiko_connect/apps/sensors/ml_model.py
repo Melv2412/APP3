@@ -4,12 +4,22 @@ from django.conf import settings
 
 MODEL_PATH = os.path.join(settings.BASE_DIR, 'asiko_connect', 'model', 'pneumonia_model.pkl')
 
+
+
+print("MODEL_PATH =", MODEL_PATH)
+print("Existe ?", os.path.exists(MODEL_PATH))
+
+
 # Charger le modèle ML de manière optionnelle (pour éviter erreur si xgboost non installé)
 try:
     if os.path.exists(MODEL_PATH):
         ml_model = joblib.load(MODEL_PATH)
+        print("✅ Modèle chargé:", type(ml_model))
     else:
+        print("❌ Fichier modèle introuvable")
         ml_model = None
-except (ImportError, ModuleNotFoundError, FileNotFoundError) as e:
-    # XGBoost ou le fichier modèle n'est pas disponible
+except Exception as e:
+    print("❌ Erreur chargement modèle:", repr(e))
     ml_model = None
+
+
