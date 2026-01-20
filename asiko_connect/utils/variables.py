@@ -1,3 +1,6 @@
+from Buzzer import ESP32_IP
+
+
 SEUIL_CRITIQUE=100
 POURCENTAGE_SEUIL_ALERT=0.8
 
@@ -23,3 +26,5 @@ PASSAGE_PHASE_2_TO_3=10  # en secondes  TASK ALERTS
 par le frontend lors de la création d'une alerte'''
 
 MESSAGE_A_VOCAL="Bonsoir monsieur Martial, Attention, un niveau de pollution élevé a été détecté. Veuillez prendre les précautions nécessaires pour votre santé."
+
+ESP32_IP = "192.168.137.197"

@@ -46,7 +46,8 @@ def phase1_timer_task(self, alert_id):
     alert.save(update_fields=["phase", "phase_2_started_at"])
 
     print(f"[PHASE 1 → PHASE 2] Alerte {alert.id}")
-    notify_esp(alert)
+    
+    notify_esp(ESP32_IP)
 
     # ⏱ Lancement du timer phase 2 (PAS immédiat)
     phase2_timer_task.apply_async(

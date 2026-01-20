@@ -18,9 +18,24 @@ def notify_frontend(message, alert_id, phase):
 if __name__ == "__main__":
     notify_frontend(1, "Alerte")
 
+import requests
 
-def notify_esp(alert) :
-    print(f"Notification ESP pour l'alerte {alert.id} en phase {alert.phase}")
+def notify_esp(ESP_IP):
+    try:
+        url = f"http://{ESP_IP}/buzzer"
+        response = requests.get(url, timeout=3)
+
+        if response.status_code == 200:
+            print("ESP32 notifié : buzzer activé")
+            return True
+        else:
+            print("ESP32 a répondu avec une erreur :", response.status_code)
+            return False
+
+    except requests.exceptions.RequestException as e:
+        print("Impossible de contacter l'ESP32 :", e)
+        return False
+
 
     
 def notify_aqi_update(aqi_value, sensor_id=None):
