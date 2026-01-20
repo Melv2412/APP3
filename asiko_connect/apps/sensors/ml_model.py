@@ -14,12 +14,9 @@ print("Existe ?", os.path.exists(MODEL_PATH))
 try:
     if os.path.exists(MODEL_PATH):
         ml_model = joblib.load(MODEL_PATH)
-        print("✅ Modèle chargé:", type(ml_model))
     else:
-        print("❌ Fichier modèle introuvable")
         ml_model = None
 except Exception as e:
-    print("❌ Erreur chargement modèle:", repr(e))
     ml_model = None
 
 

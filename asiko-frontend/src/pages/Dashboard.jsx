@@ -8,8 +8,6 @@ import { Link } from 'react-router-dom';
 import MapWidget from '../components/common/MapWidget';
 import useAlertSSE from "../hooks/useAlertSSE";
 
-
-
 const Dashboard = () => {
   const { user } = useAuth();
   useAlertSSE();
@@ -19,14 +17,13 @@ const Dashboard = () => {
   const [preventionActions, setPreventionActions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [userPosition, setUserPosition] = useState({ lat: 5.3600, lng: -4.0083 }); // Abidjan par défaut
-
+  const [userPosition, setUserPosition] = useState({ lat: 5.3600, lng: -4.0083 });
   const [showFacilitiesModal, setShowFacilitiesModal] = useState(false);
   const [facilities, setFacilities] = useState([]);
   const [facilitiesType, setFacilitiesType] = useState('');
   const [loadingFacilities, setLoadingFacilities] = useState(false);
 
-  // LOGIQUE GÉOLOCALISATION (STRICTEMENT IDENTIQUE)
+  // GÉOLOCALISATION
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -42,7 +39,7 @@ const Dashboard = () => {
     }
   }, []);
 
-  // LOGIQUE RÉCUPÉRATION DONNÉES (STRICTEMENT IDENTIQUE)
+  // RÉCUPÉRATION DONNÉES
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -73,32 +70,74 @@ const Dashboard = () => {
       }
     };
     fetchData();
-  }, [userPosition.lat, userPosition.lng]);    
+  }, [userPosition.lat, userPosition.lng]);
 
-
-
-
-  // FONCTIONS UTILITAIRES DE STYLE (CONSERVÉES)
-  const getRiskLevelText = (level) => {
-    const levels = { 'FAIBLE': 'Faible', 'MODERE': 'Modéré', 'ELEVE': 'Élevé', 'CRITIQUE': 'Critique' };
-    return levels[level] || level;
+  // ===== FONCTION CENTRALE POUR LES COULEURS =====
+  const getColorByProbability = (probability) => {
+    if (probability >= 0.7) {
+      return {
+        circle: 'text-rose-500',
+        shadow: 'shadow-[0_0_12px_rgba(244,63,94,0.5)]',
+        badge: 'bg-rose-50 text-rose-600',
+        label: 'Critique'
+      };
+    } else if (probability >= 0.5) {
+      return {
+        circle: 'text-orange-500',
+        shadow: 'shadow-[0_0_12px_rgba(249,115,22,0.5)]',
+        badge: 'bg-orange-50 text-orange-600',
+        label: 'Élevé'
+      };
+    } else if (probability >= 0.3) {
+      return {
+        circle: 'text-amber-500',
+        shadow: 'shadow-[0_0_12px_rgba(251,146,60,0.5)]',
+        badge: 'bg-amber-50 text-amber-600',
+        label: 'Modéré'
+      };
+    } else {
+      return {
+        circle: 'text-emerald-500',
+        shadow: 'shadow-[0_0_12px_rgba(52,211,153,0.5)]',
+        badge: 'bg-emerald-50 text-emerald-600',
+        label: 'Faible'
+      };
+    }
   };
 
-  const getRiskLevelColor = (level) => {
-    const colors = {
-      'FAIBLE': 'text-emerald-600 bg-emerald-50 border-emerald-100',
-      'MODERE': 'text-amber-600 bg-amber-50 border-amber-100',
-      'ELEVE': 'text-orange-600 bg-orange-50 border-orange-100',
-      'CRITIQUE': 'text-rose-600 bg-rose-50 border-rose-100'
+  // STATUT BASÉ SUR LA PRÉDICTION
+  const getStatus = () => {
+    if (prediction && prediction.probabilite_pneumonie_72h) {
+      const riskScore = prediction.probabilite_pneumonie_72h;
+      if (riskScore > 0.7) return 'Critique';
+      if (riskScore > 0.5) return 'Élevé';
+      if (riskScore > 0.3) return 'Modéré';
+    }
+    if (environmentData && (environmentData.pollution_level || 0) > 50) {
+      return 'Risque';
+    }
+    return 'Sain';
+  };
+
+  // COULEUR DU STATUT (RÉUTILISE LA FONCTION CENTRALE)
+  const getStatusColor = () => {
+    const status = getStatus();
+    const statusToColorMap = {
+      'Critique': getColorByProbability(0.75).shadow,
+      'Élevé': getColorByProbability(0.6).shadow,
+      'Modéré': getColorByProbability(0.4).shadow,
+      'Risque': 'bg-orange-500 shadow-[0_0_12px_rgba(249,115,22,0.5)]',
+      'Sain': getColorByProbability(0).shadow
     };
-    return colors[level] || 'text-gray-600 bg-gray-50 border-gray-100';
+    return statusToColorMap[status] || 'bg-slate-400';
   };
 
   const getAirQualityText = () => environmentData?.pollution_level_text || 'Analyse...';
 
-  const getStatus = () => {
-    if (!environmentData) return 'Sain';
-    return (environmentData.pollution_level || 0) > 50 ? 'Risque' : 'Sain';
+  // UTILITAIRES
+  const getRiskLevelText = (level) => {
+    const levels = { 'FAIBLE': 'Faible', 'MODERE': 'Modéré', 'ELEVE': 'Élevé', 'CRITIQUE': 'Critique' };
+    return levels[level] || level;
   };
 
   const handleShowFacilities = async (type) => {
@@ -119,13 +158,12 @@ const Dashboard = () => {
   const status = getStatus();
   const isHealthy = status === 'Sain';
   const userName = user?.first_name || user?.username || 'Utilisateur';
+  const probabilityColor = prediction ? getColorByProbability(prediction.probabilite_pneumonie_72h) : null;
 
   return (
     <div className="min-h-screen bg-[#F2F4F7] pb-32 font-sans antialiased text-slate-900">
-
-      {/* 1. TOP BANNER : STYLE IMMERSIF NÉO-MODERNE */}
+      {/* 1. TOP BANNER */}
       <header className="relative bg-[#0F172A] pt-14 pb-28 px-6 overflow-hidden">
-        {/* Cercles de lumière décoratifs */}
         <div className="absolute top-[-10%] right-[-10%] w-[300px] h-[300px] bg-emerald-500/10 rounded-full blur-[80px]" />
         <div className="absolute bottom-[-20%] left-[-5%] w-[250px] h-[250px] bg-blue-500/10 rounded-full blur-[80px]" />
 
@@ -137,7 +175,7 @@ const Dashboard = () => {
                   {userName.charAt(0).toUpperCase()}
                 </div>
               </div>
-              <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-emerald-500 rounded-full border-[4px] border-[#0F172A] flex items-center justify-center">
+              <div className={`absolute -bottom-1 -right-1 w-7 h-7 rounded-full border-[4px] border-[#0F172A] flex items-center justify-center ${getStatusColor()}`}>
                 <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
               </div>
             </div>
@@ -146,17 +184,17 @@ const Dashboard = () => {
               <div className="flex items-center gap-3 mt-1">
                 <span className="text-slate-400 font-medium">Connecté au réseau de santé</span>
                 <span className="h-1 w-1 bg-slate-600 rounded-full" />
-                <span className="text-emerald-400 text-sm font-bold uppercase tracking-widest">En direct</span>
+                <span className="text-emerald-400 text-sm font-bold uppercase tracking-widest">En ligne</span>
               </div>
             </div>
           </div>
 
-          {/* STATUS CARDS OVERLAY */}
+          {/* STATUS CARDS */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-5 hover:bg-white/10 transition-all">
               <p className="text-slate-400 text-[11px] font-black uppercase tracking-[0.2em] mb-2">Statut Santé</p>
               <div className="flex items-center gap-3">
-                <div className={`w-3 h-3 rounded-full ${isHealthy ? 'bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.5)]' : 'bg-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.5)]'}`} />
+                <div className={`w-3 h-3 rounded-full ${isHealthy ? 'bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.5)]' : getStatusColor()}`} />
                 <span className="text-white text-xl font-bold">{status}</span>
               </div>
             </div>
@@ -168,11 +206,10 @@ const Dashboard = () => {
         </div>
       </header>
 
-      {/* 2. MAIN CONTENT AREA */}
+      {/* 2. MAIN CONTENT */}
       <main className="max-w-5xl mx-auto px-6 -mt-10 relative z-20 space-y-8">
-
-        {/* SECTION PRÉDICTION : GRANDE CARTE DE RELIEF */}
-        {prediction && (
+        {/* SECTION PRÉDICTION */}
+        {prediction && probabilityColor && (
           <div className="bg-white rounded-[40px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.08)] border border-white p-8 group overflow-hidden relative">
             <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity">
               <svg className="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M13 3v10h10V3H13zM3 13h10v10H3V13zm0-10h10v10H3V3zm10 10h10v10H13V13z" /></svg>
@@ -182,9 +219,13 @@ const Dashboard = () => {
               <div className="relative">
                 <svg className="w-40 h-40 transform -rotate-90">
                   <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-slate-50" />
-                  <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="12" fill="transparent"
-                    strokeDasharray={440} strokeDashoffset={440 - (440 * prediction.probabilite_pneumonie_72h)}
-                    className="text-emerald-500 transition-all duration-1000 ease-in-out" strokeLinecap="round" />
+                  <circle 
+                    cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="12" fill="transparent"
+                    strokeDasharray={440} 
+                    strokeDashoffset={440 - (440 * prediction.probabilite_pneumonie_72h)}
+                    className={`${probabilityColor.circle} transition-all duration-1000 ease-in-out`} 
+                    strokeLinecap="round" 
+                  />
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <span className="text-3xl font-black text-slate-900">{(prediction.probabilite_pneumonie_72h * 100).toFixed(1)}%</span>
@@ -194,12 +235,12 @@ const Dashboard = () => {
 
               <div className="flex-1 space-y-5">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600 font-black text-xs uppercase italic">Prédiction 72h</div>
+                  <div className={`p-2 rounded-lg font-black text-xs uppercase italic ${probabilityColor.badge}`}>Prédiction 72h</div>
                   <h3 className="text-2xl font-black text-slate-900 tracking-tight">Analyse Pulmonaire</h3>
                 </div>
                 <div className="flex flex-wrap gap-4">
-                  <div className={`px-5 py-3 rounded-2xl border-2 flex items-center gap-3 ${getRiskLevelColor(prediction.niveau_risque)}`}>
-                    <span className="text-sm font-black uppercase tracking-wider">Risque {getRiskLevelText(prediction.niveau_risque)}</span>
+                  <div className={`px-5 py-3 rounded-2xl border-2 flex items-center gap-3 ${probabilityColor.badge} border-current`}>
+                    <span className="text-sm font-black uppercase tracking-wider">Risque {probabilityColor.label}</span>
                   </div>
                 </div>
               </div>
@@ -208,8 +249,7 @@ const Dashboard = () => {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-          {/* CARTE LOCALISATION / MAP */}
+          {/* CARTE LOCALISATION */}
           <div className="bg-white rounded-[32px] p-3 shadow-sm border border-slate-200/60 flex flex-col">
             <div className="p-5 flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center">
@@ -222,7 +262,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* ACTIONS PRÉVENTIVES : LISTE ÉPURÉE */}
+          {/* ACTIONS PRÉVENTIVES */}
           <div className="bg-white rounded-[32px] p-8 shadow-sm border border-slate-200/60">
             <div className="flex items-center justify-between mb-8">
               <h3 className="font-black text-slate-900 uppercase text-sm tracking-widest">Actions Prioritaires</h3>
@@ -230,11 +270,11 @@ const Dashboard = () => {
             </div>
 
             <div className="space-y-4">
-              {preventionActions.length > 0 ? preventionActions.map((action, idx) => (
+              {preventionActions.length > 0 ? preventionActions.map((action) => (
                 <div key={action.id} className="group p-5 bg-slate-50 rounded-2xl border border-transparent hover:border-emerald-100 hover:bg-emerald-50/50 transition-all flex items-start gap-4">
                   <span className="text-2xl">{
                     action.action_type === 'AVOID_ZONE' ? '🚫' :
-                      action.action_type === 'WEAR_MASK' ? '😷' : '📋'
+                    action.action_type === 'WEAR_MASK' ? '😷' : '📋'
                   }</span>
                   <div className="flex-1">
                     <p className="text-[15px] font-bold text-slate-800 leading-snug">{action.recommendation_text || action.text}</p>
@@ -248,14 +288,13 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* SECTION SERVICES & SERVICES À VENIR */}
+        {/* SECTION SERVICES */}
         <div className="bg-white rounded-[40px] p-10 border border-slate-200/60 shadow-sm">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-10">
             <div className="space-y-1">
               <h3 className="text-2xl font-black text-slate-900 tracking-tight leading-none">Services & Facteurs</h3>
               <p className="text-slate-400 font-medium">Trouvez de l'aide à proximité immédiatement.</p>
             </div>
-            {/* Segmented control style tabs */}
             <div className="bg-slate-100 p-1.5 rounded-2xl flex gap-1">
               <button className="px-4 py-2 bg-white rounded-[12px] shadow-sm text-xs font-black text-slate-900">Services en ligne</button>
               <button className="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-900 transition-colors">Service 24x7</button>
@@ -283,7 +322,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* GESTION DES ÉTATS : ERREUR & CHARGEMENT */}
+        {/* GESTION DES ÉTATS */}
         {error && (
           <div className="bg-rose-50 border-2 border-rose-100 text-rose-700 p-6 rounded-[32px] flex items-center gap-5 animate-pulse">
             <span className="text-2xl">⚠️</span>
@@ -299,17 +338,16 @@ const Dashboard = () => {
         )}
       </main>
 
-      {/* 3. MODALE ÉTABLISSEMENTS : STYLE iOS FULL SCREEN SHEET */}
+      {/* 3. MODALE ÉTABLISSEMENTS */}
       {showFacilitiesModal && (
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div className="absolute inset-0 bg-[#0F172A]/80 backdrop-blur-md animate-fade-in" onClick={() => setShowFacilitiesModal(false)} />
           <div className="relative bg-[#F8FAFC] w-full max-w-2xl rounded-t-[40px] sm:rounded-[40px] max-h-[90vh] overflow-hidden shadow-2xl animate-in slide-in-from-bottom-20 duration-500">
-
             <div className="sticky top-0 bg-white border-b border-slate-100 p-8 flex justify-between items-center z-10">
               <div>
                 <h3 className="text-2xl font-black text-slate-900 tracking-tight">
                   {facilitiesType === 'HOSPITAL' ? 'Hôpitaux Généraux' :
-                    facilitiesType === 'PNEUMOLOGY_CENTER' ? 'Centres de Pneumologie' : 'Établissements'}
+                   facilitiesType === 'PNEUMOLOGY_CENTER' ? 'Centres de Pneumologie' : 'Établissements'}
                 </h3>
                 <p className="text-emerald-500 font-bold text-xs uppercase tracking-widest mt-1">Rayon 10 KM • GPS Actif</p>
               </div>

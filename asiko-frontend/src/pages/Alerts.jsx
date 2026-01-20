@@ -124,7 +124,7 @@ const Alerts = () => {
                             {alert.phase.replace('_', ' ')}
                           </Badge>
                           <h2 className="text-[20px] font-bold text-gray-900 tracking-tight leading-tight">
-                            {alert.sensor_device_id || "Capteur sans nom"}
+                            {alert.sensor_device_id || "Capteur par defaut"}
                           </h2>
                           <p className="text-[14px] text-gray-500 font-medium">
                             Détecté à {new Date(alert.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

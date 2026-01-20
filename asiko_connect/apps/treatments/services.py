@@ -6,6 +6,117 @@ from django.db.models import Q
 from asiko_connect.apps.treatments.models import PreventionAction
 from asiko_connect.apps.alerts.models import Alert
 from asiko_connect.apps.sensors.models import Sensor, Zone
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def generate_prevention_actions_for_alert_to_users(alert):
+    """
+    Génère des actions préventives pour les utilisateurs affectés par une alerte.
+    Filtre les utilisateurs par zone géographique pour plus de pertinence.
+    
+    Args:
+        alert: Instance d'Alert
+    
+    Returns:
+        list: Liste des PreventionAction créées
+    """
+    if not alert or not alert.is_active:
+        logger.warning(f"Alerte {alert.id if alert else 'None'} n'est pas active")
+        return []
+    
+    actions_created = []
+    logger.info(f"📍 Alerte {alert.id} - Phase {alert.phase} - Zone: {alert.sensor.zone.name}")
+    
+    # Récupérer tous les utilisateurs (patients)
+    from asiko_connect.apps.users.models import User
+    all_patients = User.objects.filter(role=User.Role.PATIENT)
+    logger.info(f"👥 Total patients: {all_patients.count()}")
+    
+    # Filtrer par zone si possible, sinon prendre tous les patients
+    # Pour plus tard: faire une vérification GPS ou d'adhésion à zone
+    users_to_notify = all_patients  # Pour l'instant, on notifie tous les patients
+    
+    # Déterminer le type d'action et la priorité selon la phase de l'alerte
+    if alert.phase == Alert.PHASE_1:
+        action_type = PreventionAction.WEAR_MASK
+        priority = PreventionAction.MEDIUM
+        recommendation_text = (
+            f"⚠️ Attention : Un niveau de pollution élevé a été détecté dans la zone {alert.sensor.zone.name}. "
+            f"Portez un masque si vous devez sortir."
+        )
+    elif alert.phase == Alert.PHASE_2:
+        action_type = PreventionAction.AVOID_ZONE
+        priority = PreventionAction.HIGH
+        recommendation_text = (
+            f"⚠️ Zone à risque détectée : {alert.sensor.zone.name}. "
+            f"Éloignez-vous rapidement de cette zone si vous vous y trouvez."
+        )
+    elif alert.phase == Alert.PHASE_3:
+        action_type = PreventionAction.AVOID_ZONE
+        priority = PreventionAction.HIGH
+        recommendation_text = (
+            f"🚨 ALERTE CRITIQUE : Zone {alert.sensor.zone.name} en danger. "
+            f"Éloignez-vous immédiatement de cette zone. Restez à domicile si possible."
+        )
+    else:
+        logger.warning(f"Phase inconnue: {alert.phase}")
+        return []
+    
+    # Créer une action pour chaque utilisateur
+    for user in users_to_notify:
+        # Vérifier si une action similaire existe déjà et n'est pas complétée
+        existing_action = PreventionAction.objects.filter(
+            user=user,
+            alert=alert,
+            action_type=action_type,
+            completed=False
+        ).first()
+        
+        if not existing_action:
+            try:
+                action = PreventionAction.objects.create(
+                    user=user,
+                    alert=alert,
+                    action_type=action_type,
+                    recommendation_text=recommendation_text,
+                    priority=priority
+                )
+                actions_created.append(action)
+                logger.info(f"  ✓ Action créée pour {user.username}")
+            except Exception as e:
+                logger.error(f"  ✗ Erreur pour {user.username}: {str(e)}")
+        else:
+            logger.info(f"  ℹ️ Action existante pour {user.username}")
+    
+    # Pour Phase 3, ajouter aussi une action "Rester à domicile"
+    if alert.phase == Alert.PHASE_3:
+        for user in users_to_notify:
+            existing_stay_home = PreventionAction.objects.filter(
+                user=user,
+                alert=alert,
+                action_type=PreventionAction.STAY_HOME,
+                completed=False
+            ).first()
+            
+            if not existing_stay_home:
+                try:
+                    stay_home_action = PreventionAction.objects.create(
+                        user=user,
+                        alert=alert,
+                        action_type=PreventionAction.STAY_HOME,
+                        recommendation_text=(
+                            f"🏠 Restez à domicile. La zone {alert.sensor.zone.name} présente un risque critique."
+                        ),
+                        priority=PreventionAction.HIGH
+                    )
+                    actions_created.append(stay_home_action)
+                    logger.info(f"  ✓ Action 'Rester à domicile' créée pour {user.username}")
+                except Exception as e:
+                    logger.error(f"  ✗ Erreur pour stay_home {user.username}: {str(e)}")
+    
+    return actions_created
 
 
 def generate_prevention_actions_for_alert(alert):
@@ -19,88 +130,7 @@ def generate_prevention_actions_for_alert(alert):
     Returns:
         list: Liste des PreventionAction créées
     """
-    if not alert or not alert.is_active:
-        return []
-    
-    actions_created = []
-    
-    # Récupérer tous les utilisateurs (patients) qui pourraient être affectés
-    # Pour l'instant, on génère pour tous les patients
-    # TODO: Filtrer par zone géographique si nécessaire
-    from asiko_connect.apps.users.models import User
-    users = User.objects.filter(role=User.Role.PATIENT)
-    
-    # Déterminer le type d'action et la priorité selon la phase de l'alerte
-    if alert.phase == Alert.PHASE_1:
-        # Phase 1 : Avertissement modéré
-        action_type = PreventionAction.WEAR_MASK
-        priority = PreventionAction.MEDIUM
-        recommendation_text = (
-            f"Attention : Un niveau de pollution élevé a été détecté dans la zone {alert.sensor.zone.name}. "
-            f"Portez un masque si vous devez sortir."
-        )
-    elif alert.phase == Alert.PHASE_2:
-        # Phase 2 : Action urgente
-        action_type = PreventionAction.AVOID_ZONE
-        priority = PreventionAction.HIGH
-        recommendation_text = (
-            f"Zone à risque détectée : {alert.sensor.zone.name}. "
-            f"Éloignez-vous rapidement de cette zone si vous vous y trouvez."
-        )
-    elif alert.phase == Alert.PHASE_3:
-        # Phase 3 : Évacuation critique
-        action_type = PreventionAction.AVOID_ZONE
-        priority = PreventionAction.HIGH
-        recommendation_text = (
-            f"⚠️ ALERTE CRITIQUE : Zone {alert.sensor.zone.name} en danger. "
-            f"Éloignez-vous immédiatement de cette zone. Restez à domicile si possible."
-        )
-    else:
-        return []
-    
-    # Créer une action pour chaque utilisateur
-    for user in users:
-        # Vérifier si une action similaire existe déjà et n'est pas complétée
-        existing_action = PreventionAction.objects.filter(
-            user=user,
-            alert=alert,
-            action_type=action_type,
-            completed=False
-        ).first()
-        
-        if not existing_action:
-            action = PreventionAction.objects.create(
-                user=user,
-                alert=alert,
-                action_type=action_type,
-                recommendation_text=recommendation_text,
-                priority=priority
-            )
-            actions_created.append(action)
-    
-    # Pour Phase 3, ajouter aussi une action "Rester à domicile" pour chaque utilisateur
-    if alert.phase == Alert.PHASE_3:
-        for user in users:
-            existing_stay_home = PreventionAction.objects.filter(
-                user=user,
-                alert=alert,
-                action_type=PreventionAction.STAY_HOME,
-                completed=False
-            ).first()
-            
-            if not existing_stay_home:
-                stay_home_action = PreventionAction.objects.create(
-                    user=user,
-                    alert=alert,
-                    action_type=PreventionAction.STAY_HOME,
-                    recommendation_text=(
-                        f"Restez à domicile. La zone {alert.sensor.zone.name} présente un risque critique."
-                    ),
-                    priority=PreventionAction.HIGH
-                )
-                actions_created.append(stay_home_action)
-    
-    return actions_created
+    return generate_prevention_actions_for_alert_to_users(alert)
 
 
 def generate_prevention_actions_for_user(user, prediction=None, alerts=None, risk_zones=None):
