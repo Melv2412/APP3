@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const InputField = ({ label, name, type = 'text', placeholder, icon, value, onChange }) => (
+const InputField = ({ label, name, type = 'text', placeholder, icon, value, onChange, required = true }) => (
   <div className="mb-4">
      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">{label}</label>
      <div className="relative group">
@@ -15,7 +15,7 @@ const InputField = ({ label, name, type = 'text', placeholder, icon, value, onCh
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          required
+          required={required}
           className="w-full bg-white border border-slate-100 rounded-2xl px-5 py-3.5 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 transition-all placeholder:text-slate-300 shadow-sm"
         />
      </div>
@@ -41,8 +41,13 @@ const Register = () => {
     diabetes: false,
     asthma: false,
     depression: false,
+    copd_asthma: false,
+    immunosuppression: false,
     smoking_status: 'NEVER',
     vaccination_status: 'OK',
+    emergency_contact_name: '',
+    emergency_contact_phone: '',
+    emergency_contact_relation: '',
   });
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [error, setError] = useState('');
@@ -86,8 +91,13 @@ const Register = () => {
         diabetes: formData.diabetes,
         asthma: formData.asthma,
         depression: formData.depression,
+        copd_asthma: formData.copd_asthma,
+        immunosuppression: formData.immunosuppression,
         smoking_status: formData.smoking_status,
         vaccination_status: formData.vaccination_status,
+        emergency_contact_name: formData.emergency_contact_name || null,
+        emergency_contact_phone: formData.emergency_contact_phone || null,
+        emergency_contact_relation: formData.emergency_contact_relation || null,
       };
 
       await register(registrationData);
@@ -139,6 +149,8 @@ const Register = () => {
                     {[
                       { l: 'Diabète', n: 'diabetes' },
                       { l: 'Asthme', n: 'asthma' },
+                      { l: 'BPCO', n: 'copd_asthma' },
+                      { l: 'Immunosuppression', n: 'immunosuppression' },
                       { l: 'Dépression', n: 'depression' },
                     ].map(item => (
                       <label key={item.n} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl cursor-pointer hover:bg-white/10 transition-all border border-white/5">
@@ -146,6 +158,47 @@ const Register = () => {
                          <input type="checkbox" name={item.n} checked={formData[item.n]} onChange={handleChange} className="w-5 h-5 rounded-lg border-white/20 bg-transparent text-emerald-500 focus:ring-emerald-500" />
                       </label>
                     ))}
+                 </div>
+
+                 {/* EMERGENCY CONTACT SECTION */}
+                 <div className="mb-6">
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Contact d'urgence</h4>
+                    <div className="space-y-3">
+                       <InputField 
+                         label="Nom du contact" 
+                         name="emergency_contact_name" 
+                         placeholder="Ex: Marie Dupont" 
+                         value={formData.emergency_contact_name} 
+                         onChange={handleChange} 
+                         required={false}
+                       />
+                       <InputField 
+                         label="Téléphone du contact" 
+                         name="emergency_contact_phone" 
+                         type="tel"
+                         placeholder="01..." 
+                         value={formData.emergency_contact_phone} 
+                         onChange={handleChange} 
+                         required={false}
+                       />
+                       <div>
+                          <label className="block text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1.5 ml-1">Lien de parenté</label>
+                          <select 
+                            name="emergency_contact_relation" 
+                            value={formData.emergency_contact_relation} 
+                            onChange={handleChange} 
+                            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-[11px] font-bold text-white focus:ring-emerald-500"
+                          >
+                             <option value="">Sélectionner...</option>
+                             <option value="FATHER">Père</option>
+                             <option value="MOTHER">Mère</option>
+                             <option value="SPOUSE">Époux/Épouse</option>
+                             <option value="BROTHER">Frère</option>
+                             <option value="SISTER">Sœur</option>
+                             <option value="OTHER">Autre</option>
+                          </select>
+                       </div>
+                    </div>
                  </div>
 
                  <div className="grid grid-cols-2 gap-4">

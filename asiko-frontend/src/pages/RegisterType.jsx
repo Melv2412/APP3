@@ -41,7 +41,7 @@ const RegisterType = () => {
                👤
             </div>
             <div className="text-left">
-               <p className={`text-[13px] font-black uppercase tracking-widest ${selectedType === 'PATIENT' ? 'text-white' : 'text-slate-900'}`}>Utilisateur</p>
+               <p className={`text-[13px] font-black uppercase tracking-widest ${selectedType === 'PATIENT' ? 'text-white' : 'text-slate-900'}`}>PATIENT</p>
                <p className={`text-[10px] font-bold ${selectedType === 'PATIENT' ? 'text-slate-400' : 'text-slate-500'}`}>Suivi de santé & prévention</p>
             </div>
             {selectedType === 'PATIENT' && (
@@ -61,7 +61,7 @@ const RegisterType = () => {
                🩺
             </div>
             <div className="text-left">
-               <p className={`text-[13px] font-black uppercase tracking-widest ${selectedType === 'DOCTOR' ? 'text-white' : 'text-slate-900'}`}>Professionnel</p>
+               <p className={`text-[13px] font-black uppercase tracking-widest ${selectedType === 'DOCTOR' ? 'text-white' : 'text-slate-900'}`}>MEDECIN</p>
                <p className={`text-[10px] font-bold ${selectedType === 'DOCTOR' ? 'text-slate-400' : 'text-slate-500'}`}>Epidémiologie & Conseil</p>
             </div>
             {selectedType === 'DOCTOR' && (
