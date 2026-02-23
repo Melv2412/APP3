@@ -5,6 +5,23 @@ import { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+const InputField = ({ label, name, type = 'text', placeholder, icon, value, onChange }) => (
+  <div className="mb-4">
+     <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">{label}</label>
+     <div className="relative group">
+        <input
+          type={type}
+          name={name}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          required
+          className="w-full bg-white border border-slate-100 rounded-2xl px-5 py-3.5 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 transition-all placeholder:text-slate-300 shadow-sm"
+        />
+     </div>
+  </div>
+);
+
 const Register = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -82,23 +99,6 @@ const Register = () => {
     }
   };
 
-  const InputField = ({ label, name, type = 'text', placeholder, icon }) => (
-    <div className="mb-4">
-       <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">{label}</label>
-       <div className="relative group">
-          <input
-            type={type}
-            name={name}
-            value={formData[name]}
-            onChange={handleChange}
-            placeholder={placeholder}
-            required
-            className="w-full bg-white border border-slate-100 rounded-2xl px-5 py-3.5 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-emerald-500 transition-all placeholder:text-slate-300 shadow-sm"
-          />
-       </div>
-    </div>
-  );
-
   return (
     <div className="min-h-screen bg-[#F8F9FB] pb-32 pt-8 px-6">
       <div className="max-w-md mx-auto">
@@ -115,19 +115,19 @@ const Register = () => {
            {/* PERSONAL SECTION */}
            <div className="bg-white/50 backdrop-blur-md p-6 rounded-[32px] border border-white shadow-sm">
               <h3 className="text-[11px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-6">Informations Personnelles</h3>
-              <InputField label="Nom COMPLET" name="full_name" placeholder="Ex: Jean Dupont" />
-              <InputField label="Email" name="email" type="email" placeholder="jean@exemple.com" />
+              <InputField label="Nom COMPLET" name="full_name" placeholder="Ex: Jean Dupont" value={formData.full_name} onChange={handleChange} />
+              <InputField label="Email" name="email" type="email" placeholder="jean@exemple.com" value={formData.email} onChange={handleChange} />
               <div className="grid grid-cols-2 gap-4">
-                 <InputField label="Âge" name="age" type="number" placeholder="25" />
-                 <InputField label="Téléphone" name="phone" type="tel" placeholder="01..." />
+                 <InputField label="Âge" name="age" type="number" placeholder="25" value={formData.age} onChange={handleChange} />
+                 <InputField label="Téléphone" name="phone" type="tel" placeholder="01..." value={formData.phone} onChange={handleChange} />
               </div>
            </div>
 
            {/* PROFESSIONAL / CONTEXT SECTION */}
            <div className="bg-white/50 backdrop-blur-md p-6 rounded-[32px] border border-white shadow-sm">
               <h3 className="text-[11px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-6">Contexte</h3>
-              <InputField label="Fonction" name="fonction" placeholder="Ex: Étudiant" />
-              <InputField label="Lieu" name="lieu_fonction" placeholder="Ex: Université" />
+              <InputField label="Fonction" name="fonction" placeholder="Ex: Étudiant" value={formData.fonction} onChange={handleChange} />
+              <InputField label="Lieu" name="lieu_fonction" placeholder="Ex: Université" value={formData.lieu_fonction} onChange={handleChange} />
            </div>
 
            {/* MEDICAL SECTION (Only for Patients) */}
@@ -224,3 +224,4 @@ const Register = () => {
 };
 
 export default Register;
+
