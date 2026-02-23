@@ -4,12 +4,8 @@ import django
 import random
 
 # Configuration Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'asiko_connect.core.settings.base')
-try:
-    django.setup()
-except Exception:
-    os.environ['DJANGO_SETTINGS_MODULE'] = 'asiko_connect.settings'
-    django.setup()
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'asiko_connect.settings')
+django.setup()
 
 from asiko_connect.apps.users.models import User
 from asiko_connect.apps.sensors.models import SensorMeasurement, Prediction

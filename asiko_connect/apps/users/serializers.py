@@ -101,6 +101,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
+        from django.db import transaction
+        from datetime import date
+        from asiko_connect.apps.health_profiles.models import HealthProfile, Comorbidity, VaccinationStatus
+        
         # Récupérer et supprimer le password
         validated_data.pop('password_confirm')
         password = validated_data.pop('password')
@@ -126,97 +130,78 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         patient_fields['diabetes'] = diabetes_health
         patient_fields['copd_asthma'] = copd_asthma or asthma  # Si asthma est True, mettre copd_asthma aussi
 
-        # Créer l'utilisateur
-        user = User.objects.create_user(password=password, **validated_data)
+        # Utiliser une transaction pour s'assurer que tout est créé ou rien
+        with transaction.atomic():
+            # Créer l'utilisateur
+            user = User.objects.create_user(password=password, **validated_data)
 
-        # Créer PatientData et HealthProfile si rôle PATIENT
-        if user.role == User.Role.PATIENT:
-            from datetime import date
-            # Calculer l'âge si non fourni mais date_of_birth disponible
-            calculated_age = age
-            if not calculated_age and user.date_of_birth:
-                today = date.today()
-                calculated_age = today.year - user.date_of_birth.year - (
-                    (today.month, today.day) < (user.date_of_birth.month, user.date_of_birth.day)
+            # Créer PatientData et HealthProfile si rôle PATIENT
+            if user.role == User.Role.PATIENT:
+                # Calculer l'âge si non fourni mais date_of_birth disponible
+                calculated_age = age
+                if not calculated_age and user.date_of_birth:
+                    today = date.today()
+                    calculated_age = today.year - user.date_of_birth.year - (
+                        (today.month, today.day) < (user.date_of_birth.month, user.date_of_birth.day)
+                    )
+
+                # Créer PatientData (qui créera automatiquement un HealthProfile de base via save())
+                patient_data = PatientData.objects.create(
+                    user=user,
+                    age=calculated_age if calculated_age else 0,
+                    **patient_fields
                 )
-
-            # Créer PatientData
-            PatientData.objects.create(
-                user=user,
-                age=calculated_age if calculated_age else 0,
-                **patient_fields
-            )
-            
-            # Créer HealthProfile avec les comorbidités
-            # On utilise une transaction pour s'assurer que tout est sauvegardé ou rien
-            from django.db import transaction
-            from asiko_connect.apps.health_profiles.models import HealthProfile, Comorbidity, VaccinationStatus
-            
-            try:
-                with transaction.atomic():
-                    health_profile = HealthProfile.objects.create(
-                        user=user,
-                        age=calculated_age,
-                        smoking_status=smoking_status  # Utiliser directement le select
+                
+                # Récupérer le HealthProfile créé par PatientData.save()
+                health_profile = user.health_profile
+                
+                # Mettre à jour le HealthProfile avec les détails supplémentaires
+                health_profile.age = calculated_age
+                health_profile.smoking_status = smoking_status
+                health_profile.save()
+                
+                # Créer et associer les comorbidités
+                comorbidities_to_add = []
+                
+                if asthma or copd_asthma:
+                    comorbidity, created = Comorbidity.objects.get_or_create(
+                        name='ASTHMA',
+                        defaults={'severity': 'MILD', 'is_active': True}
                     )
-                    
-                    # Créer et associer les comorbidités
-                    comorbidities_to_add = []
-                    
-                    if asthma or copd_asthma:
-                        comorbidity, created = Comorbidity.objects.get_or_create(
-                            name='ASTHMA',
-                            defaults={'severity': 'MILD', 'is_active': True}
-                        )
-                        comorbidities_to_add.append(comorbidity)
-                    
-                    if diabetes_health:
-                        comorbidity, created = Comorbidity.objects.get_or_create(
-                            name='DIABETES',
-                            defaults={'severity': 'MILD', 'is_active': True}
-                        )
-                        comorbidities_to_add.append(comorbidity)
-                    
-                    if depression:
-                        comorbidity, created = Comorbidity.objects.get_or_create(
-                            name='DEPRESSION',
-                            defaults={'severity': 'MILD', 'is_active': True}
-                        )
-                        comorbidities_to_add.append(comorbidity)
-                    
-                    if comorbidities_to_add:
-                        health_profile.comorbidities.set(comorbidities_to_add)
-                    
-                    # Créer et associer le statut vaccinal pour la PNEUMONIE uniquement
-                    # On ne crée qu'un seul statut vaccinal pour le vaccin de la pneumonie
-                    vaccination_status_obj = VaccinationStatus.objects.create(
-                        vaccine_type='PNEUMONIA',
-                        status=vaccination_status,
-                        is_vaccinated=(vaccination_status == 'OK'),
+                    comorbidities_to_add.append(comorbidity)
+                
+                if diabetes_health:
+                    comorbidity, created = Comorbidity.objects.get_or_create(
+                        name='DIABETES',
+                        defaults={'severity': 'MILD', 'is_active': True}
                     )
-                    health_profile.vaccination_statuses.add(vaccination_status_obj)
-                    
-                    # Calculer l'indice de vulnérabilité
-                    health_profile.calculate_vulnerability_index()
-                    
-                    # Forcer la sauvegarde pour s'assurer que tout est bien enregistré
-                    health_profile.save()
-                    
-            except Exception as e:
-                # Si erreur lors de la création du HealthProfile, on doit lever l'exception
-                # pour que l'utilisateur sache qu'il y a un problème
-                import traceback
-                error_trace = traceback.format_exc()
-                print(f"[ERROR] Erreur lors de la création du HealthProfile: {e}")
-                print(error_trace)
-                # On lève l'exception pour que l'inscription échoue complètement
-                # plutôt que de créer un utilisateur incomplet
-                raise serializers.ValidationError({
-                    'non_field_errors': [f'Erreur lors de la création du profil de santé: {str(e)}']
-                })
-
-   
-        return user
+                    comorbidities_to_add.append(comorbidity)
+                
+                if depression:
+                    comorbidity, created = Comorbidity.objects.get_or_create(
+                        name='DEPRESSION',
+                        defaults={'severity': 'MILD', 'is_active': True}
+                    )
+                    comorbidities_to_add.append(comorbidity)
+                
+                if comorbidities_to_add:
+                    health_profile.comorbidities.set(comorbidities_to_add)
+                
+                # Créer et associer le statut vaccinal pour la PNEUMONIE uniquement
+                vaccination_status_obj = VaccinationStatus.objects.create(
+                    vaccine_type='PNEUMONIA',
+                    status=vaccination_status,
+                    is_vaccinated=(vaccination_status == 'OK'),
+                )
+                health_profile.vaccination_statuses.add(vaccination_status_obj)
+                
+                # Calculer l'indice de vulnérabilité
+                health_profile.calculate_vulnerability_index()
+                
+                # Forcer la sauvegarde pour s'assurer que tout est bien enregistré
+                health_profile.save()
+            
+            return user
     
 
 

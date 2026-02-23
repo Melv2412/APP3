@@ -33,17 +33,6 @@ class UserRegistrationView(generics.CreateAPIView):
             serializer.is_valid(raise_exception=True)
             user = serializer.save()
             
-            # Vérifier que le HealthProfile a été créé pour les patients
-            if user.role == User.Role.PATIENT:
-                from asiko_connect.apps.health_profiles.models import HealthProfile
-                if not hasattr(user, 'health_profile'):
-                    # Si le HealthProfile n'existe pas, le créer avec des valeurs par défaut
-                    HealthProfile.objects.create(
-                        user=user,
-                        age=user.patient_data.age if hasattr(user, 'patient_data') else None,
-                        smoking_status='NEVER'
-                    )
-            
             # Générer les tokens JWT
             refresh = RefreshToken.for_user(user)
             

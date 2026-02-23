@@ -4,12 +4,8 @@ import django
 from django.utils import timezone
 
 # Configuration Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'asiko_connect.core.settings.base')
-try:
-    django.setup()
-except Exception:
-    os.environ['DJANGO_SETTINGS_MODULE'] = 'asiko_connect.settings'
-    django.setup()
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'asiko_connect.settings')
+django.setup()
 
 from asiko_connect.apps.alerts.models import Alert
 from asiko_connect.apps.sensors.models import Sensor, Zone
