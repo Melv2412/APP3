@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NotificationBell from '../common/NotificationBell';
+import VoiceButton from '../common/VoiceButton';
 import { useAuth } from '../../context/AuthContext';
 
 /**
@@ -90,6 +91,11 @@ const Header = ({ onMenuClick, showNotifications = true }) => {
 
             {/* Séparateur vertical (Desktop uniquement) */}
             <div className="hidden sm:block h-6 w-px bg-slate-200"></div>
+
+            {/* Voice Assistant Button */}
+            <div className="transform hover:scale-105 transition-transform duration-200">
+              <VoiceButton />
+            </div>
 
             {/* Avatar / Profil (Miniature) */}
             <button
