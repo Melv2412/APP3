@@ -40,7 +40,7 @@ def phase1_timer_task(self, alert_id):
         print(f"[PHASE 1] Alerte {alert.id} désactivée (IQA insuffisant)")
         return
 
-    # ✅ Passage en PHASE 2
+    #   Passage en PHASE 2
     alert.phase = Alert.PHASE_2
     alert.phase_2_started_at = timezone.now()
     alert.save(update_fields=["phase", "phase_2_started_at"])

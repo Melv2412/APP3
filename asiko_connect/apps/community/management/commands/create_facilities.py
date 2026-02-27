@@ -140,7 +140,7 @@ class Command(BaseCommand):
             )
             if created:
                 created_count += 1
-                self.stdout.write(self.style.SUCCESS(f'✅ Créé: {facility.name}'))
+                self.stdout.write(self.style.SUCCESS(f'  Créé: {facility.name}'))
             else:
                 self.stdout.write(self.style.WARNING(f'⚠️  Existe déjà: {facility.name}'))
 

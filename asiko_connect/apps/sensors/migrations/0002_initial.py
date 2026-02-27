@@ -10,53 +10,52 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("telemedicine", "0001_initial"),
+        ("sensors", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name="message",
-            name="sender",
+            model_name="prediction",
+            name="user",
             field=models.ForeignKey(
                 on_delete=django.db.models.deletion.CASCADE,
-                related_name="sent_messages",
-                to=settings.AUTH_USER_MODEL,
-                verbose_name="Expéditeur",
-            ),
-        ),
-        migrations.AddField(
-            model_name="thread",
-            name="doctor",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="doctor_threads",
-                to=settings.AUTH_USER_MODEL,
-                verbose_name="Médecin",
-            ),
-        ),
-        migrations.AddField(
-            model_name="thread",
-            name="patient",
-            field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="patient_threads",
+                related_name="predictions",
                 to=settings.AUTH_USER_MODEL,
                 verbose_name="Patient",
             ),
         ),
         migrations.AddField(
-            model_name="message",
-            name="thread",
+            model_name="sensor",
+            name="owner",
             field=models.ForeignKey(
-                on_delete=django.db.models.deletion.CASCADE,
-                related_name="messages",
-                to="telemedicine.thread",
-                verbose_name="Thread",
+                on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL
             ),
         ),
-        migrations.AlterUniqueTogether(
-            name="thread",
-            unique_together={("patient", "doctor")},
+        migrations.AddField(
+            model_name="airqualitymeasurement",
+            name="sensor",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="measurements",
+                to="sensors.sensor",
+            ),
+        ),
+        migrations.AddField(
+            model_name="sensormeasurement",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="sensor_measurements",
+                to=settings.AUTH_USER_MODEL,
+                verbose_name="Patient",
+            ),
+        ),
+        migrations.AddField(
+            model_name="sensor",
+            name="zone",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="sensors.zone"
+            ),
         ),
     ]

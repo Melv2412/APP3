@@ -30,7 +30,7 @@ def alert_created_or_updated(sender, instance, created, **kwargs):
             actions_created = generate_prevention_actions_for_alert_to_users(instance)
             
             if actions_created:
-                logger.info(f"✅ {len(actions_created)} action(s) préventive(s) créée(s) pour l'alerte {instance.id}")
+                logger.info(f"  {len(actions_created)} action(s) préventive(s) créée(s) pour l'alerte {instance.id}")
             else:
                 logger.warning(f"⚠️ Aucune action préventive créée pour l'alerte {instance.id}")
     except Exception as e:

@@ -1,10 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Script de test complet pour l'API de prédiction ML.
-Utilise directement Django pour éviter les problèmes d'authentification.
 
-Usage: python manage.py shell < test_ml_prediction.py
-"""
 
 import os
 import django
@@ -19,32 +13,32 @@ from asiko_connect.apps.sensors.ml_model import ml_model
 from asiko_connect.utils.calculs import calculate_trend, calculate_curb65, risk_level
 
 print("=" * 70)
-print("🧪 TEST COMPLET DE LA PRÉDICTION ML")
+print(" TEST COMPLET DE LA PRÉDICTION ML")
 print("=" * 70)
 
 # 1. Vérifier que le modèle ML est chargé
-print("\n📊 ÉTAPE 1: Vérification du modèle ML")
+print("\n ÉTAPE 1: Vérification du modèle ML")
 print("-" * 70)
 if ml_model is None:
-    print("❌ ERREUR: Le modèle ML n'est pas chargé!")
+    print(" ERREUR: Le modèle ML n'est pas chargé!")
     print("   Assure-toi que xgboost est installé et que le fichier model existe.")
     exit(1)
 else:
-    print(f"✅ Modèle ML chargé avec succès")
+    print(f"  Modèle ML chargé avec succès")
     print(f"   Type: {type(ml_model).__name__}")
     print(f"   Features attendues: {ml_model.n_features_in_}")
 
 # 2. Récupérer ou créer un patient de test
-print("\n👤 ÉTAPE 2: Préparation du patient de test")
+print("\n ÉTAPE 2: Préparation du patient de test")
 print("-" * 70)
 
 # Utiliser le patient test_ml créé précédemment
 try:
-    user = User.objects.get(email='test_ml@asiko.com')
+    user = User.objects.get(email='l.kamfox7@gmail.com')
     patient_data = user.patient_data
-    print(f"✅ Patient trouvé: {user.email}")
+    print(f"  Patient trouvé: {user.email}")
 except User.DoesNotExist:
-    print("⚠️  Patient test_ml non trouvé, création...")
+    print("  Patient test_ml non trouvé, création...")
     user = User.objects.create_user(
         username='test_ml',
         email='test_ml@asiko.com',
@@ -61,7 +55,7 @@ except User.DoesNotExist:
         copd_asthma=False,
         immunosuppression=False
     )
-    print(f"✅ Patient créé: {user.email}")
+    print(f"  Patient créé: {user.email}")
 
 print(f"\n   Données statiques du patient:")
 print(f"   - Âge: {patient_data.age} ans")
@@ -71,7 +65,7 @@ print(f"   - COPD/Asthme: {'Oui' if patient_data.copd_asthma else 'Non'}")
 print(f"   - Immunosuppression: {'Oui' if patient_data.immunosuppression else 'Non'}")
 
 # 3. Créer des mesures de capteurs
-print("\n📡 ÉTAPE 3: Simulation de mesures de capteurs")
+print("\n ÉTAPE 3: Simulation de mesures de capteurs")
 print("-" * 70)
 
 # Données de test (patient avec risque modéré à élevé)
@@ -138,10 +132,10 @@ measurement = SensorMeasurement.objects.create(
     spo2_trend=spo2_trend
 )
 
-print(f"\n✅ Mesure créée avec ID: {measurement.id}")
+print(f"\n  Mesure créée avec ID: {measurement.id}")
 
 # 4. Préparer le vecteur de features pour le modèle ML
-print("\n🤖 ÉTAPE 4: Préparation des features pour le modèle ML")
+print("\n ÉTAPE 4: Préparation des features pour le modèle ML")
 print("-" * 70)
 
 X = [
@@ -175,7 +169,7 @@ for i, (name, value) in enumerate(zip(feature_names, X), 1):
     print(f"   {i:2d}. {name:20s} = {value}")
 
 # 5. Faire la prédiction ML
-print("\n🎯 ÉTAPE 5: Prédiction ML")
+print("\n ÉTAPE 5: Prédiction ML")
 print("-" * 70)
 
 try:
@@ -183,8 +177,8 @@ try:
     prob = float(ml_model.predict_proba([X])[0][1])
     risk = risk_level(prob)
     
-    print(f"✅ Prédiction réussie!")
-    print(f"\n   📊 RÉSULTATS:")
+    print(f"  Prédiction réussie!")
+    print(f"\n    RÉSULTATS:")
     print(f"   {'=' * 50}")
     print(f"   Probabilité de pneumonie à 72h: {prob:.1%} ({prob:.4f})")
     print(f"   Niveau de risque: {risk}")
@@ -192,16 +186,16 @@ try:
     
     # Interprétation
     if risk == 'CRITIQUE':
-        print(f"\n   🚨 ALERTE: Risque CRITIQUE - Hospitalisation immédiate recommandée")
+        print(f"\n    ALERTE: Risque CRITIQUE - Hospitalisation immédiate recommandée")
     elif risk == 'ELEVE':
-        print(f"\n   ⚠️  ATTENTION: Risque ÉLEVÉ - Consultation médicale urgente")
+        print(f"\n     ATTENTION: Risque ÉLEVÉ - Consultation médicale urgente")
     elif risk == 'MODERE':
-        print(f"\n   ⚡ VIGILANCE: Risque MODÉRÉ - Surveillance rapprochée nécessaire")
+        print(f"\n    VIGILANCE: Risque MODÉRÉ - Surveillance rapprochée nécessaire")
     else:
-        print(f"\n   ✅ NORMAL: Risque faible - Continuer la surveillance")
+        print(f"\n     NORMAL: Risque faible - Continuer la surveillance")
     
     # 6. Stocker la prédiction
-    print("\n💾 ÉTAPE 6: Sauvegarde de la prédiction")
+    print("\nÉTAPE 6: Sauvegarde de la prédiction")
     print("-" * 70)
     
     prediction = Prediction.objects.create(
@@ -213,20 +207,20 @@ try:
         }
     )
     
-    print(f"✅ Prédiction sauvegardée avec ID: {prediction.id}")
+    print(f"  Prédiction sauvegardée avec ID: {prediction.id}")
     print(f"   Créée le: {prediction.created_at.strftime('%Y-%m-%d %H:%M:%S')}")
     
     # 7. Résumé final
     print("\n" + "=" * 70)
-    print("✅ TEST RÉUSSI - TOUS LES COMPOSANTS FONCTIONNENT")
+    print("  TEST RÉUSSI - TOUS LES COMPOSANTS FONCTIONNENT")
     print("=" * 70)
-    print(f"\n📈 Statistiques:")
+    print(f"\n Statistiques:")
     print(f"   - Total mesures pour ce patient: {user.sensor_measurements.count()}")
     print(f"   - Total prédictions pour ce patient: {user.predictions.count()}")
     print(f"\n🎉 Le système de prédiction ML est opérationnel!")
     
 except Exception as e:
-    print(f"\n❌ ERREUR lors de la prédiction:")
+    print(f"\n ERREUR lors de la prédiction:")
     print(f"   {type(e).__name__}: {str(e)}")
     import traceback
     traceback.print_exc()

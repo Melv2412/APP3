@@ -311,7 +311,7 @@ const PreventionActions = () => {
       ) : (
         <div className="bg-white rounded-[40px] p-12 text-center border border-slate-100 shadow-sm animate-in zoom-in duration-700">
           <div className="w-24 h-24 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
-            <span className="text-5xl">✅</span>
+            <span className="text-5xl"> </span>
           </div>
           <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">Aucune menace</h3>
           <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-[240px] mx-auto">

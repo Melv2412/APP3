@@ -23,6 +23,6 @@ PASSAGE_PHASE_2_TO_3=10  # en secondes  TASK ALERTS
 '''Message à vocaliser 
 par le frontend lors de la création d'une alerte'''
 
-MESSAGE_A_VOCAL="Bonsoir monsieur Martial, Attention, un niveau de pollution élevé a été détecté. Veuillez prendre les précautions nécessaires pour votre santé."
+MESSAGE_A_VOCAL="Bonsoir monsieur babo, Attention, un niveau de pollution élevé a été détecté. Veuillez prendre les précautions nécessaires pour votre santé."
 
 ESP32_IP = "192.168.137.197"

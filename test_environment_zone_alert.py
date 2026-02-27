@@ -42,7 +42,7 @@ def test_environment_zone_alert():
     actions = generate_prevention_actions_for_alert(alert)
     
     if actions:
-        print(f"✅ SUCCÈS : {len(actions)} actions préventives ont été créées.")
+        print(f"  SUCCÈS : {len(actions)} actions préventives ont été créées.")
         print(f"   Exemple de consigne : {actions[0].recommendation_text}")
         print("   Vérifiez maintenant votre page 'Prévention' ou le badge 'Alertes' sur le dashboard.")
     else:

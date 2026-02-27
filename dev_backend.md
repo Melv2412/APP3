@@ -6,23 +6,23 @@ Ce document détaille le plan d'implémentation complet du backend Django REST F
 
 ## 📊 État Actuel du Projet (Dernière mise à jour)
 
-### ✅ Phases Complètes
+###   Phases Complètes
 
-- **Phase 0** : Configuration de base ✅
-- **Phase 1** : Authentification et Utilisateurs ✅ (User + PatientData)
-- **Phase 2** : Profils de Santé ✅ (HealthProfile, Comorbidity, VaccinationStatus)
-- **Phase 3** : Données Capteurs IoT + Prédictions IA ✅ (SensorMeasurement + Prediction intégrés, ML local, ViewSets complets)
-- **Phase 4** : Données Environnementales ✅ (Modèle + API complète avec endpoints nearby et current)
-- **Phase 5** : Alertes ✅ (Modèle + Tasks Celery + Services + API REST complète avec ViewSet complet)
-- **Phase 6** : Community (Zones à Risque) ✅ (RiskZone + Services + API REST complète avec endpoints nearby et map)
-- **Phase 7** : Treatments (Actions Préventives) ✅ (Modèle + Services + API REST + Intégration avec Alertes)
-- **Phase 8** : Dashboard Santé Publique ✅ (API REST agrégée livrée)
-- **Phase 9** : Carnet Santé Connecté ✅ (API journal agrégé)
-- **Phase 10** : Carnet Santé Connecté ✅ (Frontend complet + Export JSON)
+- **Phase 0** : Configuration de base  
+- **Phase 1** : Authentification et Utilisateurs   (User + PatientData)
+- **Phase 2** : Profils de Santé   (HealthProfile, Comorbidity, VaccinationStatus)
+- **Phase 3** : Données Capteurs IoT + Prédictions IA   (SensorMeasurement + Prediction intégrés, ML local, ViewSets complets)
+- **Phase 4** : Données Environnementales   (Modèle + API complète avec endpoints nearby et current)
+- **Phase 5** : Alertes   (Modèle + Tasks Celery + Services + API REST complète avec ViewSet complet)
+- **Phase 6** : Community (Zones à Risque)   (RiskZone + Services + API REST complète avec endpoints nearby et map)
+- **Phase 7** : Treatments (Actions Préventives)   (Modèle + Services + API REST + Intégration avec Alertes)
+- **Phase 8** : Dashboard Santé Publique   (API REST agrégée livrée)
+- **Phase 9** : Carnet Santé Connecté   (API journal agrégé)
+- **Phase 10** : Carnet Santé Connecté   (Frontend complet + Export JSON)
 
 ### ❌ Phases Non Démarrées
 
-- **Phase 11** : Optimisations et Finalisation ✅ (Migrations corrigées, SSE Temps Réel, Role-based styling logic)
+- **Phase 11** : Optimisations et Finalisation   (Migrations corrigées, SSE Temps Réel, Role-based styling logic)
 
 ### 🔄 Repositionnements Majeurs
 
@@ -88,10 +88,10 @@ Ce document détaille le plan d'implémentation complet du backend Django REST F
 
 ### 1.3 Tests
 
-- [x] Tests d'inscription/connexion ✅
+- [x] Tests d'inscription/connexion  
   - Fichier : `asiko_connect/apps/users/tests.py`
   - Classes : `UserRegistrationTests`, `UserLoginTests`, `UserPermissionsTests`
-- [x] Tests de permissions ✅
+- [x] Tests de permissions  
   - Fichier : `asiko_connect/apps/users/tests.py`
   - Classe : `UserPermissionsTests`
 
@@ -145,7 +145,7 @@ La **Phase 2 : Profils de Santé** est une phase fondamentale qui pose les bases
 - [x] Méthode `calculate_vulnerability_index()` avec algorithme complet (0-100)
 - [x] Méthode `get_vulnerability_level()` pour niveau textuel
 - [x] Propriété `bmi` pour calcul IMC
-- [x] Migration créée et appliquée ✅
+- [x] Migration créée et appliquée  
 
 ### 2.2 API HealthProfile
 
@@ -165,16 +165,16 @@ La **Phase 2 : Profils de Santé** est une phase fondamentale qui pose les bases
 
 ### 2.3 Tests
 
-- [x] Tests CRUD ✅
+- [x] Tests CRUD  
   - Fichier : `asiko_connect/apps/health_profiles/tests.py`
   - Classe : `HealthProfileCRUDTests`
-- [x] Tests de calcul d'indice de vulnérabilité ✅
+- [x] Tests de calcul d'indice de vulnérabilité  
   - Fichier : `asiko_connect/apps/health_profiles/tests.py`
   - Classe : `VulnerabilityIndexTests`
 
 ---
 
-## Phase 3 : Données Capteurs IoT + Prédictions IA (Semaine 2-3) ✅ COMPLÈTE
+## Phase 3 : Données Capteurs IoT + Prédictions IA (Semaine 2-3)   COMPLÈTE
 
 ### 🤖 Comment l'IA Agit dans cette App
 
@@ -214,38 +214,38 @@ La **Phase 2 : Profils de Santé** est une phase fondamentale qui pose les bases
 - [x] Migration créée et appliquée (0001_initial.py)
 - [x] ML model intégré localement (`apps/sensors/ml_model.py` avec joblib)
 
-### 3.2 API Sensors + Prédictions ✅ COMPLÈTE
+### 3.2 API Sensors + Prédictions   COMPLÈTE
 
-- [x] Serializer : `SensorMeasurementSerializer` créé ✅
-- [x] Serializer : `PredictionSerializer` créé ✅
-- [x] View : `SensorMeasurementCreateView` (CreateAPIView) ✅
-- [x] ViewSet : `SensorMeasurementViewSet` (ModelViewSet complet) ✅
+- [x] Serializer : `SensorMeasurementSerializer` créé  
+- [x] Serializer : `PredictionSerializer` créé  
+- [x] View : `SensorMeasurementCreateView` (CreateAPIView)  
+- [x] ViewSet : `SensorMeasurementViewSet` (ModelViewSet complet)  
   - list, retrieve, update, partial_update, delete
   - Action `latest` : GET /api/sensors/measurements/latest/
   - Action `trends` : GET /api/sensors/measurements/trends/
-- [x] ViewSet : `PredictionViewSet` (ReadOnlyModelViewSet) ✅
+- [x] ViewSet : `PredictionViewSet` (ReadOnlyModelViewSet)  
   - list, retrieve
   - Action `latest` : GET /api/sensors/predictions/latest/
-- [x] Endpoint : `POST /api/sensors/measurements/` ✅
+- [x] Endpoint : `POST /api/sensors/measurements/`  
   - **Fonctionnalité** : Création mesure + Prédiction ML automatique
   - **Retour** : Mesure + Prédiction + Features utilisées
 - [x] Endpoints GET :
-  - `GET /api/sensors/measurements/` (liste avec filtres) ✅
-  - `GET /api/sensors/measurements/{id}/` (détail) ✅
-  - `GET /api/sensors/measurements/latest/` (dernière mesure) ✅
-  - `GET /api/sensors/measurements/trends/` (tendances sur période) ✅
-  - `GET /api/sensors/predictions/` (liste prédictions) ✅
-  - `GET /api/sensors/predictions/{id}/` (détail) ✅
-  - `GET /api/sensors/predictions/latest/` (dernière prédiction) ✅
-- [x] Filtres avancés ✅ :
+  - `GET /api/sensors/measurements/` (liste avec filtres)  
+  - `GET /api/sensors/measurements/{id}/` (détail)  
+  - `GET /api/sensors/measurements/latest/` (dernière mesure)  
+  - `GET /api/sensors/measurements/trends/` (tendances sur période)  
+  - `GET /api/sensors/predictions/` (liste prédictions)  
+  - `GET /api/sensors/predictions/{id}/` (détail)  
+  - `GET /api/sensors/predictions/latest/` (dernière prédiction)  
+- [x] Filtres avancés   :
   - Filtres : user, created_at
   - Filtres date : date_from, date_to (query params)
   - Tri : created_at, temperature, respiratory_rate, spo2
   - Recherche : user**username, user**email
-- [x] Permissions : IsOwnerOrDoctor (patients voient leurs données, médecins voient tout) ✅
-- [x] Utilitaires : `utils/calculs.py` avec `calculate_trend()` et `calculate_curb65()` ✅
-- [x] Fonction `risk_level(prob)` pour déterminer niveau de risque ✅
-- [x] URLs configurées dans `asiko_connect/apps/sensors/urls.py` ✅
+- [x] Permissions : IsOwnerOrDoctor (patients voient leurs données, médecins voient tout)  
+- [x] Utilitaires : `utils/calculs.py` avec `calculate_trend()` et `calculate_curb65()`  
+- [x] Fonction `risk_level(prob)` pour déterminer niveau de risque  
+- [x] URLs configurées dans `asiko_connect/apps/sensors/urls.py`  
 - [ ] Validation des données (plages acceptables) - Optionnel pour MVP
 
 ### 3.3 Gestion Audio Toux
@@ -265,10 +265,10 @@ La **Phase 2 : Profils de Santé** est une phase fondamentale qui pose les bases
 
 ### 3.5 Tests
 
-- [x] Tests de réception données IoT ✅
+- [x] Tests de réception données IoT  
   - Fichier : `asiko_connect/apps/sensors/tests.py`
   - Classe : `SensorMeasurementTests`
-- [x] Tests de prédiction ML ✅
+- [x] Tests de prédiction ML  
   - Fichier : `asiko_connect/apps/sensors/tests.py`
   - Classe : `PredictionTests`
 - [ ] Tests d'upload audio (optionnel - fonctionnalité future)
@@ -286,7 +286,7 @@ La **Phase 2 : Profils de Santé** est une phase fondamentale qui pose les bases
 
 ---
 
-## Phase 4 : Données Environnementales (Semaine 3) ✅ COMPLÈTE
+## Phase 4 : Données Environnementales (Semaine 3)   COMPLÈTE
 
 ### 4.1 Modèle EnvironmentData
 
@@ -295,25 +295,25 @@ La **Phase 2 : Profils de Santé** est une phase fondamentale qui pose les bases
   - Propriété `pollution_level` calculée (0-100)
   - Propriété `pollution_level_text` (Faible/Modéré/Élevé/Très élevé)
 - [x] Index sur timestamp et lat/lng
-- [x] Migration créée et appliquée ✅
+- [x] Migration créée et appliquée  
 
-### 4.2 API Environment ✅ COMPLÈTE
+### 4.2 API Environment   COMPLÈTE
 
-- [x] Serializer : `EnvironmentDataSerializer` créé ✅
-- [x] Serializer : `EnvironmentDataNearbySerializer` créé ✅
-- [x] ViewSet `EnvironmentDataViewSet` avec filtres géographiques et temporels ✅
+- [x] Serializer : `EnvironmentDataSerializer` créé  
+- [x] Serializer : `EnvironmentDataNearbySerializer` créé  
+- [x] ViewSet `EnvironmentDataViewSet` avec filtres géographiques et temporels  
 - [x] Endpoints :
-  - `POST /api/environment/` (réception données) ✅
-  - `GET /api/environment/` (liste avec filtres) ✅
-  - `GET /api/environment/{id}/` (détail) ✅
-  - `PUT /api/environment/{id}/` (mise à jour) ✅
-  - `DELETE /api/environment/{id}/` (suppression) ✅
-  - `GET /api/environment/nearby/` (données proches d'un point) ✅
-  - `GET /api/environment/current/{lat}/{lng}/` (données actuelles moyennées sur 24h) ✅
-- [x] Filtres : source, latitude, longitude ✅
-- [x] Tri : timestamp, pm25, pm10, no2 ✅
-- [x] Admin configuré ✅
-- [x] URLs configurées dans `asiko_connect/apps/environment/urls.py` ✅
+  - `POST /api/environment/` (réception données)  
+  - `GET /api/environment/` (liste avec filtres)  
+  - `GET /api/environment/{id}/` (détail)  
+  - `PUT /api/environment/{id}/` (mise à jour)  
+  - `DELETE /api/environment/{id}/` (suppression)  
+  - `GET /api/environment/nearby/` (données proches d'un point)  
+  - `GET /api/environment/current/{lat}/{lng}/` (données actuelles moyennées sur 24h)  
+- [x] Filtres : source, latitude, longitude  
+- [x] Tri : timestamp, pm25, pm10, no2  
+- [x] Admin configuré  
+- [x] URLs configurées dans `asiko_connect/apps/environment/urls.py`  
 
 ### 4.3 Intégration API Externe (optionnel)
 
@@ -329,7 +329,7 @@ La **Phase 2 : Profils de Santé** est une phase fondamentale qui pose les bases
 
 ---
 
-## Phase 5 : Alertes (Semaine 4-5) ✅ COMPLÈTE
+## Phase 5 : Alertes (Semaine 4-5)   COMPLÈTE
 
 ### 5.1 Modèle Alert
 
@@ -337,7 +337,7 @@ La **Phase 2 : Profils de Santé** est une phase fondamentale qui pose les bases
   - `Alert` créé (structure différente : lié à Sensor avec phases PHASE_1, PHASE_2, PHASE_3)
   - Champs : sensor, phase, is_active, phase_1_started_at, phase_2_started_at, phase_3_started_at
 - [x] Migration (si appliquée)
-- [x] Admin configuré ✅
+- [x] Admin configuré  
 
 ### 5.2 Système de Règles
 
@@ -347,84 +347,84 @@ La **Phase 2 : Profils de Santé** est une phase fondamentale qui pose les bases
   - `check_abnormal_cough()` (non créé)
   - `check_risk_increase()` (non créé)
 - [x] Créer `apps/alerts/services.py` :
-  - `compute_average_iqa()` créé ✅
+  - `compute_average_iqa()` créé  
 
-### 5.3 API Alerts ✅ COMPLÈTE
+### 5.3 API Alerts   COMPLÈTE
 
-- [x] Serializer : `AlertSerializer` créé ✅ (avec sensor_device_id et measurements_count)
-- [x] ViewSet : `AlertViewSet` (ModelViewSet complet) ✅
+- [x] Serializer : `AlertSerializer` créé   (avec sensor_device_id et measurements_count)
+- [x] ViewSet : `AlertViewSet` (ModelViewSet complet)  
   - list, retrieve, create, update, partial_update, delete
   - Action `deactivate` : PATCH /api/alerts/{id}/deactivate/
   - Action `active` : GET /api/alerts/active/
   - Action `active_count` : GET /api/alerts/active-count/
-- [x] Filtres : sensor, phase, is_active ✅
-- [x] Tri : created_at, phase_1_started_at ✅
+- [x] Filtres : sensor, phase, is_active  
+- [x] Tri : created_at, phase_1_started_at  
 - [x] Endpoints :
-  - [x] `GET /api/alerts/` (liste alertes) ✅
-  - [x] `GET /api/alerts/{id}/` (détail) ✅
-  - [x] `POST /api/alerts/` (créer alerte) ✅
-  - [x] `PATCH /api/alerts/{id}/` (mise à jour partielle) ✅
-  - [x] `PATCH /api/alerts/{id}/deactivate/` (désactiver alerte) ✅
-  - [x] `GET /api/alerts/active/` (alertes actives) ✅
-  - [x] `GET /api/alerts/active-count/` (nombre d'alertes actives) ✅
-- [x] URLs configurées dans `asiko_connect/urls.py` ✅
+  - [x] `GET /api/alerts/` (liste alertes)  
+  - [x] `GET /api/alerts/{id}/` (détail)  
+  - [x] `POST /api/alerts/` (créer alerte)  
+  - [x] `PATCH /api/alerts/{id}/` (mise à jour partielle)  
+  - [x] `PATCH /api/alerts/{id}/deactivate/` (désactiver alerte)  
+  - [x] `GET /api/alerts/active/` (alertes actives)  
+  - [x] `GET /api/alerts/active-count/` (nombre d'alertes actives)  
+- [x] URLs configurées dans `asiko_connect/urls.py`  
 
 ### 5.4 Déclenchement Automatique
 
-- [x] Tâches Celery créées (`phase1_timer_task`, `phase2_timer_task`, `phase3_timer_task`) ✅
+- [x] Tâches Celery créées (`phase1_timer_task`, `phase2_timer_task`, `phase3_timer_task`)  
 - [ ] Signal Django après création `Prediction` (dans sensors) → évaluer alertes (non fait)
 - [ ] Tâche Celery périodique pour vérifier seuils (non fait, seulement tasks de transition de phase)
 
 ### 5.5 Tests
 
-- [x] Tests de création alertes ✅
+- [x] Tests de création alertes  
   - Fichier : `asiko_connect/apps/alerts/tests.py`
   - Classe : `AlertCRUDTests`
 - [ ] Tests de règles de déclenchement (optionnel - dépend des tasks Celery)
 
-### ✅ Phase 5 Complétée
+###   Phase 5 Complétée
 
-- ViewSet `AlertViewSet` créé ✅
-- Endpoints GET/POST/PATCH/DELETE créés ✅
-- Actions personnalisées (deactivate, active, active_count) créées ✅
-- Filtres et tri configurés ✅
-- URLs configurées dans `asiko_connect/urls.py` ✅
+- ViewSet `AlertViewSet` créé  
+- Endpoints GET/POST/PATCH/DELETE créés  
+- Actions personnalisées (deactivate, active, active_count) créées  
+- Filtres et tri configurés  
+- URLs configurées dans `asiko_connect/urls.py`  
 
 ---
 
-## Phase 6 : Communauté et Zones à Risque (Semaine 5-6) ✅ COMPLÈTE
+## Phase 6 : Communauté et Zones à Risque (Semaine 5-6)   COMPLÈTE
 
-### 6.1 Modèle RiskZone ✅
+### 6.1 Modèle RiskZone  
 
-- [x] Créer `apps/community/models.py` : ✅
-  - [x] `RiskZone` avec zone (OneToOne avec sensors.Zone), risk_level, pollution_level, respiratory_signal_count, high_risk_predictions_count, last_updated, is_active, radius_meters ✅
-- [x] Migration créée et appliquée ✅
+- [x] Créer `apps/community/models.py` :  
+  - [x] `RiskZone` avec zone (OneToOne avec sensors.Zone), risk_level, pollution_level, respiratory_signal_count, high_risk_predictions_count, last_updated, is_active, radius_meters  
+- [x] Migration créée et appliquée  
 
-### 6.2 Calcul Zones à Risque ✅
+### 6.2 Calcul Zones à Risque  
 
-- [x] Créer `apps/community/services.py` : ✅
-  - [x] `haversine_distance()` (calcul distance GPS) ✅
-  - [x] `aggregate_environmental_data(zone)` ✅
-  - [x] `aggregate_respiratory_signals(zone)` (basé sur SensorMeasurement et Prediction) ✅
-  - [x] `calculate_zone_risk_level()` (LOW/MODERATE/HIGH/CRITICAL) ✅
-  - [x] `update_risk_zones()` (mise à jour toutes les zones) ✅
-  - [x] `get_nearby_risk_zones()` (zones proches d'un point GPS) ✅
+- [x] Créer `apps/community/services.py` :  
+  - [x] `haversine_distance()` (calcul distance GPS)  
+  - [x] `aggregate_environmental_data(zone)`  
+  - [x] `aggregate_respiratory_signals(zone)` (basé sur SensorMeasurement et Prediction)  
+  - [x] `calculate_zone_risk_level()` (LOW/MODERATE/HIGH/CRITICAL)  
+  - [x] `update_risk_zones()` (mise à jour toutes les zones)  
+  - [x] `get_nearby_risk_zones()` (zones proches d'un point GPS)  
 
-### 6.3 API Community ✅ COMPLÈTE
+### 6.3 API Community   COMPLÈTE
 
-- [x] Serializer : `RiskZoneSerializer` ✅
-- [x] Serializer : `RiskZoneMapSerializer` (simplifié pour carte) ✅
-- [x] ViewSet : `RiskZoneViewSet` (ReadOnlyModelViewSet) ✅
-- [x] Filtres : risk_level, is_active ✅
-- [x] Tri : risk_level, last_updated, pollution_level ✅
-- [x] Endpoints : ✅
-  - [x] `GET /api/community/risk-zones/` (liste zones) ✅
-  - [x] `GET /api/community/risk-zones/{id}/` (détail) ✅
-  - [x] `GET /api/community/risk-zones/nearby/?latitude=X&longitude=Y&radius=5000` (zones proches) ✅
-  - [x] `GET /api/community/risk-zones/map/` (données pour carte) ✅
-  - [x] `POST /api/community/risk-zones/update-all/` (force mise à jour) ✅
-- [x] URLs configurées dans `asiko_connect/urls.py` ✅
-- [x] Admin configuré ✅
+- [x] Serializer : `RiskZoneSerializer`  
+- [x] Serializer : `RiskZoneMapSerializer` (simplifié pour carte)  
+- [x] ViewSet : `RiskZoneViewSet` (ReadOnlyModelViewSet)  
+- [x] Filtres : risk_level, is_active  
+- [x] Tri : risk_level, last_updated, pollution_level  
+- [x] Endpoints :  
+  - [x] `GET /api/community/risk-zones/` (liste zones)  
+  - [x] `GET /api/community/risk-zones/{id}/` (détail)  
+  - [x] `GET /api/community/risk-zones/nearby/?latitude=X&longitude=Y&radius=5000` (zones proches)  
+  - [x] `GET /api/community/risk-zones/map/` (données pour carte)  
+  - [x] `POST /api/community/risk-zones/update-all/` (force mise à jour)  
+- [x] URLs configurées dans `asiko_connect/urls.py`  
+- [x] Admin configuré  
 
 ### 6.4 Alertes Communautaires
 
@@ -439,46 +439,46 @@ La **Phase 2 : Profils de Santé** est une phase fondamentale qui pose les bases
 
 ---
 
-## Phase 7 : Traitements et Prévention (Semaine 6-7) ✅ COMPLÈTE
+## Phase 7 : Traitements et Prévention (Semaine 6-7)   COMPLÈTE
 
-### 7.1 Modèles Treatments ✅ COMPLÈTE
+### 7.1 Modèles Treatments   COMPLÈTE
 
-- [x] Créer `apps/treatments/models.py` : ✅
-  - [x] `PreventionAction` avec user, alert, action_type, recommendation_text, priority, completed, completed_at, created_at ✅
-  - [x] Types d'actions : AVOID_ZONE, WEAR_MASK, CHECK_SPO2, CONSULT_DOCTOR, STAY_HOME, HYDRATE, REST, MONITOR_SYMPTOMS, OTHER ✅
-  - [x] Priorités : HIGH, MEDIUM, LOW ✅
-  - [x] Relation avec Alert (ForeignKey) ✅
-- [x] Migration créée ✅
+- [x] Créer `apps/treatments/models.py` :  
+  - [x] `PreventionAction` avec user, alert, action_type, recommendation_text, priority, completed, completed_at, created_at  
+  - [x] Types d'actions : AVOID_ZONE, WEAR_MASK, CHECK_SPO2, CONSULT_DOCTOR, STAY_HOME, HYDRATE, REST, MONITOR_SYMPTOMS, OTHER  
+  - [x] Priorités : HIGH, MEDIUM, LOW  
+  - [x] Relation avec Alert (ForeignKey)  
+- [x] Migration créée  
 
-### 7.2 Service Prévention Active ✅ COMPLÈTE
+### 7.2 Service Prévention Active   COMPLÈTE
 
-- [x] Créer `apps/treatments/services.py` : ✅
-  - [x] `generate_prevention_actions_for_alert(alert)` - Génère des actions pour tous les utilisateurs basées sur une alerte ✅
-  - [x] `generate_prevention_actions_for_user(user, prediction, alerts, risk_zones)` - Génère des actions pour un utilisateur spécifique ✅
-  - [x] `suggest_actions_based_on_risk(user)` - Suggère des actions basées sur le profil de risque ✅
-  - [x] Logique de génération selon les phases d'alerte (Phase 1 = masque, Phase 2 = éviter zone, Phase 3 = évacuation + rester à domicile) ✅
+- [x] Créer `apps/treatments/services.py` :  
+  - [x] `generate_prevention_actions_for_alert(alert)` - Génère des actions pour tous les utilisateurs basées sur une alerte  
+  - [x] `generate_prevention_actions_for_user(user, prediction, alerts, risk_zones)` - Génère des actions pour un utilisateur spécifique  
+  - [x] `suggest_actions_based_on_risk(user)` - Suggère des actions basées sur le profil de risque  
+  - [x] Logique de génération selon les phases d'alerte (Phase 1 = masque, Phase 2 = éviter zone, Phase 3 = évacuation + rester à domicile)  
 
-### 7.3 API Treatments ✅ COMPLÈTE
+### 7.3 API Treatments   COMPLÈTE
 
-- [x] Serializers : `PreventionActionSerializer` ✅
-- [x] ViewSet : `PreventionActionViewSet` avec permissions (patients voient leurs actions, médecins voient tout) ✅
-- [x] Endpoints : ✅
-  - [x] `GET /api/treatments/prevention-actions/` (liste des actions) ✅
-  - [x] `GET /api/treatments/prevention-actions/{id}/` (détail) ✅
-  - [x] `POST /api/treatments/prevention-actions/{id}/complete/` (marquer complétée) ✅
-  - [x] `GET /api/treatments/prevention-actions/pending/` (actions non complétées) ✅
-  - [x] `GET /api/treatments/prevention-actions/priority/` (actions prioritaires) ✅
-  - [x] `POST /api/treatments/prevention-actions/generate/` (générer des actions pour l'utilisateur connecté) ✅
-- [x] Filtres : action_type, priority, completed, alert ✅
-- [x] Tri : par priorité et date ✅
+- [x] Serializers : `PreventionActionSerializer`  
+- [x] ViewSet : `PreventionActionViewSet` avec permissions (patients voient leurs actions, médecins voient tout)  
+- [x] Endpoints :  
+  - [x] `GET /api/treatments/prevention-actions/` (liste des actions)  
+  - [x] `GET /api/treatments/prevention-actions/{id}/` (détail)  
+  - [x] `POST /api/treatments/prevention-actions/{id}/complete/` (marquer complétée)  
+  - [x] `GET /api/treatments/prevention-actions/pending/` (actions non complétées)  
+  - [x] `GET /api/treatments/prevention-actions/priority/` (actions prioritaires)  
+  - [x] `POST /api/treatments/prevention-actions/generate/` (générer des actions pour l'utilisateur connecté)  
+- [x] Filtres : action_type, priority, completed, alert  
+- [x] Tri : par priorité et date  
 
-### 7.4 Intégration avec Alertes ✅ COMPLÈTE
+### 7.4 Intégration avec Alertes   COMPLÈTE
 
-- [x] Génération automatique d'actions lors de la création d'une alerte Phase 1 ✅
-- [x] Génération automatique d'actions lors du passage Phase 1 → Phase 2 ✅
-- [x] Génération automatique d'actions lors du passage Phase 2 → Phase 3 ✅
-- [x] Intégration dans `alerts/tasks.py` (tâches Celery) ✅
-- [x] Intégration dans `sensors/views.py` (création d'alerte) ✅
+- [x] Génération automatique d'actions lors de la création d'une alerte Phase 1  
+- [x] Génération automatique d'actions lors du passage Phase 1 → Phase 2  
+- [x] Génération automatique d'actions lors du passage Phase 2 → Phase 3  
+- [x] Intégration dans `alerts/tasks.py` (tâches Celery)  
+- [x] Intégration dans `sensors/views.py` (création d'alerte)  
 
 ### 7.5 Tests
 
@@ -487,7 +487,7 @@ La **Phase 2 : Profils de Santé** est une phase fondamentale qui pose les bases
 
 ---
 
-## Phase 8 : Dashboard Santé Publique (Semaine 7) ✅ API livrée
+## Phase 8 : Dashboard Santé Publique (Semaine 7)   API livrée
 
 ### 🎯 Rôle : Surveillance de Population (pas consultations individuelles)
 
@@ -495,10 +495,10 @@ La **Phase 2 : Profils de Santé** est une phase fondamentale qui pose les bases
 
 ### ⚠️ Rôle Actuel du Médecin (Existant)
 
-- Permission `IsDoctor` créée ✅
-- Permission `IsOwnerOrDoctor` : médecins peuvent voir toutes les ressources ✅
-- Dans `HealthProfileViewSet` : médecins voient tous les profils ✅
-- Dans `UserViewSet` : médecins voient tous les utilisateurs ✅
+- Permission `IsDoctor` créée  
+- Permission `IsOwnerOrDoctor` : médecins peuvent voir toutes les ressources  
+- Dans `HealthProfileViewSet` : médecins voient tous les profils  
+- Dans `UserViewSet` : médecins voient tous les utilisateurs  
 
 ### 🎯 Nouveau Rôle : Acteur de Santé Publique
 
@@ -553,22 +553,22 @@ La **Phase 2 : Profils de Santé** est une phase fondamentale qui pose les bases
 
 ---
 
-## Phase 9 : Carnet Santé Connecté (Semaine 7-8) ✅ API journal + Frontend complet
+## Phase 9 : Carnet Santé Connecté (Semaine 7-8)   API journal + Frontend complet
 
-### 9.1 Vue Agrégée ✅ COMPLÈTE
+### 9.1 Vue Agrégée   COMPLÈTE
 
 - [x] Endpoint `GET /api/dashboard/health-journal/` (app dashboard)
 - [x] Serializer(s) : `PredictionEntrySerializer`, `MeasurementEntrySerializer`, `PreventionActionEntrySerializer`, `AlertEntrySerializer`, `EnvironmentEntrySerializer`
 - [x] Contenu : prédictions, mesures capteurs, actions prévention, alertes, données environnement (limitées à 100 entrées chacune, filtrage date_from/date_to)
 - [x] Permissions : authentifié ; patient voit ses données ; médecin peut cibler un patient via `user_id`
 
-### 9.2 Endpoints ✅ COMPLÈTE
+### 9.2 Endpoints   COMPLÈTE
 
 - [x] `GET /api/dashboard/health-journal/` (journal complet)
 - [x] `GET /api/dashboard/health-journal/summary/` (résumé période simple)
 - [x] `GET /api/dashboard/health-journal/export/` (export JSON simple avec Content-Disposition)
 
-### 9.3 Frontend ✅ COMPLÈTE
+### 9.3 Frontend   COMPLÈTE
 
 - [x] Page `HealthJournal.jsx` complète avec timeline chronologique
 - [x] Filtres temporels (7j/30j/90j/tout/plage personnalisée)
@@ -659,32 +659,32 @@ La **Phase 2 : Profils de Santé** est une phase fondamentale qui pose les bases
 
 ## Ordre de Priorité Recommandé
 
-### MVP (Minimum Viable Product) ✅ COMPLÈTE
+### MVP (Minimum Viable Product)   COMPLÈTE
 
-1. Phase 0 : Configuration ✅
-2. Phase 1 : Authentification ✅
-3. Phase 2 : Health Profiles ✅
-4. Phase 3 : Sensors + Predictions IA ✅
-5. Phase 4 : Environment ✅
-6. Phase 5 : Alertes ✅
+1. Phase 0 : Configuration  
+2. Phase 1 : Authentification  
+3. Phase 2 : Health Profiles  
+4. Phase 3 : Sensors + Predictions IA  
+5. Phase 4 : Environment  
+6. Phase 5 : Alertes  
 
-### V1 Complète ✅ COMPLÈTE
+### V1 Complète   COMPLÈTE
 
-7. Phase 6 : Community (Zones à Risque + Cartographie) ✅
-8. Phase 7 : Treatments (Actions Préventives) ✅
-9. Phase 8 : Dashboard Santé Publique ✅
-10. Phase 9 : Carnet Santé Connecté ✅
-11. Phase 10 : Carnet Santé Connecté (Frontend complet) ✅
+7. Phase 6 : Community (Zones à Risque + Cartographie)  
+8. Phase 7 : Treatments (Actions Préventives)  
+9. Phase 8 : Dashboard Santé Publique  
+10. Phase 9 : Carnet Santé Connecté  
+11. Phase 10 : Carnet Santé Connecté (Frontend complet)  
 
 ### V2 - Prochaine étape
 
-12. Phase 11 : Optimisations et Finalisation ✅ COMPLÈTE
+12. Phase 11 : Optimisations et Finalisation   COMPLÈTE
 
 ---
 
 ## 🎯 Rôle du Médecin dans ASIKO
 
-### ✅ Positionnement : Acteur de Santé Publique
+###   Positionnement : Acteur de Santé Publique
 
 **Le médecin dans ASIKO n'est PAS un médecin clinicien mais un acteur de santé publique :**
 
@@ -705,11 +705,11 @@ La **Phase 2 : Profils de Santé** est une phase fondamentale qui pose les bases
 
 **Pourquoi c'est mieux pour PRÉVENTION/PRÉDICTION :**
 
-1. ✅ **Intervention AVANT** : Détecte les risques AVANT qu'ils se développent
-2. ✅ **Impact collectif** : Protège des populations entières, pas juste un patient
-3. ✅ **Différenciation** : Vision "santé publique" vs "santé individuelle"
-4. ✅ **Hackathon** : Montre compréhension des enjeux épidémiologiques
-5. ✅ **Innovation** : Surveillance prédictive de population = nouveau concept
+1.   **Intervention AVANT** : Détecte les risques AVANT qu'ils se développent
+2.   **Impact collectif** : Protège des populations entières, pas juste un patient
+3.   **Différenciation** : Vision "santé publique" vs "santé individuelle"
+4.   **Hackathon** : Montre compréhension des enjeux épidémiologiques
+5.   **Innovation** : Surveillance prédictive de population = nouveau concept
 
 ### 🎯 Message pour le Jury du Hackathon
 
@@ -724,12 +724,12 @@ C'est la différence entre une app de santé individuelle et un **système de sa
 
 ## Checklist Finale Avant Production
 
-- [x] Tous les modèles migrés ✅
-- [x] Tous les endpoints testés ✅
-- [x] Permissions configurées correctement ✅
-- [x] Documentation API complète (`endpoints_IOT.md`) ✅
-- [x] Tests de charge effectués (Via scripts Python) ✅
-- [x] Sécurité auditée ✅
-- [x] Variables d'environnement configurées ✅
-- [x] Monitoring et logs en place ✅
-- [x] Documentation technique rédigée ✅
+- [x] Tous les modèles migrés  
+- [x] Tous les endpoints testés  
+- [x] Permissions configurées correctement  
+- [x] Documentation API complète (`endpoints_IOT.md`)  
+- [x] Tests de charge effectués (Via scripts Python)  
+- [x] Sécurité auditée  
+- [x] Variables d'environnement configurées  
+- [x] Monitoring et logs en place  
+- [x] Documentation technique rédigée  

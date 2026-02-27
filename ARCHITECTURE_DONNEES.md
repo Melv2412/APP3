@@ -6,7 +6,7 @@
 **Localisation :** `asiko_connect/apps/users/models.py`
 
 **Champs collectés à l'inscription :**
-- `phone` (Téléphone) ✅
+- `phone` (Téléphone)  
 - `email`
 - `first_name`, `last_name`
 - `date_of_birth` (optionnel)
@@ -21,10 +21,10 @@
 **Localisation :** `asiko_connect/apps/users/models.py`
 
 **Champs collectés à l'inscription :**
-- `age` (Âge) ✅
+- `age` (Âge)  
 - `smoking` (booléen - dérivé de `smoking_status`)
-- `diabetes` (booléen) ✅
-- `copd_asthma` (booléen - dérivé de `asthma`) ✅
+- `diabetes` (booléen)  
+- `copd_asthma` (booléen - dérivé de `asthma`)  
 - `immunosuppression` (optionnel)
 
 **Note :** Ce modèle est créé automatiquement lors de l'inscription d'un PATIENT.
@@ -35,12 +35,12 @@
 **Localisation :** `asiko_connect/apps/health_profiles/models.py`
 
 **Champs collectés à l'inscription :**
-- `age` (Âge) ✅
-- `smoking_status` (Select: NEVER/FORMER/CURRENT) ✅
+- `age` (Âge)  
+- `smoking_status` (Select: NEVER/FORMER/CURRENT)  
 - `comorbidities` (ManyToMany) :
-  - `ASTHMA` (si `asthma` = True) ✅
-  - `DIABETES` (si `diabetes` = True) ✅
-  - `DEPRESSION` (si `depression` = True) ✅
+  - `ASTHMA` (si `asthma` = True)  
+  - `DIABETES` (si `diabetes` = True)  
+  - `DEPRESSION` (si `depression` = True)  
 
 **Champs modifiables après inscription :**
 - `height` (Taille en cm)
@@ -182,15 +182,15 @@ Total                        = 39 points
 
 ---
 
-## ✅ Cohérence Frontend/Backend
+##   Cohérence Frontend/Backend
 
 ### Inscription (Register.jsx)
-- ✅ **Checkboxes** pour : Diabète, Asthme, Dépression (cohérent avec HealthProfile)
-- ✅ **Select** pour : Statut tabagique (cohérent avec HealthProfile.smoking_status)
+-   **Checkboxes** pour : Diabète, Asthme, Dépression (cohérent avec HealthProfile)
+-   **Select** pour : Statut tabagique (cohérent avec HealthProfile.smoking_status)
 
 ### Profil de Santé (HealthProfile.jsx)
-- ✅ **Select** pour : Statut tabagique (même format qu'à l'inscription)
-- ✅ **Checkboxes** pour : Comorbidités (même format qu'à l'inscription)
+-   **Select** pour : Statut tabagique (même format qu'à l'inscription)
+-   **Checkboxes** pour : Comorbidités (même format qu'à l'inscription)
 
 **Résultat :** Aucune confusion logique ! 🎯
 
@@ -217,9 +217,9 @@ Total                        = 39 points
 
 ## 📝 Résumé des Modifications Appliquées
 
-1. ✅ Frontend : Checkbox "Fumeur" → Select "Statut tabagique"
-2. ✅ Backend : `smoking` (booléen) → `smoking_status` (select)
-3. ✅ Création automatique de `HealthProfile` à l'inscription
-4. ✅ Création automatique des comorbidités (Asthme, Diabète, Dépression)
-5. ✅ Calcul automatique de l'indice de vulnérabilité
-6. ✅ Cohérence totale entre inscription et profil de santé
+1.   Frontend : Checkbox "Fumeur" → Select "Statut tabagique"
+2.   Backend : `smoking` (booléen) → `smoking_status` (select)
+3.   Création automatique de `HealthProfile` à l'inscription
+4.   Création automatique des comorbidités (Asthme, Diabète, Dépression)
+5.   Calcul automatique de l'indice de vulnérabilité
+6.   Cohérence totale entre inscription et profil de santé

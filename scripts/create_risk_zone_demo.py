@@ -70,7 +70,7 @@ def create_risk_zone(latitude=None, longitude=None):
         )
         
         if response.status_code == 201:
-            print(f"✅ Zone à risque créée avec succès!")
+            print(f"  Zone à risque créée avec succès!")
             print(f"   La zone a été mise à jour avec la position GPS")
             print(f"   Une alerte devrait être déclenchée si les seuils sont dépassés")
             return True
@@ -118,7 +118,7 @@ def main():
     print()
     if success:
         print("=" * 60)
-        print("✅ Démo terminée avec succès!")
+        print("  Démo terminée avec succès!")
         print("=" * 60)
         print()
         print("💡 Prochaines étapes:")

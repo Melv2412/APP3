@@ -55,7 +55,7 @@ def test_patient_health_alert():
         
         if actions:
             for action in actions:
-                print(f"✅ ACTION GÉNÉRÉE : [{action.action_type}] {action.recommendation_text}")
+                print(f"  ACTION GÉNÉRÉE : [{action.action_type}] {action.recommendation_text}")
                 print(f"   Priorité : {action.priority}")
         else:
             print("❌ Aucune action générée. Vérifiez si une action identique n'est pas déjà active (non complétée).")
