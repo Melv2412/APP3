@@ -68,10 +68,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     depression = serializers.BooleanField(required=False, default=False)
     copd_asthma = serializers.BooleanField(required=False, default=False)  # Gardé pour compatibilité
     immunosuppression = serializers.BooleanField(required=False, default=False)
-    emergency_contact_name = serializers.CharField(write_only=True, required=False, allow_blank=True)
-    emergency_contact_phone = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    emergency_contact_name = serializers.CharField(write_only=True, required=False, allow_blank=True, allow_null=True)
+    emergency_contact_phone = serializers.CharField(write_only=True, required=False, allow_blank=True, allow_null=True)
     emergency_contact_relation = serializers.ChoiceField(
-        choices=PatientData.EmergencyRelation.choices, write_only=True, required=False, allow_blank=True
+        choices=PatientData.EmergencyRelation.choices, write_only=True, required=False, allow_blank=True, allow_null=True
     )
 
     class Meta:

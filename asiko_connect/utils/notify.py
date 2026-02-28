@@ -21,6 +21,7 @@ if __name__ == "__main__":
 import requests
 
 def notify_esp(ESP_IP):
+    print(f"Notifiant l'ESP32 à l'adresse {ESP_IP}...")  # Log de tentative de notification 
     try:
         url = f"http://{ESP_IP}/buzzer"
         response = requests.get(url, timeout=3)

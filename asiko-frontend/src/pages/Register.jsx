@@ -95,15 +95,24 @@ const Register = () => {
         immunosuppression: formData.immunosuppression,
         smoking_status: formData.smoking_status,
         vaccination_status: formData.vaccination_status,
-        emergency_contact_name: formData.emergency_contact_name || null,
-        emergency_contact_phone: formData.emergency_contact_phone || null,
-        emergency_contact_relation: formData.emergency_contact_relation || null,
+        emergency_contact_name: formData.emergency_contact_name || '',
+        emergency_contact_phone: formData.emergency_contact_phone || '',
+        emergency_contact_relation: formData.emergency_contact_relation || '',
       };
 
       await register(registrationData);
       navigate('/login');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Erreur d\'inscription');
+      const data = err.response?.data;
+      const detail = data?.detail;
+      if (typeof detail === 'string' && detail.trim()) {
+        setError(detail);
+      } else if (data && typeof data === 'object') {
+        const firstFieldError = Object.values(data).flat().find(Boolean);
+        setError(typeof firstFieldError === 'string' ? firstFieldError : 'Erreur d\'inscription');
+      } else {
+        setError('Erreur d\'inscription');
+      }
     } finally {
       setLoading(false);
     }

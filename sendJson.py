@@ -7,7 +7,7 @@ LOGIN_URL = "http://127.0.0.1:8000/api/auth/login/"  # endpoint de login
 
 # Identifiants
 USERNAME = "lama"
-PASSWORD = "12345678"
+PASSWORD = "L@djilama123"
 
 # Données fixes
 DEVICE_ID = "ESP32_TEST_001"
@@ -29,7 +29,7 @@ payload = {
 }
 
 
-def get_token(username=USERNAME, password=PASSWORD):
+def get_token(username="l.kamfox7@gmail.com", password="L@djilama123"):
     """Récupère un token JWT via le endpoint de login"""
     try:
         response = requests.post(

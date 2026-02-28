@@ -25,4 +25,4 @@ par le frontend lors de la création d'une alerte'''
 
 MESSAGE_A_VOCAL="Bonsoir monsieur babo, Attention, un niveau de pollution élevé a été détecté. Veuillez prendre les précautions nécessaires pour votre santé."
 
-ESP32_IP = "192.168.137.197"
+ESP32_IP = "192.168.137.92"

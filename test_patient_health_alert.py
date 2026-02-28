@@ -12,7 +12,7 @@ from asiko_connect.apps.sensors.models import SensorMeasurement, Prediction
 from asiko_connect.apps.treatments.services import suggest_actions_based_on_risk
 
 # CONFIGURATION : Changez l'email par celui de votre compte test
-TEST_EMAIL = "lama@gmail.com" 
+TEST_EMAIL = "l.kamfox7@gmail.com" 
 
 def test_patient_health_alert():
     print(f"\n--- 🏥 TEST : ALERTE SANTÉ PATIENT ({TEST_EMAIL}) ---")

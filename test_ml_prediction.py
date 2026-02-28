@@ -70,12 +70,12 @@ print("-" * 70)
 
 # Données de test (patient avec risque modéré à élevé)
 measurement_data = {
-    'temperature': 38.5,      # Fièvre modérée
+    'temperature': 0,      # Fièvre modérée
     'respiratory_rate': 26,   # Tachypnée
     'heart_rate': 98,         # Tachycardie légère
     'spo2': 91,               # Hypoxémie modérée
     'systolic_bp': 130,       # Tension normale
-    'wbc': 12500              # Leucocytose modérée
+    'wbc': 0              # Leucocytose modérée
 }
 
 print(f"   Mesures envoyées:")
